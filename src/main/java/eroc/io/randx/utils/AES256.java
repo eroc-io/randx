@@ -13,6 +13,7 @@ public class AES256 {
     //AES_256_cbc pkcs7
     private static final String ALGORITHM = "AES/CBC/PKCS7Padding";
 
+
     //加密
     public static byte[] AES_cbc_encrypt(byte[] srcData, byte[] key, byte[] iv) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
