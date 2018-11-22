@@ -11,6 +11,7 @@ import java.security.*;
 public class AES256 {
 
     //AES_256_cbc pkcs7
+
     private static final String ALGORITHM = "AES/CBC/PKCS7Padding";
 
 
