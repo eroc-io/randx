@@ -8,5 +8,6 @@ public class RandxApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(RandxApplication.class, args);
+
 	}
 }
