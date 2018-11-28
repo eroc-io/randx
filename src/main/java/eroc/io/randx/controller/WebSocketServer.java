@@ -3,6 +3,8 @@ package eroc.io.randx.controller;
 import com.google.protobuf.ByteString;
 import eroc.io.randx.event.PlayEvent;
 import eroc.io.randx.pojo.Buffer;
+import eroc.io.randx.service.PlayService;
+import eroc.io.randx.utils.TypeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -22,6 +24,9 @@ public class WebSocketServer {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private PlayService playService;
 
 
     //静态变量，用来记录当前在线连接数。应该把它设计成线程安全的
@@ -44,7 +49,7 @@ public class WebSocketServer {
         try {
             WebSocketServer ws = new WebSocketServer();
             Buffer.transtion p = Buffer.transtion.parseFrom(player);
-            ws.setPk(p.getPk());
+            ws.setPk(p.getPk(0));
             ws.setSession(session);
             webSocketSet.add(ws);     //加入set中
             addOnlineCount();           //在线数加1
@@ -78,9 +83,18 @@ public class WebSocketServer {
      */
     @OnMessage
     public void onMessage(byte[] message, Session session) throws IOException {
-        System.out.println("来自客户端的消息:" + message);
-//        群发消息
-        sendInfo(message);
+        Buffer.transtion player = Buffer.transtion.parseFrom(message);
+        String action = player.getAction();
+        if (action.equals("drawcard")) {
+            playService.drawCard(player);
+        } else if (action.equals("drawleftcard")) {
+
+
+        } else if (action.equals("returncards")) {
+
+        } else {
+            sendInfo(message);
+        }
     }
 
     /**
@@ -101,8 +115,6 @@ public class WebSocketServer {
         sendStream.write(message);
         sendStream.flush();
         sendStream.close();
-//        this.session.getBasicRemote().sendText(message);
-        //this.session.getAsyncRemote().sendText(message);
     }
 
 
@@ -114,9 +126,30 @@ public class WebSocketServer {
             try {
                 item.sendMessage(message);
             } catch (IOException e) {
-                continue;
+                e.printStackTrace();
             }
         }
+    }
+
+
+    /**
+     * 给指定的用户发送消息
+     *
+     * @param msg
+     */
+    public static void sendInfoSpecific(byte[] msg, byte[] pk) {
+        String spk = TypeUtils.bytesToHexString(pk);
+        for(WebSocketServer item : webSocketSet) {
+            try {
+                String ipk = TypeUtils.bytesToHexString(item.getPk().toByteArray());
+                if (ipk.equals(spk)) {
+                    item.sendMessage(msg);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
 

@@ -27,7 +27,6 @@ public class ListenerPlayEvent implements ApplicationListener<PlayEvent> {
         if (playEvent.getCount().equals(num)) {
             //开始游戏
             playService.openGame(playEvent.getWss());
-
         }
     }
 }

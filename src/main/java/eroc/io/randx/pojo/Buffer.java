@@ -11,13 +11,29 @@ public final class Buffer {
       com.google.protobuf.MessageLiteOrBuilder {
 
     /**
-     * <code>optional bytes salt = 1;</code>
+     * <pre>
+     *盐
+     * </pre>
+     *
+     * <code>repeated bytes salt = 1;</code>
      */
-    boolean hasSalt();
+    java.util.List<com.google.protobuf.ByteString> getSaltList();
     /**
-     * <code>optional bytes salt = 1;</code>
+     * <pre>
+     *盐
+     * </pre>
+     *
+     * <code>repeated bytes salt = 1;</code>
      */
-    com.google.protobuf.ByteString getSalt();
+    int getSaltCount();
+    /**
+     * <pre>
+     *盐
+     * </pre>
+     *
+     * <code>repeated bytes salt = 1;</code>
+     */
+    com.google.protobuf.ByteString getSalt(int index);
 
     /**
      * <code>optional bytes dpk = 2;</code>
@@ -29,71 +45,149 @@ public final class Buffer {
     com.google.protobuf.ByteString getDpk();
 
     /**
-     * <code>optional bytes sign = 3;</code>
+     * <code>repeated string s = 3;</code>
      */
-    boolean hasSign();
+    java.util.List<String>
+        getSList();
     /**
-     * <code>optional bytes sign = 3;</code>
+     * <code>repeated string s = 3;</code>
      */
-    com.google.protobuf.ByteString getSign();
+    int getSCount();
+    /**
+     * <code>repeated string s = 3;</code>
+     */
+    String getS(int index);
+    /**
+     * <code>repeated string s = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getSBytes(int index);
 
     /**
-     * <code>optional bytes pk = 4;</code>
+     * <code>repeated string r = 5;</code>
      */
-    boolean hasPk();
+    java.util.List<String>
+        getRList();
     /**
-     * <code>optional bytes pk = 4;</code>
+     * <code>repeated string r = 5;</code>
      */
-    com.google.protobuf.ByteString getPk();
+    int getRCount();
+    /**
+     * <code>repeated string r = 5;</code>
+     */
+    String getR(int index);
+    /**
+     * <code>repeated string r = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getRBytes(int index);
 
     /**
-     * <code>repeated bytes cs = 5;</code>
+     * <code>repeated bytes pk = 4;</code>
      */
-    java.util.List<com.google.protobuf.ByteString> getCsList();
+    java.util.List<com.google.protobuf.ByteString> getPkList();
     /**
-     * <code>repeated bytes cs = 5;</code>
+     * <code>repeated bytes pk = 4;</code>
      */
-    int getCsCount();
+    int getPkCount();
     /**
-     * <code>repeated bytes cs = 5;</code>
+     * <code>repeated bytes pk = 4;</code>
      */
-    com.google.protobuf.ByteString getCs(int index);
+    com.google.protobuf.ByteString getPk(int index);
 
     /**
+     * <pre>
+     *剩余牌
+     * </pre>
+     *
      * <code>repeated int32 liftcard = 6;</code>
      */
     java.util.List<Integer> getLiftcardList();
     /**
+     * <pre>
+     *剩余牌
+     * </pre>
+     *
      * <code>repeated int32 liftcard = 6;</code>
      */
     int getLiftcardCount();
     /**
+     * <pre>
+     *剩余牌
+     * </pre>
+     *
      * <code>repeated int32 liftcard = 6;</code>
      */
     int getLiftcard(int index);
 
     /**
+     * <pre>
+     *牌桌id
+     * </pre>
+     *
      * <code>optional int32 pid = 7;</code>
      */
     boolean hasPid();
     /**
+     * <pre>
+     *牌桌id
+     * </pre>
+     *
      * <code>optional int32 pid = 7;</code>
      */
     int getPid();
 
     /**
+     * <pre>
+     *信息
+     * </pre>
+     *
      * <code>optional string msg = 8;</code>
      */
     boolean hasMsg();
     /**
+     * <pre>
+     *信息
+     * </pre>
+     *
      * <code>optional string msg = 8;</code>
      */
     String getMsg();
     /**
+     * <pre>
+     *信息
+     * </pre>
+     *
      * <code>optional string msg = 8;</code>
      */
     com.google.protobuf.ByteString
         getMsgBytes();
+
+    /**
+     * <pre>
+     *动作：opengame drawcard drawleftcard returncards
+     * </pre>
+     *
+     * <code>optional string action = 9;</code>
+     */
+    boolean hasAction();
+    /**
+     * <pre>
+     *动作：opengame drawcard drawleftcard returncards
+     * </pre>
+     *
+     * <code>optional string action = 9;</code>
+     */
+    String getAction();
+    /**
+     * <pre>
+     *动作：opengame drawcard drawleftcard returncards
+     * </pre>
+     *
+     * <code>optional string action = 9;</code>
+     */
+    com.google.protobuf.ByteString
+        getActionBytes();
   }
   /**
    * Protobuf type {@code transtion}
@@ -104,47 +198,109 @@ public final class Buffer {
       // @@protoc_insertion_point(message_implements:transtion)
       transtionOrBuilder {
     private transtion() {
-      salt_ = com.google.protobuf.ByteString.EMPTY;
+      salt_ = emptyProtobufList();
       dpk_ = com.google.protobuf.ByteString.EMPTY;
-      sign_ = com.google.protobuf.ByteString.EMPTY;
-      pk_ = com.google.protobuf.ByteString.EMPTY;
-      cs_ = emptyProtobufList();
+      s_ = com.google.protobuf.GeneratedMessageLite.emptyProtobufList();
+      r_ = com.google.protobuf.GeneratedMessageLite.emptyProtobufList();
+      pk_ = emptyProtobufList();
       liftcard_ = emptyIntList();
       msg_ = "";
+      action_ = "";
     }
     private int bitField0_;
     public static final int SALT_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString salt_;
+    private com.google.protobuf.Internal.ProtobufList<com.google.protobuf.ByteString> salt_;
     /**
-     * <code>optional bytes salt = 1;</code>
+     * <pre>
+     *盐
+     * </pre>
+     *
+     * <code>repeated bytes salt = 1;</code>
      */
     @Override
-    public boolean hasSalt() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>optional bytes salt = 1;</code>
-     */
-    @Override
-    public com.google.protobuf.ByteString getSalt() {
+    public java.util.List<com.google.protobuf.ByteString>
+        getSaltList() {
       return salt_;
     }
     /**
-     * <code>optional bytes salt = 1;</code>
+     * <pre>
+     *盐
+     * </pre>
+     *
+     * <code>repeated bytes salt = 1;</code>
      */
-    private void setSalt(com.google.protobuf.ByteString value) {
+    @Override
+    public int getSaltCount() {
+      return salt_.size();
+    }
+    /**
+     * <pre>
+     *盐
+     * </pre>
+     *
+     * <code>repeated bytes salt = 1;</code>
+     */
+    @Override
+    public com.google.protobuf.ByteString getSalt(int index) {
+      return salt_.get(index);
+    }
+    private void ensureSaltIsMutable() {
+      if (!salt_.isModifiable()) {
+        salt_ =
+            com.google.protobuf.GeneratedMessageLite.mutableCopy(salt_);
+       }
+    }
+    /**
+     * <pre>
+     *盐
+     * </pre>
+     *
+     * <code>repeated bytes salt = 1;</code>
+     */
+    private void setSalt(
+        int index, com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
-      salt_ = value;
+  ensureSaltIsMutable();
+      salt_.set(index, value);
     }
     /**
-     * <code>optional bytes salt = 1;</code>
+     * <pre>
+     *盐
+     * </pre>
+     *
+     * <code>repeated bytes salt = 1;</code>
+     */
+    private void addSalt(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureSaltIsMutable();
+      salt_.add(value);
+    }
+    /**
+     * <pre>
+     *盐
+     * </pre>
+     *
+     * <code>repeated bytes salt = 1;</code>
+     */
+    private void addAllSalt(
+        Iterable<? extends com.google.protobuf.ByteString> values) {
+      ensureSaltIsMutable();
+      com.google.protobuf.AbstractMessageLite.addAll(
+          values, salt_);
+    }
+    /**
+     * <pre>
+     *盐
+     * </pre>
+     *
+     * <code>repeated bytes salt = 1;</code>
      */
     private void clearSalt() {
-      bitField0_ = (bitField0_ & ~0x00000001);
-      salt_ = getDefaultInstance().getSalt();
+      salt_ = emptyProtobufList();
     }
 
     public static final int DPK_FIELD_NUMBER = 2;
@@ -154,7 +310,7 @@ public final class Buffer {
      */
     @Override
     public boolean hasDpk() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
+      return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
      * <code>optional bytes dpk = 2;</code>
@@ -170,155 +326,265 @@ public final class Buffer {
       if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000001;
       dpk_ = value;
     }
     /**
      * <code>optional bytes dpk = 2;</code>
      */
     private void clearDpk() {
-      bitField0_ = (bitField0_ & ~0x00000002);
+      bitField0_ = (bitField0_ & ~0x00000001);
       dpk_ = getDefaultInstance().getDpk();
     }
 
-    public static final int SIGN_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString sign_;
+    public static final int S_FIELD_NUMBER = 3;
+    private com.google.protobuf.Internal.ProtobufList<String> s_;
     /**
-     * <code>optional bytes sign = 3;</code>
+     * <code>repeated string s = 3;</code>
      */
     @Override
-    public boolean hasSign() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
+    public java.util.List<String> getSList() {
+      return s_;
     }
     /**
-     * <code>optional bytes sign = 3;</code>
+     * <code>repeated string s = 3;</code>
      */
     @Override
-    public com.google.protobuf.ByteString getSign() {
-      return sign_;
+    public int getSCount() {
+      return s_.size();
     }
     /**
-     * <code>optional bytes sign = 3;</code>
-     */
-    private void setSign(com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-      sign_ = value;
-    }
-    /**
-     * <code>optional bytes sign = 3;</code>
-     */
-    private void clearSign() {
-      bitField0_ = (bitField0_ & ~0x00000004);
-      sign_ = getDefaultInstance().getSign();
-    }
-
-    public static final int PK_FIELD_NUMBER = 4;
-    private com.google.protobuf.ByteString pk_;
-    /**
-     * <code>optional bytes pk = 4;</code>
+     * <code>repeated string s = 3;</code>
      */
     @Override
-    public boolean hasPk() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
+    public String getS(int index) {
+      return s_.get(index);
     }
     /**
-     * <code>optional bytes pk = 4;</code>
+     * <code>repeated string s = 3;</code>
      */
     @Override
-    public com.google.protobuf.ByteString getPk() {
-      return pk_;
+    public com.google.protobuf.ByteString
+        getSBytes(int index) {
+      return com.google.protobuf.ByteString.copyFromUtf8(
+          s_.get(index));
     }
-    /**
-     * <code>optional bytes pk = 4;</code>
-     */
-    private void setPk(com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
-      pk_ = value;
-    }
-    /**
-     * <code>optional bytes pk = 4;</code>
-     */
-    private void clearPk() {
-      bitField0_ = (bitField0_ & ~0x00000008);
-      pk_ = getDefaultInstance().getPk();
-    }
-
-    public static final int CS_FIELD_NUMBER = 5;
-    private com.google.protobuf.Internal.ProtobufList<com.google.protobuf.ByteString> cs_;
-    /**
-     * <code>repeated bytes cs = 5;</code>
-     */
-    @Override
-    public java.util.List<com.google.protobuf.ByteString>
-        getCsList() {
-      return cs_;
-    }
-    /**
-     * <code>repeated bytes cs = 5;</code>
-     */
-    @Override
-    public int getCsCount() {
-      return cs_.size();
-    }
-    /**
-     * <code>repeated bytes cs = 5;</code>
-     */
-    @Override
-    public com.google.protobuf.ByteString getCs(int index) {
-      return cs_.get(index);
-    }
-    private void ensureCsIsMutable() {
-      if (!cs_.isModifiable()) {
-        cs_ =
-            com.google.protobuf.GeneratedMessageLite.mutableCopy(cs_);
+    private void ensureSIsMutable() {
+      if (!s_.isModifiable()) {
+        s_ =
+            com.google.protobuf.GeneratedMessageLite.mutableCopy(s_);
        }
     }
     /**
-     * <code>repeated bytes cs = 5;</code>
+     * <code>repeated string s = 3;</code>
      */
-    private void setCs(
+    private void setS(
+        int index, String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureSIsMutable();
+      s_.set(index, value);
+    }
+    /**
+     * <code>repeated string s = 3;</code>
+     */
+    private void addS(
+        String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureSIsMutable();
+      s_.add(value);
+    }
+    /**
+     * <code>repeated string s = 3;</code>
+     */
+    private void addAllS(
+        Iterable<String> values) {
+      ensureSIsMutable();
+      com.google.protobuf.AbstractMessageLite.addAll(
+          values, s_);
+    }
+    /**
+     * <code>repeated string s = 3;</code>
+     */
+    private void clearS() {
+      s_ = com.google.protobuf.GeneratedMessageLite.emptyProtobufList();
+    }
+    /**
+     * <code>repeated string s = 3;</code>
+     */
+    private void addSBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureSIsMutable();
+      s_.add(value.toStringUtf8());
+    }
+
+    public static final int R_FIELD_NUMBER = 5;
+    private com.google.protobuf.Internal.ProtobufList<String> r_;
+    /**
+     * <code>repeated string r = 5;</code>
+     */
+    @Override
+    public java.util.List<String> getRList() {
+      return r_;
+    }
+    /**
+     * <code>repeated string r = 5;</code>
+     */
+    @Override
+    public int getRCount() {
+      return r_.size();
+    }
+    /**
+     * <code>repeated string r = 5;</code>
+     */
+    @Override
+    public String getR(int index) {
+      return r_.get(index);
+    }
+    /**
+     * <code>repeated string r = 5;</code>
+     */
+    @Override
+    public com.google.protobuf.ByteString
+        getRBytes(int index) {
+      return com.google.protobuf.ByteString.copyFromUtf8(
+          r_.get(index));
+    }
+    private void ensureRIsMutable() {
+      if (!r_.isModifiable()) {
+        r_ =
+            com.google.protobuf.GeneratedMessageLite.mutableCopy(r_);
+       }
+    }
+    /**
+     * <code>repeated string r = 5;</code>
+     */
+    private void setR(
+        int index, String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureRIsMutable();
+      r_.set(index, value);
+    }
+    /**
+     * <code>repeated string r = 5;</code>
+     */
+    private void addR(
+        String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureRIsMutable();
+      r_.add(value);
+    }
+    /**
+     * <code>repeated string r = 5;</code>
+     */
+    private void addAllR(
+        Iterable<String> values) {
+      ensureRIsMutable();
+      com.google.protobuf.AbstractMessageLite.addAll(
+          values, r_);
+    }
+    /**
+     * <code>repeated string r = 5;</code>
+     */
+    private void clearR() {
+      r_ = com.google.protobuf.GeneratedMessageLite.emptyProtobufList();
+    }
+    /**
+     * <code>repeated string r = 5;</code>
+     */
+    private void addRBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureRIsMutable();
+      r_.add(value.toStringUtf8());
+    }
+
+    public static final int PK_FIELD_NUMBER = 4;
+    private com.google.protobuf.Internal.ProtobufList<com.google.protobuf.ByteString> pk_;
+    /**
+     * <code>repeated bytes pk = 4;</code>
+     */
+    @Override
+    public java.util.List<com.google.protobuf.ByteString>
+        getPkList() {
+      return pk_;
+    }
+    /**
+     * <code>repeated bytes pk = 4;</code>
+     */
+    @Override
+    public int getPkCount() {
+      return pk_.size();
+    }
+    /**
+     * <code>repeated bytes pk = 4;</code>
+     */
+    @Override
+    public com.google.protobuf.ByteString getPk(int index) {
+      return pk_.get(index);
+    }
+    private void ensurePkIsMutable() {
+      if (!pk_.isModifiable()) {
+        pk_ =
+            com.google.protobuf.GeneratedMessageLite.mutableCopy(pk_);
+       }
+    }
+    /**
+     * <code>repeated bytes pk = 4;</code>
+     */
+    private void setPk(
         int index, com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
-  ensureCsIsMutable();
-      cs_.set(index, value);
+  ensurePkIsMutable();
+      pk_.set(index, value);
     }
     /**
-     * <code>repeated bytes cs = 5;</code>
+     * <code>repeated bytes pk = 4;</code>
      */
-    private void addCs(com.google.protobuf.ByteString value) {
+    private void addPk(com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
-  ensureCsIsMutable();
-      cs_.add(value);
+  ensurePkIsMutable();
+      pk_.add(value);
     }
     /**
-     * <code>repeated bytes cs = 5;</code>
+     * <code>repeated bytes pk = 4;</code>
      */
-    private void addAllCs(
+    private void addAllPk(
         Iterable<? extends com.google.protobuf.ByteString> values) {
-      ensureCsIsMutable();
+      ensurePkIsMutable();
       com.google.protobuf.AbstractMessageLite.addAll(
-          values, cs_);
+          values, pk_);
     }
     /**
-     * <code>repeated bytes cs = 5;</code>
+     * <code>repeated bytes pk = 4;</code>
      */
-    private void clearCs() {
-      cs_ = emptyProtobufList();
+    private void clearPk() {
+      pk_ = emptyProtobufList();
     }
 
     public static final int LIFTCARD_FIELD_NUMBER = 6;
     private com.google.protobuf.Internal.IntList liftcard_;
     /**
+     * <pre>
+     *剩余牌
+     * </pre>
+     *
      * <code>repeated int32 liftcard = 6;</code>
      */
     @Override
@@ -327,6 +593,10 @@ public final class Buffer {
       return liftcard_;
     }
     /**
+     * <pre>
+     *剩余牌
+     * </pre>
+     *
      * <code>repeated int32 liftcard = 6;</code>
      */
     @Override
@@ -334,6 +604,10 @@ public final class Buffer {
       return liftcard_.size();
     }
     /**
+     * <pre>
+     *剩余牌
+     * </pre>
+     *
      * <code>repeated int32 liftcard = 6;</code>
      */
     @Override
@@ -347,6 +621,10 @@ public final class Buffer {
        }
     }
     /**
+     * <pre>
+     *剩余牌
+     * </pre>
+     *
      * <code>repeated int32 liftcard = 6;</code>
      */
     private void setLiftcard(
@@ -355,6 +633,10 @@ public final class Buffer {
       liftcard_.setInt(index, value);
     }
     /**
+     * <pre>
+     *剩余牌
+     * </pre>
+     *
      * <code>repeated int32 liftcard = 6;</code>
      */
     private void addLiftcard(int value) {
@@ -362,6 +644,10 @@ public final class Buffer {
       liftcard_.addInt(value);
     }
     /**
+     * <pre>
+     *剩余牌
+     * </pre>
+     *
      * <code>repeated int32 liftcard = 6;</code>
      */
     private void addAllLiftcard(
@@ -371,6 +657,10 @@ public final class Buffer {
           values, liftcard_);
     }
     /**
+     * <pre>
+     *剩余牌
+     * </pre>
+     *
      * <code>repeated int32 liftcard = 6;</code>
      */
     private void clearLiftcard() {
@@ -380,13 +670,21 @@ public final class Buffer {
     public static final int PID_FIELD_NUMBER = 7;
     private int pid_;
     /**
+     * <pre>
+     *牌桌id
+     * </pre>
+     *
      * <code>optional int32 pid = 7;</code>
      */
     @Override
     public boolean hasPid() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
+      return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
+     * <pre>
+     *牌桌id
+     * </pre>
+     *
      * <code>optional int32 pid = 7;</code>
      */
     @Override
@@ -394,30 +692,46 @@ public final class Buffer {
       return pid_;
     }
     /**
+     * <pre>
+     *牌桌id
+     * </pre>
+     *
      * <code>optional int32 pid = 7;</code>
      */
     private void setPid(int value) {
-      bitField0_ |= 0x00000010;
+      bitField0_ |= 0x00000002;
       pid_ = value;
     }
     /**
+     * <pre>
+     *牌桌id
+     * </pre>
+     *
      * <code>optional int32 pid = 7;</code>
      */
     private void clearPid() {
-      bitField0_ = (bitField0_ & ~0x00000010);
+      bitField0_ = (bitField0_ & ~0x00000002);
       pid_ = 0;
     }
 
     public static final int MSG_FIELD_NUMBER = 8;
     private String msg_;
     /**
+     * <pre>
+     *信息
+     * </pre>
+     *
      * <code>optional string msg = 8;</code>
      */
     @Override
     public boolean hasMsg() {
-      return ((bitField0_ & 0x00000020) == 0x00000020);
+      return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
+     * <pre>
+     *信息
+     * </pre>
+     *
      * <code>optional string msg = 8;</code>
      */
     @Override
@@ -425,6 +739,10 @@ public final class Buffer {
       return msg_;
     }
     /**
+     * <pre>
+     *信息
+     * </pre>
+     *
      * <code>optional string msg = 8;</code>
      */
     @Override
@@ -433,6 +751,10 @@ public final class Buffer {
       return com.google.protobuf.ByteString.copyFromUtf8(msg_);
     }
     /**
+     * <pre>
+     *信息
+     * </pre>
+     *
      * <code>optional string msg = 8;</code>
      */
     private void setMsg(
@@ -440,17 +762,25 @@ public final class Buffer {
       if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000020;
+  bitField0_ |= 0x00000004;
       msg_ = value;
     }
     /**
+     * <pre>
+     *信息
+     * </pre>
+     *
      * <code>optional string msg = 8;</code>
      */
     private void clearMsg() {
-      bitField0_ = (bitField0_ & ~0x00000020);
+      bitField0_ = (bitField0_ & ~0x00000004);
       msg_ = getDefaultInstance().getMsg();
     }
     /**
+     * <pre>
+     *信息
+     * </pre>
+     *
      * <code>optional string msg = 8;</code>
      */
     private void setMsgBytes(
@@ -458,36 +788,117 @@ public final class Buffer {
       if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000020;
+  bitField0_ |= 0x00000004;
       msg_ = value.toStringUtf8();
+    }
+
+    public static final int ACTION_FIELD_NUMBER = 9;
+    private String action_;
+    /**
+     * <pre>
+     *动作：opengame drawcard drawleftcard returncards
+     * </pre>
+     *
+     * <code>optional string action = 9;</code>
+     */
+    @Override
+    public boolean hasAction() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <pre>
+     *动作：opengame drawcard drawleftcard returncards
+     * </pre>
+     *
+     * <code>optional string action = 9;</code>
+     */
+    @Override
+    public String getAction() {
+      return action_;
+    }
+    /**
+     * <pre>
+     *动作：opengame drawcard drawleftcard returncards
+     * </pre>
+     *
+     * <code>optional string action = 9;</code>
+     */
+    @Override
+    public com.google.protobuf.ByteString
+        getActionBytes() {
+      return com.google.protobuf.ByteString.copyFromUtf8(action_);
+    }
+    /**
+     * <pre>
+     *动作：opengame drawcard drawleftcard returncards
+     * </pre>
+     *
+     * <code>optional string action = 9;</code>
+     */
+    private void setAction(
+        String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+      action_ = value;
+    }
+    /**
+     * <pre>
+     *动作：opengame drawcard drawleftcard returncards
+     * </pre>
+     *
+     * <code>optional string action = 9;</code>
+     */
+    private void clearAction() {
+      bitField0_ = (bitField0_ & ~0x00000008);
+      action_ = getDefaultInstance().getAction();
+    }
+    /**
+     * <pre>
+     *动作：opengame drawcard drawleftcard returncards
+     * </pre>
+     *
+     * <code>optional string action = 9;</code>
+     */
+    private void setActionBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+      action_ = value.toStringUtf8();
     }
 
     @Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, salt_);
+      for (int i = 0; i < salt_.size(); i++) {
+        output.writeBytes(1, salt_.get(i));
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeBytes(2, dpk_);
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, sign_);
+      for (int i = 0; i < s_.size(); i++) {
+        output.writeString(3, s_.get(i));
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeBytes(4, pk_);
+      for (int i = 0; i < pk_.size(); i++) {
+        output.writeBytes(4, pk_.get(i));
       }
-      for (int i = 0; i < cs_.size(); i++) {
-        output.writeBytes(5, cs_.get(i));
+      for (int i = 0; i < r_.size(); i++) {
+        output.writeString(5, r_.get(i));
       }
       for (int i = 0; i < liftcard_.size(); i++) {
         output.writeInt32(6, liftcard_.getInt(i));
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeInt32(7, pid_);
       }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeString(8, getMsg());
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeString(9, getAction());
       }
       unknownFields.writeTo(output);
     }
@@ -498,30 +909,45 @@ public final class Buffer {
       if (size != -1) return size;
 
       size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, salt_);
+      {
+        int dataSize = 0;
+        for (int i = 0; i < salt_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeBytesSizeNoTag(salt_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getSaltList().size();
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(2, dpk_);
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, sign_);
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(4, pk_);
+      {
+        int dataSize = 0;
+        for (int i = 0; i < s_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeStringSizeNoTag(s_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getSList().size();
       }
       {
         int dataSize = 0;
-        for (int i = 0; i < cs_.size(); i++) {
+        for (int i = 0; i < pk_.size(); i++) {
           dataSize += com.google.protobuf.CodedOutputStream
-            .computeBytesSizeNoTag(cs_.get(i));
+            .computeBytesSizeNoTag(pk_.get(i));
         }
         size += dataSize;
-        size += 1 * getCsList().size();
+        size += 1 * getPkList().size();
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < r_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeStringSizeNoTag(r_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getRList().size();
       }
       {
         int dataSize = 0;
@@ -532,13 +958,17 @@ public final class Buffer {
         size += dataSize;
         size += 1 * getLiftcardList().size();
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(7, pid_);
       }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
           .computeStringSize(8, getMsg());
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeStringSize(9, getAction());
       }
       size += unknownFields.getSerializedSize();
       memoizedSerializedSize = size;
@@ -641,29 +1071,84 @@ public final class Buffer {
 
 
       /**
-       * <code>optional bytes salt = 1;</code>
+       * <pre>
+       *盐
+       * </pre>
+       *
+       * <code>repeated bytes salt = 1;</code>
        */
       @Override
-      public boolean hasSalt() {
-        return instance.hasSalt();
+      public java.util.List<com.google.protobuf.ByteString>
+          getSaltList() {
+        return java.util.Collections.unmodifiableList(
+            instance.getSaltList());
       }
       /**
-       * <code>optional bytes salt = 1;</code>
+       * <pre>
+       *盐
+       * </pre>
+       *
+       * <code>repeated bytes salt = 1;</code>
        */
       @Override
-      public com.google.protobuf.ByteString getSalt() {
-        return instance.getSalt();
+      public int getSaltCount() {
+        return instance.getSaltCount();
       }
       /**
-       * <code>optional bytes salt = 1;</code>
+       * <pre>
+       *盐
+       * </pre>
+       *
+       * <code>repeated bytes salt = 1;</code>
        */
-      public Builder setSalt(com.google.protobuf.ByteString value) {
+      @Override
+      public com.google.protobuf.ByteString getSalt(int index) {
+        return instance.getSalt(index);
+      }
+      /**
+       * <pre>
+       *盐
+       * </pre>
+       *
+       * <code>repeated bytes salt = 1;</code>
+       */
+      public Builder setSalt(
+          int index, com.google.protobuf.ByteString value) {
         copyOnWrite();
-        instance.setSalt(value);
+        instance.setSalt(index, value);
         return this;
       }
       /**
-       * <code>optional bytes salt = 1;</code>
+       * <pre>
+       *盐
+       * </pre>
+       *
+       * <code>repeated bytes salt = 1;</code>
+       */
+      public Builder addSalt(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.addSalt(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *盐
+       * </pre>
+       *
+       * <code>repeated bytes salt = 1;</code>
+       */
+      public Builder addAllSalt(
+          Iterable<? extends com.google.protobuf.ByteString> values) {
+        copyOnWrite();
+        instance.addAllSalt(values);
+        return this;
+      }
+      /**
+       * <pre>
+       *盐
+       * </pre>
+       *
+       * <code>repeated bytes salt = 1;</code>
        */
       public Builder clearSalt() {
         copyOnWrite();
@@ -703,60 +1188,208 @@ public final class Buffer {
       }
 
       /**
-       * <code>optional bytes sign = 3;</code>
+       * <code>repeated string s = 3;</code>
        */
       @Override
-      public boolean hasSign() {
-        return instance.hasSign();
+      public java.util.List<String>
+          getSList() {
+        return java.util.Collections.unmodifiableList(
+            instance.getSList());
       }
       /**
-       * <code>optional bytes sign = 3;</code>
+       * <code>repeated string s = 3;</code>
        */
       @Override
-      public com.google.protobuf.ByteString getSign() {
-        return instance.getSign();
+      public int getSCount() {
+        return instance.getSCount();
       }
       /**
-       * <code>optional bytes sign = 3;</code>
+       * <code>repeated string s = 3;</code>
        */
-      public Builder setSign(com.google.protobuf.ByteString value) {
+      @Override
+      public String getS(int index) {
+        return instance.getS(index);
+      }
+      /**
+       * <code>repeated string s = 3;</code>
+       */
+      @Override
+      public com.google.protobuf.ByteString
+          getSBytes(int index) {
+        return instance.getSBytes(index);
+      }
+      /**
+       * <code>repeated string s = 3;</code>
+       */
+      public Builder setS(
+          int index, String value) {
         copyOnWrite();
-        instance.setSign(value);
+        instance.setS(index, value);
         return this;
       }
       /**
-       * <code>optional bytes sign = 3;</code>
+       * <code>repeated string s = 3;</code>
        */
-      public Builder clearSign() {
+      public Builder addS(
+          String value) {
         copyOnWrite();
-        instance.clearSign();
+        instance.addS(value);
+        return this;
+      }
+      /**
+       * <code>repeated string s = 3;</code>
+       */
+      public Builder addAllS(
+          Iterable<String> values) {
+        copyOnWrite();
+        instance.addAllS(values);
+        return this;
+      }
+      /**
+       * <code>repeated string s = 3;</code>
+       */
+      public Builder clearS() {
+        copyOnWrite();
+        instance.clearS();
+        return this;
+      }
+      /**
+       * <code>repeated string s = 3;</code>
+       */
+      public Builder addSBytes(
+          com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.addSBytes(value);
         return this;
       }
 
       /**
-       * <code>optional bytes pk = 4;</code>
+       * <code>repeated string r = 5;</code>
        */
       @Override
-      public boolean hasPk() {
-        return instance.hasPk();
+      public java.util.List<String>
+          getRList() {
+        return java.util.Collections.unmodifiableList(
+            instance.getRList());
       }
       /**
-       * <code>optional bytes pk = 4;</code>
+       * <code>repeated string r = 5;</code>
        */
       @Override
-      public com.google.protobuf.ByteString getPk() {
-        return instance.getPk();
+      public int getRCount() {
+        return instance.getRCount();
       }
       /**
-       * <code>optional bytes pk = 4;</code>
+       * <code>repeated string r = 5;</code>
        */
-      public Builder setPk(com.google.protobuf.ByteString value) {
+      @Override
+      public String getR(int index) {
+        return instance.getR(index);
+      }
+      /**
+       * <code>repeated string r = 5;</code>
+       */
+      @Override
+      public com.google.protobuf.ByteString
+          getRBytes(int index) {
+        return instance.getRBytes(index);
+      }
+      /**
+       * <code>repeated string r = 5;</code>
+       */
+      public Builder setR(
+          int index, String value) {
         copyOnWrite();
-        instance.setPk(value);
+        instance.setR(index, value);
         return this;
       }
       /**
-       * <code>optional bytes pk = 4;</code>
+       * <code>repeated string r = 5;</code>
+       */
+      public Builder addR(
+          String value) {
+        copyOnWrite();
+        instance.addR(value);
+        return this;
+      }
+      /**
+       * <code>repeated string r = 5;</code>
+       */
+      public Builder addAllR(
+          Iterable<String> values) {
+        copyOnWrite();
+        instance.addAllR(values);
+        return this;
+      }
+      /**
+       * <code>repeated string r = 5;</code>
+       */
+      public Builder clearR() {
+        copyOnWrite();
+        instance.clearR();
+        return this;
+      }
+      /**
+       * <code>repeated string r = 5;</code>
+       */
+      public Builder addRBytes(
+          com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.addRBytes(value);
+        return this;
+      }
+
+      /**
+       * <code>repeated bytes pk = 4;</code>
+       */
+      @Override
+      public java.util.List<com.google.protobuf.ByteString>
+          getPkList() {
+        return java.util.Collections.unmodifiableList(
+            instance.getPkList());
+      }
+      /**
+       * <code>repeated bytes pk = 4;</code>
+       */
+      @Override
+      public int getPkCount() {
+        return instance.getPkCount();
+      }
+      /**
+       * <code>repeated bytes pk = 4;</code>
+       */
+      @Override
+      public com.google.protobuf.ByteString getPk(int index) {
+        return instance.getPk(index);
+      }
+      /**
+       * <code>repeated bytes pk = 4;</code>
+       */
+      public Builder setPk(
+          int index, com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setPk(index, value);
+        return this;
+      }
+      /**
+       * <code>repeated bytes pk = 4;</code>
+       */
+      public Builder addPk(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.addPk(value);
+        return this;
+      }
+      /**
+       * <code>repeated bytes pk = 4;</code>
+       */
+      public Builder addAllPk(
+          Iterable<? extends com.google.protobuf.ByteString> values) {
+        copyOnWrite();
+        instance.addAllPk(values);
+        return this;
+      }
+      /**
+       * <code>repeated bytes pk = 4;</code>
        */
       public Builder clearPk() {
         copyOnWrite();
@@ -765,64 +1398,10 @@ public final class Buffer {
       }
 
       /**
-       * <code>repeated bytes cs = 5;</code>
-       */
-      @Override
-      public java.util.List<com.google.protobuf.ByteString>
-          getCsList() {
-        return java.util.Collections.unmodifiableList(
-            instance.getCsList());
-      }
-      /**
-       * <code>repeated bytes cs = 5;</code>
-       */
-      @Override
-      public int getCsCount() {
-        return instance.getCsCount();
-      }
-      /**
-       * <code>repeated bytes cs = 5;</code>
-       */
-      @Override
-      public com.google.protobuf.ByteString getCs(int index) {
-        return instance.getCs(index);
-      }
-      /**
-       * <code>repeated bytes cs = 5;</code>
-       */
-      public Builder setCs(
-          int index, com.google.protobuf.ByteString value) {
-        copyOnWrite();
-        instance.setCs(index, value);
-        return this;
-      }
-      /**
-       * <code>repeated bytes cs = 5;</code>
-       */
-      public Builder addCs(com.google.protobuf.ByteString value) {
-        copyOnWrite();
-        instance.addCs(value);
-        return this;
-      }
-      /**
-       * <code>repeated bytes cs = 5;</code>
-       */
-      public Builder addAllCs(
-          Iterable<? extends com.google.protobuf.ByteString> values) {
-        copyOnWrite();
-        instance.addAllCs(values);
-        return this;
-      }
-      /**
-       * <code>repeated bytes cs = 5;</code>
-       */
-      public Builder clearCs() {
-        copyOnWrite();
-        instance.clearCs();
-        return this;
-      }
-
-      /**
+       * <pre>
+       *剩余牌
+       * </pre>
+       *
        * <code>repeated int32 liftcard = 6;</code>
        */
       @Override
@@ -832,6 +1411,10 @@ public final class Buffer {
             instance.getLiftcardList());
       }
       /**
+       * <pre>
+       *剩余牌
+       * </pre>
+       *
        * <code>repeated int32 liftcard = 6;</code>
        */
       @Override
@@ -839,6 +1422,10 @@ public final class Buffer {
         return instance.getLiftcardCount();
       }
       /**
+       * <pre>
+       *剩余牌
+       * </pre>
+       *
        * <code>repeated int32 liftcard = 6;</code>
        */
       @Override
@@ -846,6 +1433,10 @@ public final class Buffer {
         return instance.getLiftcard(index);
       }
       /**
+       * <pre>
+       *剩余牌
+       * </pre>
+       *
        * <code>repeated int32 liftcard = 6;</code>
        */
       public Builder setLiftcard(
@@ -855,6 +1446,10 @@ public final class Buffer {
         return this;
       }
       /**
+       * <pre>
+       *剩余牌
+       * </pre>
+       *
        * <code>repeated int32 liftcard = 6;</code>
        */
       public Builder addLiftcard(int value) {
@@ -863,6 +1458,10 @@ public final class Buffer {
         return this;
       }
       /**
+       * <pre>
+       *剩余牌
+       * </pre>
+       *
        * <code>repeated int32 liftcard = 6;</code>
        */
       public Builder addAllLiftcard(
@@ -872,6 +1471,10 @@ public final class Buffer {
         return this;
       }
       /**
+       * <pre>
+       *剩余牌
+       * </pre>
+       *
        * <code>repeated int32 liftcard = 6;</code>
        */
       public Builder clearLiftcard() {
@@ -881,6 +1484,10 @@ public final class Buffer {
       }
 
       /**
+       * <pre>
+       *牌桌id
+       * </pre>
+       *
        * <code>optional int32 pid = 7;</code>
        */
       @Override
@@ -888,6 +1495,10 @@ public final class Buffer {
         return instance.hasPid();
       }
       /**
+       * <pre>
+       *牌桌id
+       * </pre>
+       *
        * <code>optional int32 pid = 7;</code>
        */
       @Override
@@ -895,6 +1506,10 @@ public final class Buffer {
         return instance.getPid();
       }
       /**
+       * <pre>
+       *牌桌id
+       * </pre>
+       *
        * <code>optional int32 pid = 7;</code>
        */
       public Builder setPid(int value) {
@@ -903,6 +1518,10 @@ public final class Buffer {
         return this;
       }
       /**
+       * <pre>
+       *牌桌id
+       * </pre>
+       *
        * <code>optional int32 pid = 7;</code>
        */
       public Builder clearPid() {
@@ -912,6 +1531,10 @@ public final class Buffer {
       }
 
       /**
+       * <pre>
+       *信息
+       * </pre>
+       *
        * <code>optional string msg = 8;</code>
        */
       @Override
@@ -919,6 +1542,10 @@ public final class Buffer {
         return instance.hasMsg();
       }
       /**
+       * <pre>
+       *信息
+       * </pre>
+       *
        * <code>optional string msg = 8;</code>
        */
       @Override
@@ -926,6 +1553,10 @@ public final class Buffer {
         return instance.getMsg();
       }
       /**
+       * <pre>
+       *信息
+       * </pre>
+       *
        * <code>optional string msg = 8;</code>
        */
       @Override
@@ -934,6 +1565,10 @@ public final class Buffer {
         return instance.getMsgBytes();
       }
       /**
+       * <pre>
+       *信息
+       * </pre>
+       *
        * <code>optional string msg = 8;</code>
        */
       public Builder setMsg(
@@ -943,6 +1578,10 @@ public final class Buffer {
         return this;
       }
       /**
+       * <pre>
+       *信息
+       * </pre>
+       *
        * <code>optional string msg = 8;</code>
        */
       public Builder clearMsg() {
@@ -951,12 +1590,89 @@ public final class Buffer {
         return this;
       }
       /**
+       * <pre>
+       *信息
+       * </pre>
+       *
        * <code>optional string msg = 8;</code>
        */
       public Builder setMsgBytes(
           com.google.protobuf.ByteString value) {
         copyOnWrite();
         instance.setMsgBytes(value);
+        return this;
+      }
+
+      /**
+       * <pre>
+       *动作：opengame drawcard drawleftcard returncards
+       * </pre>
+       *
+       * <code>optional string action = 9;</code>
+       */
+      @Override
+      public boolean hasAction() {
+        return instance.hasAction();
+      }
+      /**
+       * <pre>
+       *动作：opengame drawcard drawleftcard returncards
+       * </pre>
+       *
+       * <code>optional string action = 9;</code>
+       */
+      @Override
+      public String getAction() {
+        return instance.getAction();
+      }
+      /**
+       * <pre>
+       *动作：opengame drawcard drawleftcard returncards
+       * </pre>
+       *
+       * <code>optional string action = 9;</code>
+       */
+      @Override
+      public com.google.protobuf.ByteString
+          getActionBytes() {
+        return instance.getActionBytes();
+      }
+      /**
+       * <pre>
+       *动作：opengame drawcard drawleftcard returncards
+       * </pre>
+       *
+       * <code>optional string action = 9;</code>
+       */
+      public Builder setAction(
+          String value) {
+        copyOnWrite();
+        instance.setAction(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *动作：opengame drawcard drawleftcard returncards
+       * </pre>
+       *
+       * <code>optional string action = 9;</code>
+       */
+      public Builder clearAction() {
+        copyOnWrite();
+        instance.clearAction();
+        return this;
+      }
+      /**
+       * <pre>
+       *动作：opengame drawcard drawleftcard returncards
+       * </pre>
+       *
+       * <code>optional string action = 9;</code>
+       */
+      public Builder setActionBytes(
+          com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setActionBytes(value);
         return this;
       }
 
@@ -978,26 +1694,23 @@ public final class Buffer {
           return DEFAULT_INSTANCE;
         }
         case MAKE_IMMUTABLE: {
-          cs_.makeImmutable();
+          salt_.makeImmutable();
+          s_.makeImmutable();
+          r_.makeImmutable();
+          pk_.makeImmutable();
           liftcard_.makeImmutable();
           return null;
         }
         case VISIT: {
           Visitor visitor = (Visitor) arg0;
           transtion other = (transtion) arg1;
-          salt_ = visitor.visitByteString(
-              hasSalt(), salt_,
-              other.hasSalt(), other.salt_);
+          salt_= visitor.visitList(salt_, other.salt_);
           dpk_ = visitor.visitByteString(
               hasDpk(), dpk_,
               other.hasDpk(), other.dpk_);
-          sign_ = visitor.visitByteString(
-              hasSign(), sign_,
-              other.hasSign(), other.sign_);
-          pk_ = visitor.visitByteString(
-              hasPk(), pk_,
-              other.hasPk(), other.pk_);
-          cs_= visitor.visitList(cs_, other.cs_);
+          s_= visitor.visitList(s_, other.s_);
+          r_= visitor.visitList(r_, other.r_);
+          pk_= visitor.visitList(pk_, other.pk_);
           liftcard_= visitor.visitIntList(liftcard_, other.liftcard_);
           pid_ = visitor.visitInt(
               hasPid(), pid_,
@@ -1005,6 +1718,9 @@ public final class Buffer {
           msg_ = visitor.visitString(
               hasMsg(), msg_,
               other.hasMsg(), other.msg_);
+          action_ = visitor.visitString(
+              hasAction(), action_,
+              other.hasAction(), other.action_);
           if (visitor == MergeFromVisitor
               .INSTANCE) {
             bitField0_ |= other.bitField0_;
@@ -1028,31 +1744,42 @@ public final class Buffer {
                   done = true;
                   break;
                 case 10: {
-                  bitField0_ |= 0x00000001;
-                  salt_ = input.readBytes();
+                  if (!salt_.isModifiable()) {
+                    salt_ =
+                        com.google.protobuf.GeneratedMessageLite.mutableCopy(salt_);
+                  }
+                  salt_.add(input.readBytes());
                   break;
                 }
                 case 18: {
-                  bitField0_ |= 0x00000002;
+                  bitField0_ |= 0x00000001;
                   dpk_ = input.readBytes();
                   break;
                 }
                 case 26: {
-                  bitField0_ |= 0x00000004;
-                  sign_ = input.readBytes();
+                  String s = input.readString();
+                  if (!s_.isModifiable()) {
+                    s_ =
+                        com.google.protobuf.GeneratedMessageLite.mutableCopy(s_);
+                  }
+                  s_.add(s);
                   break;
                 }
                 case 34: {
-                  bitField0_ |= 0x00000008;
-                  pk_ = input.readBytes();
+                  if (!pk_.isModifiable()) {
+                    pk_ =
+                        com.google.protobuf.GeneratedMessageLite.mutableCopy(pk_);
+                  }
+                  pk_.add(input.readBytes());
                   break;
                 }
                 case 42: {
-                  if (!cs_.isModifiable()) {
-                    cs_ =
-                        com.google.protobuf.GeneratedMessageLite.mutableCopy(cs_);
+                  String s = input.readString();
+                  if (!r_.isModifiable()) {
+                    r_ =
+                        com.google.protobuf.GeneratedMessageLite.mutableCopy(r_);
                   }
-                  cs_.add(input.readBytes());
+                  r_.add(s);
                   break;
                 }
                 case 48: {
@@ -1077,14 +1804,20 @@ public final class Buffer {
                   break;
                 }
                 case 56: {
-                  bitField0_ |= 0x00000010;
+                  bitField0_ |= 0x00000002;
                   pid_ = input.readInt32();
                   break;
                 }
                 case 66: {
                   String s = input.readString();
-                  bitField0_ |= 0x00000020;
+                  bitField0_ |= 0x00000004;
                   msg_ = s;
+                  break;
+                }
+                case 74: {
+                  String s = input.readString();
+                  bitField0_ |= 0x00000008;
+                  action_ = s;
                   break;
                 }
                 default: {

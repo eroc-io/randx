@@ -7,15 +7,13 @@ import eroc.io.randx.utils.*;
 import org.bouncycastle.util.encoders.Base64;
 
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
 
 public class DeckDealer {
 
-    public DeckDealer(){
+    public DeckDealer() {
         init();
     }
 
@@ -25,6 +23,7 @@ public class DeckDealer {
     private static byte[] dsk;
 
     private static byte[] dpk;
+    private static KeyPair pair;
 
     private static final Integer CARD_INDEX = 7;
 
@@ -52,7 +51,7 @@ public class DeckDealer {
             secureRandom.nextBytes(seed);
             BigInteger n = new BigInteger(seed);
             if (n.compareTo(N) < 0 && n.compareTo(ZERO) > 0) {
-                KeyPair pair = Secp256r1.generateKeyPair(seed);
+                pair = Secp256r1.generateKeyPair(seed);
                 dsk = pair.getPrivate().getEncoded();
                 dpk = pair.getPublic().getEncoded();
                 max256b = new BigInteger("10000000000000000000000000000000000000000000000000000000000000000", 16);
@@ -60,12 +59,10 @@ public class DeckDealer {
                 seed = SHA256.getSHA256Bytes(seed);
                 init();
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
 
 
     /**
@@ -101,13 +98,13 @@ public class DeckDealer {
         }
 
         count = cardNum * deckNum;
-        return Buffer.transtion.newBuilder().setDpk(ByteString.copyFrom(dpk)).setSalt(ByteString.copyFrom(s)).build();
+        return Buffer.transtion.newBuilder().setDpk(ByteString.copyFrom(dpk)).addSalt(ByteString.copyFrom(s)).setAction("opengame").build();
     }
 
     /**
      * 抽牌
      *
-     * @param pk 公钥
+     * @param pk  公钥
      * @param sig 签名
      * @return
      * @throws Exception
@@ -149,8 +146,7 @@ public class DeckDealer {
         //放入抽牌证明
         List<String> p = proofs.get(pkk);
         p.add(Base64.toBase64String(SHA256.getSHA256Bytes(s)));
-
-        return CryptoUtils.ECDHEncrypt(pk, s);
+        return CryptoUtils.ECDHEncrypt(pk, s, pair);
     }
 
 

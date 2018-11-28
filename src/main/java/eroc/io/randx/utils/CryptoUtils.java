@@ -2,17 +2,23 @@ package eroc.io.randx.utils;
 
 import com.google.protobuf.ByteString;
 import eroc.io.randx.pojo.Encoding;
+import org.bouncycastle.asn1.*;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyAgreement;
 import javax.crypto.NoSuchPaddingException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
 import java.security.*;
-import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class CryptoUtils {
 
@@ -29,13 +35,13 @@ public class CryptoUtils {
      * @throws InvalidAlgorithmParameterException
      * @throws NoSuchAlgorithmException
      */
-    public static KeyPair generatorKeyPair(String algorithm, String stdName) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm);//EC,DiffieHellman,DSA,RSA
-        ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec(stdName);
-        keyPairGenerator.initialize(256);
-        keyPairGenerator.initialize(ecGenParameterSpec, new SecureRandom());
-        return keyPairGenerator.generateKeyPair();
-    }
+//    public static KeyPair generatorKeyPair(String algorithm, String stdName) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+//        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm);//EC,DiffieHellman,DSA,RSA
+//        ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec(stdName);
+//        keyPairGenerator.initialize(256);
+//        keyPairGenerator.initialize(ecGenParameterSpec, new SecureRandom());
+//        return keyPairGenerator.generateKeyPair();
+//    }
 
     /**
      * ECDH加密
@@ -44,11 +50,11 @@ public class CryptoUtils {
      * @param msg
      * @return
      */
-    public static byte[] ECDHEncrypt(byte[] publicKey, byte[] msg) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, NoSuchPaddingException, InvalidKeySpecException {
+    public static byte[] ECDHEncrypt(byte[] publicKey, byte[] msg, KeyPair keyPair) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, NoSuchPaddingException, InvalidKeySpecException {
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey);
         KeyFactory keyFactory = KeyFactory.getInstance("EC");
         PublicKey pk = keyFactory.generatePublic(x509EncodedKeySpec);
-        KeyPair keyPair = generatorKeyPair("EC", "secp256r1");//stdName:secp256k1
+//        KeyPair keyPair = generatorKeyPair("EC", "secp256r1");//stdName:secp256k1
         PublicKey epk = keyPair.getPublic();
         KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
         keyAgreement.init(keyPair.getPrivate());
@@ -118,7 +124,7 @@ public class CryptoUtils {
         PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey);
         KeyFactory keyFactory = KeyFactory.getInstance("EC");
         PrivateKey sk = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
-        Signature signature = Signature.getInstance("SHA1withECDSA");
+        Signature signature = Signature.getInstance("SHA256withECDSA");
         signature.initSign(sk);
         signature.update(message);
         return signature.sign();
@@ -128,27 +134,110 @@ public class CryptoUtils {
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey);
         KeyFactory keyFactory = KeyFactory.getInstance("EC");
         PublicKey pk = keyFactory.generatePublic(x509EncodedKeySpec);
-        Signature signature = Signature.getInstance("SHA1withECDSA");
+        Signature signature = Signature.getInstance("SHA256withECDSA");
         signature.initVerify(pk);
         signature.update(message);
         return signature.verify(signed);
     }
 
+    private static ASN1Primitive toAsn1Primitive(byte[] data) throws Exception {
+        try(ByteArrayInputStream inStream = new ByteArrayInputStream(data);
+            ASN1InputStream asnInputStream = new ASN1InputStream(inStream);) {
+            return asnInputStream.readObject();
+        }
+    }
+
+    public static List<String> generateRS(byte[] sign) throws Exception {
+        List<String> l = new ArrayList<>();
+        ASN1Primitive asn1 = toAsn1Primitive(sign);
+        if (asn1 instanceof ASN1Sequence) {
+            ASN1Sequence asn1Sequence = (ASN1Sequence) asn1;
+            ASN1Encodable[] asn1Encodables = asn1Sequence.toArray();
+            for(ASN1Encodable asn1Encodable : asn1Encodables) {
+                ASN1Primitive asn1Primitive = asn1Encodable.toASN1Primitive();
+                if (asn1Primitive instanceof ASN1Integer) {
+                    ASN1Integer asn1Integer = (ASN1Integer) asn1Primitive;
+                    BigInteger value = asn1Integer.getValue();
+                    String s = value.toString(16);
+                    if (s.length() % 2 == 0) {
+                        l.add(s);
+                    } else {
+                        s = "0" + s;
+                        l.add(s);
+                    }
+                }
+            }
+        }
+        return l;
+    }
+
+
+    public static byte[] generateSign(String pr,String ps) throws IOException {
+        BigInteger r = new BigInteger("4b4da36d6b22b4d0471c64bad49ee434280f07350463b58ef6a05856c2296a5c", 16);
+        BigInteger s = new BigInteger("a26a184751c619dd5399ebe0eb72b843479a9cb304ad10d464a5184e3d2f1f6c", 16);
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        DERSequenceGenerator seq = new DERSequenceGenerator(b);
+        seq.addObject(new ASN1Integer(r));
+        seq.addObject(new ASN1Integer(s));
+        seq.close();
+        byte[] sign = b.toByteArray();
+        b.close();
+        return sign;
+    }
+
+
     public static void main(String[] args) throws Exception {
-        //加密解密签名验证
-//        KeyPair pair = CryptoUtils.generatorKeyPair("EC", "secp256k1");
-//        PublicKey aPublic = pair.getPublic();
-//        PrivateKey aPrivate = pair.getPrivate();
-//        System.out.println("java.security genneratory：");
-//        System.out.println("privateKey: " + Arrays.toString(aPrivate.getEncoded()));
-//        System.out.println("publicKey: " + Arrays.toString(aPublic.getEncoded()));
-//        String msg = "hello world ECIES!";
-//        byte[] obj = CryptoUtils.ECDHEncrypt(aPublic.getEncoded(), msg);
-//        String s = CryptoUtils.ECDHDecrypt(aPrivate.getEncoded(), obj);
-//        System.out.println(s);
-//        byte[] sign = CryptoUtils.sign(aPrivate.getEncoded(), msg);
-//        boolean verify = CryptoUtils.verify(aPublic.getEncoded(), sign, msg);
-//        System.out.println(verify);
+        String msg = "a message for java-js interop purpose";
+
+
+        //根据sign生成r s
+//        for(int i = 0; i < 10; i++) {
+//            BigInteger d = new BigInteger("628f142e96a2ba15f29f13ec85f3aeb9ec56fe0b3df30bea68870a19bbb7fba0", 16);
+//            KeyPair pair = Secp256r1.generateKeyPair(d.toByteArray());
+//            PrivateKey aPrivate = pair.getPrivate();
+//            byte[] signature = sign(aPrivate.getEncoded(), msg.getBytes());
+//            ASN1Primitive asn1 = toAsn1Primitive(signature);
+//            if (asn1 instanceof ASN1Sequence) {
+//                ASN1Sequence asn1Sequence = (ASN1Sequence) asn1;
+//                ASN1Encodable[] asn1Encodables = asn1Sequence.toArray();
+//                for(ASN1Encodable asn1Encodable : asn1Encodables) {
+//                    ASN1Primitive asn1Primitive = asn1Encodable.toASN1Primitive();
+//                    if (asn1Primitive instanceof ASN1Integer) {
+//                        ASN1Integer asn1Integer = (ASN1Integer) asn1Primitive;
+//                        BigInteger value = asn1Integer.getValue();
+//                        String s = value.toString(16);
+//                        if (s.length() % 2 == 0) {
+//                            System.out.println(s);
+//                        } else {
+//                            s = "0" + s;
+//                            System.out.println(s);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+
+
+        //根据 r 和s 生成sign
+//        BigInteger r = new BigInteger("4b4da36d6b22b4d0471c64bad49ee434280f07350463b58ef6a05856c2296a5c", 16);
+//        BigInteger s = new BigInteger("a26a184751c619dd5399ebe0eb72b843479a9cb304ad10d464a5184e3d2f1f6c", 16);
+//        ByteArrayOutputStream b = new ByteArrayOutputStream();
+//        DERSequenceGenerator seq = new DERSequenceGenerator(b);
+//        seq.addObject(new ASN1Integer(r));
+//        seq.addObject(new ASN1Integer(s));
+//        seq.close();
+//        System.out.println(TypeUtils.bytesToHexString(b.toByteArray()));
+
+
+        //设置x ,y点生成pk
+//        BigInteger x = new BigInteger("61166327685726372633146956112430165093840350805695271212904644383394079735442");
+//        BigInteger y = new BigInteger("58046343023627330736346952573191938034837742142120314188975834647179723108352");
+//        ECPoint epk = new ECPoint(x, y);
+//        X9ECParameters ecCurve = ECNamedCurveTable.getByName("secp256r1");
+//        ECParameterSpec ecps = new ECNamedCurveSpec("secp256r1", ecCurve.getCurve(), ecCurve.getG(), ecCurve.getN(), ecCurve.getH(), ecCurve.getSeed());
+//        ECPublicKeySpec ecpk = new ECPublicKeySpec(epk, ecps);
+//        KeyFactory keyFactory = KeyFactory.getInstance("EC");
+//        PublicKey publicKey = keyFactory.generatePublic(ecpk);
 
 
         //ECDH密钥交换
