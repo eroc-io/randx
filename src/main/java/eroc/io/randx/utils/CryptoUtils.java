@@ -1,7 +1,7 @@
 package eroc.io.randx.utils;
 
 import com.google.protobuf.ByteString;
-import eroc.io.randx.pojo.Encoding;
+import eroc.io.randx.pojo.Buffer;
 import org.bouncycastle.asn1.*;
 
 import javax.crypto.BadPaddingException;
@@ -11,6 +11,7 @@ import javax.crypto.NoSuchPaddingException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
@@ -50,7 +51,7 @@ public class CryptoUtils {
      * @param msg
      * @return
      */
-    public static byte[] ECDHEncrypt(byte[] publicKey, byte[] msg, KeyPair keyPair) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, NoSuchPaddingException, InvalidKeySpecException {
+    public static Buffer.EciesBody ECDHEncrypt(byte[] publicKey, byte[] msg, KeyPair keyPair) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, NoSuchPaddingException, InvalidKeySpecException, UnsupportedEncodingException {
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey);
         KeyFactory keyFactory = KeyFactory.getInstance("EC");
         PublicKey pk = keyFactory.generatePublic(x509EncodedKeySpec);
@@ -69,15 +70,14 @@ public class CryptoUtils {
         ByteString pct = ByteString.copyFrom(ct);
         ByteString pepk = ByteString.copyFrom(epk.getEncoded());
         ByteString piv = ByteString.copyFrom(iv);
-        Encoding.ecies dataToMac = Encoding.ecies.newBuilder()
-                .setCiphertext(pct)
-                .setEphemPublicKey(pepk)
+        Buffer.EciesBody dataToMac = Buffer.EciesBody.newBuilder()
+                .setCipher(pct)
+                .setEpk(pepk)
                 .setIv(piv)
                 .build();
         String mac = SHA256.sha256_HMAC(dataToMac.toString(), macKey);//hash（ct,epk,iv）
-        ByteString pmac = ByteString.copyFrom(mac.getBytes());
-        Encoding.ecies obj = Encoding.ecies.newBuilder().setIv(piv).setEphemPublicKey(pepk).setCiphertext(pct).setMac(pmac).build();
-        return obj.toByteArray();
+        ByteString pmac = ByteString.copyFrom(mac, "utf-8");
+        return Buffer.EciesBody.newBuilder().setIv(piv).setEpk(pepk).setCipher(pct).setMac(pmac).build();
     }
 
 
@@ -85,15 +85,15 @@ public class CryptoUtils {
      * ECDH解密
      *
      * @param
-     * @param body
+     * @param
      * @return
      */
-    public static byte[] ECDHDecrypt(byte[] privateKey, byte[] body) throws Exception {
-        Encoding.ecies ecies = Encoding.ecies.parseFrom(body);
-        byte[] ct = ecies.getCiphertext().toByteArray();
+    public static byte[] ECDHDecrypt(byte[] privateKey, Buffer.EciesBody ecies) throws Exception {
+//        Buffer.EciesBody ecies = Buffer.EciesBody.parseFrom(body);
+        byte[] ct = ecies.getCipher().toByteArray();
         byte[] iv = ecies.getIv().toByteArray();
         String bmac = ecies.getMac().toStringUtf8();
-        byte[] pepk = ecies.getEphemPublicKey().toByteArray();
+        byte[] pepk = ecies.getEpk().toByteArray();
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(pepk);
         KeyFactory kf = KeyFactory.getInstance("EC");
         PublicKey epk = kf.generatePublic(x509EncodedKeySpec);
@@ -106,9 +106,9 @@ public class CryptoUtils {
         byte[] secret = keyAgreement.generateSecret();
         byte[] encKey = Arrays.copyOfRange(secret, 0, 16);
         String macKey = TypeUtils.bytesToHexString(Arrays.copyOfRange(secret, 16, 32));
-        Encoding.ecies dataToMac = Encoding.ecies.newBuilder()
-                .setCiphertext(ByteString.copyFrom(ct))
-                .setEphemPublicKey(ByteString.copyFrom(pepk))
+        Buffer.EciesBody dataToMac = Buffer.EciesBody.newBuilder()
+                .setCipher(ByteString.copyFrom(ct))
+                .setEpk(ByteString.copyFrom(pepk))
                 .setIv(ByteString.copyFrom(iv))
                 .build();
         String mac = SHA256.sha256_HMAC(dataToMac.toString(), macKey);
@@ -172,7 +172,7 @@ public class CryptoUtils {
     }
 
 
-    public static byte[] generateSign(String pr,String ps) throws IOException {
+    public static byte[] generateSign(String pr, String ps) throws IOException {
         BigInteger r = new BigInteger("4b4da36d6b22b4d0471c64bad49ee434280f07350463b58ef6a05856c2296a5c", 16);
         BigInteger s = new BigInteger("a26a184751c619dd5399ebe0eb72b843479a9cb304ad10d464a5184e3d2f1f6c", 16);
         ByteArrayOutputStream b = new ByteArrayOutputStream();

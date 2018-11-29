@@ -10,8 +10,10 @@ public interface PlayService {
 
     void openGame(CopyOnWriteArraySet<WebSocketServer> wss);
 
-    void drawCard(Buffer.transtion transtion);
+    void drawCard(Buffer.DrawRequest dr);
 
-    void drawLeftCards(Buffer.transtion transtion);
+    void drawLeftCards(CopyOnWriteArraySet<WebSocketServer> wss);
+
+    void returnCards(Buffer.ReturnRequest rr);
 
 }

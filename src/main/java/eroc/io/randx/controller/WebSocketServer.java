@@ -1,68 +1,55 @@
 package eroc.io.randx.controller;
 
-import com.google.protobuf.ByteString;
-import eroc.io.randx.event.PlayEvent;
 import eroc.io.randx.pojo.Buffer;
 import eroc.io.randx.service.PlayService;
 import eroc.io.randx.utils.TypeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * 斗地主controller
  */
-@ServerEndpoint("/deckdealer")
+@ServerEndpoint("/ws")
 @Component
 public class WebSocketServer {
 
     @Autowired
-    private ApplicationContext applicationContext;
-
-    @Autowired
     private PlayService playService;
-
-
-    //静态变量，用来记录当前在线连接数。应该把它设计成线程安全的
-    private static int onlineCount = 0;
 
     //concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象
     private static CopyOnWriteArraySet<WebSocketServer> webSocketSet = new CopyOnWriteArraySet<>();
-
+    //记录当前在线连接数
+    private static int onlineCount = 0;
     //与某个客户端的连接会话，需要通过它来给客户端发送数据
     private Session session;
     //当玩家公钥
-    private ByteString pk;
+    private byte[] pk;
+    //签名
+    private byte[] sign;
+    //牌桌编号，牌桌id
+    private Map<Integer, byte[]> deck;
 
 
     /**
      * 连接建立成功调用的方法
      */
     @OnOpen
-    public void onOpen(Session session, byte[] player) {
-        try {
-            WebSocketServer ws = new WebSocketServer();
-            Buffer.transtion p = Buffer.transtion.parseFrom(player);
-            ws.setPk(p.getPk(0));
-            ws.setSession(session);
-            webSocketSet.add(ws);     //加入set中
-            addOnlineCount();           //在线数加1
-            int i = getOnlineCount();
-            System.out.println("有新连接加入！当前在线人数为" + i);
-            //发布监听
-            applicationContext.publishEvent(new PlayEvent(this, i, webSocketSet));
-            Buffer.transtion.Builder out = Buffer.transtion.newBuilder();
-            String msg = "连接成功,当前已有" + i + "个玩家准备就绪";
-            sendMessage(out.setMsg(msg).build().toByteArray());
-        } catch (IOException e) {
-            System.out.println("websocket IO异常");
-        }
+    public void onOpen(Session session) {
+        WebSocketServer ws = new WebSocketServer();
+        ws.setSession(session);
+        webSocketSet.add(ws);     //加入set中
+        addOnlineCount();           //在线数加1
+        int i = getOnlineCount();
+        System.out.println("有新连接加入！当前在线人数为" + i);
+        //发布监听
+//            applicationContext.publishEvent(new PlayEvent(this, i, webSocketSet));
     }
 
     /**
@@ -83,17 +70,33 @@ public class WebSocketServer {
      */
     @OnMessage
     public void onMessage(byte[] message, Session session) throws IOException {
-        Buffer.transtion player = Buffer.transtion.parseFrom(message);
-        String action = player.getAction();
-        if (action.equals("drawcard")) {
-            playService.drawCard(player);
-        } else if (action.equals("drawleftcard")) {
+        byte b = message[0];
+        int l = message.length - 1;
+        byte[] msg = new byte[l];
+        System.arraycopy(message, 1, msg, 0, l);
+        if (b == 0) {//OpenRequest
 
+        } else if (b == 1) {//JoinReaquest
 
-        } else if (action.equals("returncards")) {
-
+        } else if (b == 2) {//drawReaquest
+            playService.drawCard(Buffer.DrawRequest.parseFrom(msg));
+        } else if (b == 3) {//drawLeftRequest
+            //取剩余牌，所有人的公钥和签名
+//            for(WebSocketServer ws : webSocketSet) {
+//                if (TypeUtils.bytesToHexString(ws.getPk()).equalsIgnoreCase(TypeUtils.bytesToHexString(player.getPk(0).toByteArray()))) {
+//                    byte[] sign = CryptoUtils.generateSign(player.getR(0), player.getS(0));
+//                    ws.setSign(sign);
+//                }
+//            }
+//            playService.drawLeftCards(webSocketSet);
+        } else if (b == 4) {//return request
+//            for(WebSocketServer ws : webSocketSet) {
+//                if (TypeUtils.bytesToHexString(ws.getPk()).equalsIgnoreCase(TypeUtils.bytesToHexString(player.getPk(0).toByteArray()))) {
+//                    playService.returnCards(player);
+//                }
+//            }
         } else {
-            sendInfo(message);
+            this.sendMessage("操作异常".getBytes());
         }
     }
 
@@ -141,7 +144,7 @@ public class WebSocketServer {
         String spk = TypeUtils.bytesToHexString(pk);
         for(WebSocketServer item : webSocketSet) {
             try {
-                String ipk = TypeUtils.bytesToHexString(item.getPk().toByteArray());
+                String ipk = TypeUtils.bytesToHexString(item.getPk());
                 if (ipk.equals(spk)) {
                     item.sendMessage(msg);
                 }
@@ -173,11 +176,19 @@ public class WebSocketServer {
         this.session = session;
     }
 
-    public ByteString getPk() {
+    public byte[] getPk() {
         return pk;
     }
 
-    public void setPk(ByteString pk) {
+    public void setPk(byte[] pk) {
         this.pk = pk;
+    }
+
+    public byte[] getSign() {
+        return sign;
+    }
+
+    public void setSign(byte[] sign) {
+        this.sign = sign;
     }
 }
