@@ -1,40 +1,17 @@
 package eroc.io.randx.service;
 
+import com.google.protobuf.ByteString;
 import eroc.io.randx.exception.DataException;
+import eroc.io.randx.pojo.Buffer;
 import eroc.io.randx.utils.*;
 import org.bouncycastle.util.encoders.Base64;
 
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
 
 public class DeckDealer {
-
-
-    {
-        try {
-            KeyPair pair = CryptoUtils.generatorKeyPair("EC", "secp256k1");
-            dsk = pair.getPrivate().getEncoded();
-            dpk = pair.getPublic().getEncoded();
-            SecureRandom secureRandom = new SecureRandom();
-            seed = new byte[32];
-            secureRandom.nextBytes(seed);
-            StringBuffer stringBuffer = new StringBuffer();
-            for(int i = 0; i < 64; i++) {
-                String s = Integer.toHexString(new SecureRandom().nextInt(16));
-                stringBuffer.append(s);
-            }
-            max256b = new BigInteger("10000000000000000000000000000000000000000000000000000000000000000", 16);
-        } catch (InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-
-    }
 
 
     private static byte[] seed = {};
@@ -42,6 +19,8 @@ public class DeckDealer {
     private static byte[] dsk;
 
     private static byte[] dpk;
+
+    private static KeyPair pair;
 
     private static final Integer CARD_INDEX = 7;
 
@@ -56,6 +35,34 @@ public class DeckDealer {
     //剩余牌数
     private static Integer count = 0;
 
+    private static final BigInteger ZERO = new BigInteger("0");
+    private static final BigInteger N = new BigInteger("FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551", 16);
+
+
+
+    /**
+     * 重置游戏
+     */
+    public void resetOrStart() {
+        try {
+            SecureRandom secureRandom = new SecureRandom();
+            seed = new byte[32];
+            secureRandom.nextBytes(seed);
+            BigInteger n = new BigInteger(seed);
+            if (n.compareTo(N) < 0 && n.compareTo(ZERO) > 0) {
+                pair = Secp256r1.generateKeyPair(seed);
+                dsk = pair.getPrivate().getEncoded();
+                dpk = pair.getPublic().getEncoded();
+                max256b = new BigInteger("10000000000000000000000000000000000000000000000000000000000000000", 16);
+            } else {
+                seed = SHA256.getSHA256Bytes(seed);
+                resetOrStart();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     /**
      * 开始游戏
@@ -63,10 +70,9 @@ public class DeckDealer {
      * @param cardNum 卡牌数量
      * @param deckNum 几副
      * @param pks
+     * @return dpk 牌局的公钥    s 初始盐
      */
-    public static Object[] openGame(Integer cardNum, Integer deckNum, List<byte[]> pks) throws Exception {
-        new DeckDealer();
-        cards.clear();
+    public Object[] openGame(Integer cardNum, Integer deckNum, List<byte[]> pks) throws Exception {
         for(Short i = 0; i < deckNum; i++) {
             for(Short j = 0; j < cardNum; j++) {
                 cards.add(j);
@@ -90,11 +96,19 @@ public class DeckDealer {
         }
 
         count = cardNum * deckNum;
-        Object[] o = {s, dpk};
+        Object[] o={s,dpk};
         return o;
     }
 
-    public static byte[] drawCard(byte[] pk, byte[] sig) throws Exception {
+    /**
+     * 抽牌
+     *
+     * @param pk  公钥
+     * @param sig 签名
+     * @return object[0]给抽牌玩家的信息  object[1]给其他玩家的proof
+     * @throws Exception
+     */
+    public Object[] drawCard(byte[] pk, byte[] sig) throws Exception {
         if (count <= 0) {
             throw new Exception("No more card can be drawn");
         }
@@ -128,11 +142,14 @@ public class DeckDealer {
         Arrays.fill(s, s.length - 1, s.length, crc);
         //更新玩家的最新盐
         salts.put(pkk, s);
-        //放入抽牌证明
+        //将抽牌证明放入数据库
         List<String> p = proofs.get(pkk);
-        p.add(Base64.toBase64String(SHA256.getSHA256Bytes(s)));
-
-        return CryptoUtils.ECDHEncrypt(pk, s);
+        String proof = Base64.toBase64String(SHA256.getSHA256Bytes(s));
+        p.add(proof);
+        Buffer.DrawResponse.Builder resp = Buffer.DrawResponse.newBuilder().setCardCipher(CryptoUtils.ECDHEncrypt(pk, s, pair));
+        Buffer.DrawNotification.Builder notify = Buffer.DrawNotification.newBuilder().setPk(ByteString.copyFrom(pk)).setProof(ByteString.copyFrom(proof, "utf-8"));
+        Object[] obj = {resp, notify};
+        return obj;
     }
 
 
@@ -143,7 +160,7 @@ public class DeckDealer {
      * @param signs 签名集合
      * @return 抓取的牌
      */
-    public static List<Short> drawLeftCards(List<byte[]> pks, List<byte[]> signs) throws Exception {
+    public Buffer.DrawLeftNotification drawLeftCards(List<byte[]> pks, List<byte[]> signs) throws Exception {
 
         //牌数小于等于零，抛出异常
         if (count <= 0) {
@@ -173,38 +190,46 @@ public class DeckDealer {
             if (salt == null || salt.length == 0) {
                 throw new DataException("Unknown player: " + Base64.toBase64String(pks.get(i)));
             }
-            boolean flag = ECDSA.verify(h2s, pks.get(i), "SHA1withECDSA", signs.get(i));
+            boolean flag = ECDSA.verify(h2s, pks.get(i), "SHA256withECDSA", signs.get(i));
             //验证签名失败，抛出异常
             if (flag == false) {
                 throw new DataException("Signature verification failed");
             }
         }
         //验证成功，取出所有牌
-        List<Short> card = new ArrayList<>();
-        card.addAll(cards.subList(0, count));
-        cards.clear();
+        List<Short> lc = cards.subList(0, count);
+        byte[] cards = {};
+        for(Short l : lc) {
+            byte b = TypeUtils.uint8ToByte(l);
+            int cl = cards.length;
+            Arrays.copyOf(cards, cl + 1);
+            System.arraycopy(b, 0, cards, cl, 1);
+        }
+        DeckDealer.cards.clear();
         count = 0;
-        return card;
+        return Buffer.DrawLeftNotification.newBuilder().setCards(ByteString.copyFrom(cards)).build();
     }
 
 
     /**
      * 返还牌
      *
-     * @param pk  玩家公钥
-     * @param sig 签名
-     * @param cs  牌信息
+     * @param pk    玩家公钥
+     * @param sig   签名
+     * @param ecies 牌信息
+     * @return 最新盐
      */
 
-    public static byte[] returnCards(byte[] pk, byte[] sig, List<byte[]> cs) throws Exception {
-
+    public Object[] returnCards(byte[] pk, byte[] sig, Buffer.EciesBody ecies) throws Exception {
+        byte[] msg = CryptoUtils.ECDHDecrypt(dsk, ecies);
+        List<byte[]> cs = new ArrayList<>();//byte[] msg 如何存储牌信息
         //验证玩家身份
         String pkStr = Base64.toBase64String(pk);
         byte[] salt = salts.get(pkStr);
         if (salt == null || salt.length == 0) {
             throw new DataException("Unknown player: " + pkStr);
         }
-        boolean flag = ECDSA.verify(salt, pk, "SHA1withECDSA", sig);
+        boolean flag = ECDSA.verify(salt, pk, "SHA256withECDSA", sig);
         //验证签名失败，抛出异常
         if (flag == false) {
             throw new DataException("Signature verification failed");
@@ -228,118 +253,123 @@ public class DeckDealer {
         seed = Arrays.copyOf(seed, length + sig.length);
         System.arraycopy(sig, 0, seed, length, sig.length);
         seed = SHA256.getSHA256Bytes(seed);
-        seed = ECDSA.sign(seed, dsk, "SHA1withECDSA");
-        salts.put(pkStr, SHA256.getSHA256Bytes(seed));
-
-        return SHA256.getSHA256Bytes(seed);
+        seed = ECDSA.sign(seed, dsk, "SHA256withECDSA");
+        byte[] s = SHA256.getSHA256Bytes(seed);
+        salts.put(pkStr, s);
+        Buffer.ReturnResponse resp = Buffer.ReturnResponse.newBuilder().setNumReturned(cs.size()).setSalt(ByteString.copyFrom(s)).build();
+        Buffer.ReturnNotification notify = Buffer.ReturnNotification.newBuilder().setNumReturned(cs.size()).setPk(ByteString.copyFrom(pk)).build();
+        Object[] o = {resp, notify};
+        return o;
 
     }
 
 
     public static void main(String[] args) throws Exception {
-
-        String[] cardNames = {
-                "2♢", "3♢", "4♢", "5♢", "6♢", "7♢", "8♢", "9♢", "10♢", "J♢", "Q♢", "K♢", "A♢",
-                "2♧", "3♧", "4♧", "5♧", "6♧", "7♧", "8♧", "9♧", "10♧", "J♧", "Q♧", "K♧", "A♧",
-                "2♡", "3♡", "4♡", "5♡", "6♡", "7♡", "8♡", "9♡", "10♡", "J♡", "Q♡", "K♡", "A♡",
-                "2♤", "3♤", "4♤", "5♤", "6♤", "7♤", "8♤", "9♤", "10♤", "J♤", "Q♤", "K♤", "A♤",
-                "b🃏", "c🃏"
-        };
-        //测试游戏
-        List<byte[]> pks = new ArrayList<>();
-        List<byte[]> sks = new ArrayList<>();
-        for(int i = 0; i < 4; i++) {
-            KeyPair pair = CryptoUtils.generatorKeyPair("EC", "secp256k1");
-            pks.add(pair.getPublic().getEncoded());
-            sks.add(pair.getPrivate().getEncoded());
-        }
-        Object[] objects = DeckDealer.openGame(54, 1, pks);
-        List<byte[]> es = new ArrayList<>();//每个玩家最新的盐
-        Map<Integer, List<Short>> cbps = new HashMap<>();//每个玩家的牌信息
-        for(int i = 0; i < 4; i++) {
-            cbps.put(i, new ArrayList<>());
-        }
-        for(int i = 0; i < 4; i++) {
-            es.add((byte[]) objects[0]);
-        }
-        long round = Math.round(Math.floor((54 * 1) / 4));
-
-        List<byte[]> cs = new ArrayList<>();
-
-        for(long i = 0; i < round - 1; i++) {
-            for(int j = 0; j < 4; j++) {
-                byte[] r = DeckDealer.drawCard(pks.get(j), CryptoUtils.sign(sks.get(j), es.get(j)));
-                es.set(j, CryptoUtils.ECDHDecrypt(sks.get(j), r));
-                byte[] s = es.get(j);
-
-                if (j == 1 && cs.size() < 6) {
-                    if (i == 1 || i == 3 || i == 5 || i == 6 || i == 9 || i == 10) {
-                        cs.add(s);
-                    }
-                }
-
-                List<Short> c = cbps.get(j);
-                c.add(TypeUtils.byteToUnit8(s[DeckDealer.CARD_INDEX]));
-            }
-        }
-
-        System.out.println("12轮抽牌结果:");
-        for(int i = 0; i < 4; i++) {
-            List<Short> shorts = cbps.get(i);
-            System.out.print(i + 1 + "号玩家牌：");
-            for(Short s : shorts) {
-                System.out.print(cardNames[s] + " ");
-            }
-            System.out.println("\n");
-        }
-
-        //抓取剩余牌
-        byte[] initial = new byte[0];
-        int length;
-        for(byte[] pk : pks) {
-            length = initial.length;
-            initial = Arrays.copyOf(initial, pk.length + length);
-            System.arraycopy(pk, 0, initial, length, pk.length);
-        }
-        byte[] h2s = SHA256.getSHA256Bytes(initial);
-
-        List<byte[]> signs = new ArrayList<>();
-
-        for(int i = 0; i < 4; i++) {
-            signs.add(ECDSA.sign(h2s, sks.get(i), "SHA1withECDSA"));
-        }
-
-        List<Short> lc = DeckDealer.drawLeftCards(pks, signs);
-
-        System.out.println("抓取的剩余牌:");
-
-        for(Short s : lc) {
-            System.out.print(cardNames[s] + " ");
-        }
-        System.out.println("\n");
-
-        cbps.get(1).addAll(lc);
-
-
-        System.out.println("牌抓完了:");
-        for(int i = 0; i < 4; i++) {
-            List<Short> shorts = cbps.get(i);
-            System.out.print(i + 1 + "号玩家牌：");
-            for(Short s : shorts) {
-                System.out.print(cardNames[s] + " ");
-            }
-            System.out.println("\n");
-        }
-
-        //还牌
-        DeckDealer.returnCards(pks.get(1), ECDSA.sign(es.get(1), sks.get(1), "SHA1withECDSA"), cs);
-
-        System.out.println("返回的牌:");
-
-        for(Short s : DeckDealer.cards) {
-            System.out.print(cardNames[s] + " ");
-        }
-        System.out.println("\n");
+        String s = UUID.randomUUID().toString().replace("-", "");
+        System.out.println(s);
+//
+//        String[] cardNames = {
+//                "2♢", "3♢", "4♢", "5♢", "6♢", "7♢", "8♢", "9♢", "10♢", "J♢", "Q♢", "K♢", "A♢",
+//                "2♧", "3♧", "4♧", "5♧", "6♧", "7♧", "8♧", "9♧", "10♧", "J♧", "Q♧", "K♧", "A♧",
+//                "2♡", "3♡", "4♡", "5♡", "6♡", "7♡", "8♡", "9♡", "10♡", "J♡", "Q♡", "K♡", "A♡",
+//                "2♤", "3♤", "4♤", "5♤", "6♤", "7♤", "8♤", "9♤", "10♤", "J♤", "Q♤", "K♤", "A♤",
+//                "b🃏", "c🃏"
+//        };
+//        //测试游戏
+//        List<byte[]> pks = new ArrayList<>();
+//        List<byte[]> sks = new ArrayList<>();
+//        for(int i = 0; i < 4; i++) {
+//            KeyPair pair = CryptoUtils.generatorKeyPair("EC", "secp256k1");
+//            pks.add(pair.getPublic().getEncoded());
+//            sks.add(pair.getPrivate().getEncoded());
+//        }
+//        Object[] objects = DeckDealer.openGame(54, 1, pks);
+//        List<byte[]> es = new ArrayList<>();//每个玩家最新的盐
+//        Map<Integer, List<Short>> cbps = new HashMap<>();//每个玩家的牌信息
+//        for(int i = 0; i < 4; i++) {
+//            cbps.put(i, new ArrayList<>());
+//        }
+//        for(int i = 0; i < 4; i++) {
+//            es.add((byte[]) objects[0]);
+//        }
+//        long round = Math.round(Math.floor((54 * 1) / 4));
+//
+//        List<byte[]> cs = new ArrayList<>();
+//
+//        for(long i = 0; i < round - 1; i++) {
+//            for(int j = 0; j < 4; j++) {
+//                byte[] r = DeckDealer.drawCard(pks.get(j), CryptoUtils.sign(sks.get(j), es.get(j)));
+//                es.set(j, CryptoUtils.ECDHDecrypt(sks.get(j), r));
+//                byte[] s = es.get(j);
+//
+//                if (j == 1 && cs.size() < 6) {
+//                    if (i == 1 || i == 3 || i == 5 || i == 6 || i == 9 || i == 10) {
+//                        cs.add(s);
+//                    }
+//                }
+//
+//                List<Short> c = cbps.get(j);
+//                c.add(TypeUtils.byteToUnit8(s[DeckDealer.CARD_INDEX]));
+//            }
+//        }
+//
+//        System.out.println("12轮抽牌结果:");
+//        for(int i = 0; i < 4; i++) {
+//            List<Short> shorts = cbps.get(i);
+//            System.out.print(i + 1 + "号玩家牌：");
+//            for(Short s : shorts) {
+//                System.out.print(cardNames[s] + " ");
+//            }
+//            System.out.println("\n");
+//        }
+//
+//        //抓取剩余牌
+//        byte[] initial = new byte[0];
+//        int length;
+//        for(byte[] pk : pks) {
+//            length = initial.length;
+//            initial = Arrays.copyOf(initial, pk.length + length);
+//            System.arraycopy(pk, 0, initial, length, pk.length);
+//        }
+//        byte[] h2s = SHA256.getSHA256Bytes(initial);
+//
+//        List<byte[]> signs = new ArrayList<>();
+//
+//        for(int i = 0; i < 4; i++) {
+//            signs.add(ECDSA.sign(h2s, sks.get(i), "SHA1withECDSA"));
+//        }
+//
+//        List<Short> lc = DeckDealer.drawLeftCards(pks, signs);
+//
+//        System.out.println("抓取的剩余牌:");
+//
+//        for(Short s : lc) {
+//            System.out.print(cardNames[s] + " ");
+//        }
+//        System.out.println("\n");
+//
+//        cbps.get(1).addAll(lc);
+//
+//
+//        System.out.println("牌抓完了:");
+//        for(int i = 0; i < 4; i++) {
+//            List<Short> shorts = cbps.get(i);
+//            System.out.print(i + 1 + "号玩家牌：");
+//            for(Short s : shorts) {
+//                System.out.print(cardNames[s] + " ");
+//            }
+//            System.out.println("\n");
+//        }
+//
+//        //还牌
+//        DeckDealer.returnCards(pks.get(1), ECDSA.sign(es.get(1), sks.get(1), "SHA1withECDSA"), cs);
+//
+//        System.out.println("返回的牌:");
+//
+//        for(Short s : DeckDealer.cards) {
+//            System.out.print(cardNames[s] + " ");
+//        }
+//        System.out.println("\n");
     }
 
 
