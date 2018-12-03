@@ -13,16 +13,13 @@ import java.util.*;
 
 public class DeckDealer {
 
-    public DeckDealer() {
-        init();
-    }
-
 
     private static byte[] seed = {};
 
     private static byte[] dsk;
 
     private static byte[] dpk;
+
     private static KeyPair pair;
 
     private static final Integer CARD_INDEX = 7;
@@ -41,10 +38,12 @@ public class DeckDealer {
     private static final BigInteger ZERO = new BigInteger("0");
     private static final BigInteger N = new BigInteger("FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551", 16);
 
+
+
     /**
-     * 初始化游戏
+     * 重置游戏
      */
-    public void init() {
+    public void resetOrStart() {
         try {
             SecureRandom secureRandom = new SecureRandom();
             seed = new byte[32];
@@ -57,7 +56,7 @@ public class DeckDealer {
                 max256b = new BigInteger("10000000000000000000000000000000000000000000000000000000000000000", 16);
             } else {
                 seed = SHA256.getSHA256Bytes(seed);
-                init();
+                resetOrStart();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -73,8 +72,7 @@ public class DeckDealer {
      * @param pks
      * @return dpk 牌局的公钥    s 初始盐
      */
-    public Buffer.JoinResponse openGame(Integer cardNum, Integer deckNum, List<byte[]> pks) throws Exception {
-        cards.clear();
+    public Object[] openGame(Integer cardNum, Integer deckNum, List<byte[]> pks) throws Exception {
         for(Short i = 0; i < deckNum; i++) {
             for(Short j = 0; j < cardNum; j++) {
                 cards.add(j);
@@ -98,7 +96,8 @@ public class DeckDealer {
         }
 
         count = cardNum * deckNum;
-        return Buffer.JoinResponse.newBuilder().setDpk(ByteString.copyFrom(dpk)).setSalt(ByteString.copyFrom(s)).build();
+        Object[] o={s,dpk};
+        return o;
     }
 
     /**
@@ -147,8 +146,8 @@ public class DeckDealer {
         List<String> p = proofs.get(pkk);
         String proof = Base64.toBase64String(SHA256.getSHA256Bytes(s));
         p.add(proof);
-        Buffer.DrawResponse resp = Buffer.DrawResponse.newBuilder().setCardCipher(CryptoUtils.ECDHEncrypt(pk, s, pair)).build();
-        Buffer.DrawNotification notify = Buffer.DrawNotification.newBuilder().setPk(ByteString.copyFrom(pk)).setProof(ByteString.copyFrom(proof, "utf-8")).build();
+        Buffer.DrawResponse.Builder resp = Buffer.DrawResponse.newBuilder().setCardCipher(CryptoUtils.ECDHEncrypt(pk, s, pair));
+        Buffer.DrawNotification.Builder notify = Buffer.DrawNotification.newBuilder().setPk(ByteString.copyFrom(pk)).setProof(ByteString.copyFrom(proof, "utf-8"));
         Object[] obj = {resp, notify};
         return obj;
     }
@@ -215,9 +214,9 @@ public class DeckDealer {
     /**
      * 返还牌
      *
-     * @param pk  玩家公钥
-     * @param sig 签名
-     * @param ecies  牌信息
+     * @param pk    玩家公钥
+     * @param sig   签名
+     * @param ecies 牌信息
      * @return 最新盐
      */
 
@@ -509,13 +508,6 @@ public class DeckDealer {
 //        System.out.println(stringBuffer.toString().toUpperCase());
 
 
-    public static byte[] getSeed() {
-        return seed;
-    }
-
-    public static void setSeed(byte[] seed) {
-        DeckDealer.seed = seed;
-    }
 }
 
 

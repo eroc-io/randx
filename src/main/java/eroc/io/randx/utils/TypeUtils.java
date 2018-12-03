@@ -6,9 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class TypeUtils {
 
@@ -127,7 +124,7 @@ public class TypeUtils {
     public static byte[] double2Bytes(double d) {
         long value = Double.doubleToRawLongBits(d);
         byte[] byteRet = new byte[8];
-        for (int i = 0; i < 8; i++) {
+        for(int i = 0; i < 8; i++) {
             byteRet[i] = (byte) ((value >> 8 * i) & 0xff);
         }
         return byteRet;
@@ -136,7 +133,7 @@ public class TypeUtils {
 
     public static double bytes2Double(byte[] arr) {
         long value = 0;
-        for (int i = 0; i < 8; i++) {
+        for(int i = 0; i < 8; i++) {
             value |= ((long) (arr[i] & 0xff)) << (8 * i);
         }
         return Double.longBitsToDouble(value);
@@ -175,26 +172,31 @@ public class TypeUtils {
     /**
      * 把16进制字符串转换成字节数组
      *
-     * @param hex
+     * @param
      * @return
      */
-    public static byte[] hexStringToByte(String hex) {
-        if (hex.length() % 2 != 0) {
-            hex = "0" + hex;
+    public static byte[] hexStringToByte(String inHex) {
+        int hexlen = inHex.length();
+        byte[] result;
+        if (hexlen % 2 == 1) {
+            //奇数
+            hexlen++;
+            result = new byte[(hexlen / 2)];
+            inHex = "0" + inHex;
+        } else {
+            //偶数
+            result = new byte[(hexlen / 2)];
         }
-        int len = (hex.length() / 2);
-        byte[] result = new byte[len];
-        char[] achar = hex.toCharArray();
-        for(int i = 0; i < len; i++) {
-            int pos = i * 2;
-            result[i] = (byte) (toByte(achar[pos]) << 4 | toByte(achar[pos + 1]));
+        int j = 0;
+        for(int i = 0; i < hexlen; i += 2) {
+            result[j] = hexToByte(inHex.substring(i, i + 2));
+            j++;
         }
         return result;
     }
 
-    private static byte toByte(char c) {
-        byte b = (byte) "0123456789ABCDEF".indexOf(c);
-        return b;
+    public static byte hexToByte(String inHex) {
+        return (byte) Integer.parseInt(inHex, 16);
     }
 
 
@@ -228,7 +230,7 @@ public class TypeUtils {
      * uint8到字节数组的转换.
      */
     public static byte uint8ToByte(short number) {
-        return  new Integer(number & 0xff).byteValue();
+        return new Integer(number & 0xff).byteValue();
     }
 
     /**
@@ -269,5 +271,13 @@ public class TypeUtils {
         return l & 0x00000000ffffffff;
     }
 
+
+    public static byte[] getMsg(byte[] message, byte prefix) {
+        int l = message.length;
+        byte[] msg = new byte[l + 1];
+        msg[0] = prefix;
+        System.arraycopy(message, 0, msg, 1, l);
+        return msg;
+    }
 
 }

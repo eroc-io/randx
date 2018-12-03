@@ -3,6 +3,8 @@ package eroc.io.randx.controller;
 import eroc.io.randx.pojo.Buffer;
 import eroc.io.randx.service.PlayService;
 import eroc.io.randx.utils.TypeUtils;
+import eroc.io.randx.utils.UUIDUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +12,6 @@ import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -27,14 +28,10 @@ public class WebSocketServer {
     private static CopyOnWriteArraySet<WebSocketServer> webSocketSet = new CopyOnWriteArraySet<>();
     //记录当前在线连接数
     private static int onlineCount = 0;
-    //与某个客户端的连接会话，需要通过它来给客户端发送数据
+    //与客户端的连接会话
     private Session session;
-    //当玩家公钥
-    private byte[] pk;
-    //签名
-    private byte[] sign;
-    //牌桌编号，牌桌id
-    private Map<Integer, byte[]> deck;
+
+    private String uid;
 
 
     /**
@@ -44,22 +41,12 @@ public class WebSocketServer {
     public void onOpen(Session session) {
         WebSocketServer ws = new WebSocketServer();
         ws.setSession(session);
+        ws.setUid(UUIDUtils.getUUID());
         webSocketSet.add(ws);     //加入set中
         addOnlineCount();           //在线数加1
-        int i = getOnlineCount();
-        System.out.println("有新连接加入！当前在线人数为" + i);
+        System.out.println("有新连接加入！当前在线人数为" + getOnlineCount());
         //发布监听
-//            applicationContext.publishEvent(new PlayEvent(this, i, webSocketSet));
-    }
-
-    /**
-     * 连接关闭调用的方法
-     */
-    @OnClose
-    public void onClose() {
-        webSocketSet.remove(this);  //从set中删除
-        subOnlineCount();           //在线数减1
-        System.out.println("有一连接关闭！当前在线人数为" + getOnlineCount());
+//      applicationContext.publishEvent(new PlayEvent(this, i, webSocketSet));
     }
 
 
@@ -74,13 +61,24 @@ public class WebSocketServer {
         int l = message.length - 1;
         byte[] msg = new byte[l];
         System.arraycopy(message, 1, msg, 0, l);
-        if (b == 0) {//OpenRequest
-
-        } else if (b == 1) {//JoinReaquest
-
-        } else if (b == 2) {//drawReaquest
-            playService.drawCard(Buffer.DrawRequest.parseFrom(msg));
-        } else if (b == 3) {//drawLeftRequest
+        if (b == 0) {
+            //OpenRequest
+            Buffer.OpenResponse oresp = playService.initPlay(msg);
+            sendMessage(TypeUtils.getMsg(oresp.toByteArray(), (byte) 0));
+        } else if (b == 1) {
+            //JoinReaquest
+            Buffer.JoinResponse jresp = playService.joinGame(msg, this);
+            if (!StringUtils.isBlank(jresp.getErrMsg())) {
+                sendMessage(TypeUtils.getMsg(jresp.toByteArray(), (byte) 1));
+            }
+        } else if (b == 2) {
+            //drawReaquest
+            Buffer.DrawResponse dresp = playService.drawCard(msg, this);
+            if (!StringUtils.isBlank(dresp.getErrMsg())) {
+                sendMessage(TypeUtils.getMsg(dresp.toByteArray(), (byte) 2));
+            }
+        } else if (b == 3) {
+            //drawLeftRequest
             //取剩余牌，所有人的公钥和签名
 //            for(WebSocketServer ws : webSocketSet) {
 //                if (TypeUtils.bytesToHexString(ws.getPk()).equalsIgnoreCase(TypeUtils.bytesToHexString(player.getPk(0).toByteArray()))) {
@@ -89,15 +87,42 @@ public class WebSocketServer {
 //                }
 //            }
 //            playService.drawLeftCards(webSocketSet);
-        } else if (b == 4) {//return request
+        } else if (b == 4) {
+            //return request
 //            for(WebSocketServer ws : webSocketSet) {
 //                if (TypeUtils.bytesToHexString(ws.getPk()).equalsIgnoreCase(TypeUtils.bytesToHexString(player.getPk(0).toByteArray()))) {
 //                    playService.returnCards(player);
 //                }
 //            }
-        } else {
-            this.sendMessage("操作异常".getBytes());
         }
+    }
+
+    /**
+     * 发送消息
+     */
+    public static void sendInfo(byte[] message, String uid) throws IOException {
+        for(WebSocketServer item : webSocketSet) {
+            try {
+                if (uid == null) {
+                    item.sendMessage(message);
+                } else if (item.uid == uid) {
+                    item.sendMessage(message);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    /**
+     * 连接关闭调用的方法
+     */
+    @OnClose
+    public void onClose() {
+        webSocketSet.remove(this);  //从set中删除
+        subOnlineCount();           //在线数减1
+        System.out.println("有一连接关闭！当前在线人数为" + getOnlineCount());
     }
 
     /**
@@ -121,41 +146,6 @@ public class WebSocketServer {
     }
 
 
-    /**
-     * 群发自定义消息
-     */
-    public static void sendInfo(byte[] message) throws IOException {
-        for(WebSocketServer item : webSocketSet) {
-            try {
-                item.sendMessage(message);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
-    /**
-     * 给指定的用户发送消息
-     *
-     * @param msg
-     */
-    public static void sendInfoSpecific(byte[] msg, byte[] pk) {
-        String spk = TypeUtils.bytesToHexString(pk);
-        for(WebSocketServer item : webSocketSet) {
-            try {
-                String ipk = TypeUtils.bytesToHexString(item.getPk());
-                if (ipk.equals(spk)) {
-                    item.sendMessage(msg);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-    }
-
-
     public static synchronized int getOnlineCount() {
         return onlineCount;
     }
@@ -176,19 +166,12 @@ public class WebSocketServer {
         this.session = session;
     }
 
-    public byte[] getPk() {
-        return pk;
+
+    public String getUid() {
+        return uid;
     }
 
-    public void setPk(byte[] pk) {
-        this.pk = pk;
-    }
-
-    public byte[] getSign() {
-        return sign;
-    }
-
-    public void setSign(byte[] sign) {
-        this.sign = sign;
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 }

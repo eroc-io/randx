@@ -7,10 +7,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 public interface PlayService {
 
+    Buffer.OpenResponse initPlay(byte[] msg);
 
-    void openGame(CopyOnWriteArraySet<WebSocketServer> wss);
+    Buffer.JoinResponse joinGame(byte[] msg, WebSocketServer wss);
 
-    void drawCard(Buffer.DrawRequest dr);
+    Buffer.DrawResponse drawCard(byte[] dr, WebSocketServer wss);
 
     void drawLeftCards(CopyOnWriteArraySet<WebSocketServer> wss);
 

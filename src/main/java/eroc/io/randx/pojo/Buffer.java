@@ -1113,6 +1113,16 @@ public final class Buffer {
      * <code>bytes deckId = 1;</code>
      */
     com.google.protobuf.ByteString getDeckId();
+
+    /**
+     * <code>string errMsg = 2;</code>
+     */
+    String getErrMsg();
+    /**
+     * <code>string errMsg = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getErrMsgBytes();
   }
   /**
    * Protobuf type {@code OpenResponse}
@@ -1124,6 +1134,7 @@ public final class Buffer {
       OpenResponseOrBuilder {
     private OpenResponse() {
       deckId_ = com.google.protobuf.ByteString.EMPTY;
+      errMsg_ = "";
     }
     public static final int DECKID_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString deckId_;
@@ -1152,11 +1163,62 @@ public final class Buffer {
       deckId_ = getDefaultInstance().getDeckId();
     }
 
+    public static final int ERRMSG_FIELD_NUMBER = 2;
+    private String errMsg_;
+    /**
+     * <code>string errMsg = 2;</code>
+     */
+    @Override
+    public String getErrMsg() {
+      return errMsg_;
+    }
+    /**
+     * <code>string errMsg = 2;</code>
+     */
+    @Override
+    public com.google.protobuf.ByteString
+        getErrMsgBytes() {
+      return com.google.protobuf.ByteString.copyFromUtf8(errMsg_);
+    }
+    /**
+     * <code>string errMsg = 2;</code>
+     */
+    private void setErrMsg(
+        String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      errMsg_ = value;
+    }
+    /**
+     * <code>string errMsg = 2;</code>
+     */
+    private void clearErrMsg() {
+      
+      errMsg_ = getDefaultInstance().getErrMsg();
+    }
+    /**
+     * <code>string errMsg = 2;</code>
+     */
+    private void setErrMsgBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      errMsg_ = value.toStringUtf8();
+    }
+
     @Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (!deckId_.isEmpty()) {
         output.writeBytes(1, deckId_);
+      }
+      if (!errMsg_.isEmpty()) {
+        output.writeString(2, getErrMsg());
       }
       unknownFields.writeTo(output);
     }
@@ -1170,6 +1232,10 @@ public final class Buffer {
       if (!deckId_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(1, deckId_);
+      }
+      if (!errMsg_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeStringSize(2, getErrMsg());
       }
       size += unknownFields.getSerializedSize();
       memoizedSerializedSize = size;
@@ -1295,6 +1361,48 @@ public final class Buffer {
         return this;
       }
 
+      /**
+       * <code>string errMsg = 2;</code>
+       */
+      @Override
+      public String getErrMsg() {
+        return instance.getErrMsg();
+      }
+      /**
+       * <code>string errMsg = 2;</code>
+       */
+      @Override
+      public com.google.protobuf.ByteString
+          getErrMsgBytes() {
+        return instance.getErrMsgBytes();
+      }
+      /**
+       * <code>string errMsg = 2;</code>
+       */
+      public Builder setErrMsg(
+          String value) {
+        copyOnWrite();
+        instance.setErrMsg(value);
+        return this;
+      }
+      /**
+       * <code>string errMsg = 2;</code>
+       */
+      public Builder clearErrMsg() {
+        copyOnWrite();
+        instance.clearErrMsg();
+        return this;
+      }
+      /**
+       * <code>string errMsg = 2;</code>
+       */
+      public Builder setErrMsgBytes(
+          com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setErrMsgBytes(value);
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:OpenResponse)
     }
     @Override
@@ -1320,6 +1428,8 @@ public final class Buffer {
           OpenResponse other = (OpenResponse) arg1;
           deckId_ = visitor.visitByteString(deckId_ != com.google.protobuf.ByteString.EMPTY, deckId_,
               other.deckId_ != com.google.protobuf.ByteString.EMPTY, other.deckId_);
+          errMsg_ = visitor.visitString(!errMsg_.isEmpty(), errMsg_,
+              !other.errMsg_.isEmpty(), other.errMsg_);
           if (visitor == MergeFromVisitor
               .INSTANCE) {
           }
@@ -1344,6 +1454,12 @@ public final class Buffer {
                 case 10: {
 
                   deckId_ = input.readBytes();
+                  break;
+                }
+                case 18: {
+                  String s = input.readStringRequireUtf8();
+
+                  errMsg_ = s;
                   break;
                 }
                 default: {

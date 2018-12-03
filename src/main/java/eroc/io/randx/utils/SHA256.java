@@ -59,14 +59,14 @@ public class SHA256 {
      * sha256_HMAC加密
      *
      * @param message 消息
-     * @param secret  秘钥
+     * @param mk  秘钥
      * @return 加密后字符串
      */
-    public static String sha256_HMAC(String message, String secret) {
+    public static String sha256_HMAC(String message, byte[] mk) {
         String hash = "";
         try {
             Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
-            SecretKeySpec secret_key = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
+            SecretKeySpec secret_key = new SecretKeySpec(mk, "HmacSHA256");
             sha256_HMAC.init(secret_key);
             byte[] bytes = sha256_HMAC.doFinal(message.getBytes());
             hash = TypeUtils.bytesToHexString(bytes);
