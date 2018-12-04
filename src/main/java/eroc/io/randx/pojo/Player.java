@@ -5,10 +5,11 @@ public class Player {
     //玩家公钥
     private byte[] pk;
 
-    //玩家签名
-//    private byte[] sign;
+    //wss id
+    private String uid;
 
-    private String uid;//wss id
+    //玩家签名
+    private byte[] sign;
 
 
     public String getUid() {
@@ -25,5 +26,13 @@ public class Player {
 
     public void setPk(byte[] pk) {
         this.pk = pk;
+    }
+
+    public byte[] getSign() {
+        return sign;
+    }
+
+    public void setSign(byte[] sign) {
+        this.sign = sign;
     }
 }

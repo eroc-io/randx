@@ -79,23 +79,19 @@ public class WebSocketServer {
             }
         } else if (b == 3) {
             //drawLeftRequest
-            //取剩余牌，所有人的公钥和签名
-//            for(WebSocketServer ws : webSocketSet) {
-//                if (TypeUtils.bytesToHexString(ws.getPk()).equalsIgnoreCase(TypeUtils.bytesToHexString(player.getPk(0).toByteArray()))) {
-//                    byte[] sign = CryptoUtils.generateSign(player.getR(0), player.getS(0));
-//                    ws.setSign(sign);
-//                }
-//            }
-//            playService.drawLeftCards(webSocketSet);
+            Buffer.DrawLeftNotification dln = playService.drawLeftCards(msg, this);
+            if (!StringUtils.isBlank(dln.getErrMsg())) {
+                sendMessage(TypeUtils.getMsg(dln.toByteArray(), (byte) 4));
+            }
         } else if (b == 4) {
             //return request
-//            for(WebSocketServer ws : webSocketSet) {
-//                if (TypeUtils.bytesToHexString(ws.getPk()).equalsIgnoreCase(TypeUtils.bytesToHexString(player.getPk(0).toByteArray()))) {
-//                    playService.returnCards(player);
-//                }
-//            }
+            Buffer.ReturnResponse returnResponse = playService.returnCards(msg, this);
+            if (!StringUtils.isBlank(returnResponse.getErrMsg())) {
+                sendMessage(TypeUtils.getMsg(returnResponse.toByteArray(), (byte) 5));
+            }
         }
     }
+
 
     /**
      * 发送消息

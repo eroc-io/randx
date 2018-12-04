@@ -39,11 +39,10 @@ public class DeckDealer {
     private static final BigInteger N = new BigInteger("FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551", 16);
 
 
-
     /**
      * 重置游戏
      */
-    public void resetOrStart() {
+    public Object[] resetOrStart() {
         try {
             SecureRandom secureRandom = new SecureRandom();
             seed = new byte[32];
@@ -61,6 +60,8 @@ public class DeckDealer {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        Object[] o = {dsk, dpk};
+        return o;
     }
 
 
@@ -96,7 +97,7 @@ public class DeckDealer {
         }
 
         count = cardNum * deckNum;
-        Object[] o={s,dpk};
+        Object[] o = {s, dpk};
         return o;
     }
 
@@ -160,7 +161,7 @@ public class DeckDealer {
      * @param signs 签名集合
      * @return 抓取的牌
      */
-    public Buffer.DrawLeftNotification drawLeftCards(List<byte[]> pks, List<byte[]> signs) throws Exception {
+    public Buffer.DrawLeftNotification.Builder drawLeftCards(List<byte[]> pks, List<byte[]> signs) throws Exception {
 
         //牌数小于等于零，抛出异常
         if (count <= 0) {
@@ -198,31 +199,34 @@ public class DeckDealer {
         }
         //验证成功，取出所有牌
         List<Short> lc = cards.subList(0, count);
-        byte[] cards = {};
-        for(Short l : lc) {
-            byte b = TypeUtils.uint8ToByte(l);
-            int cl = cards.length;
-            Arrays.copyOf(cards, cl + 1);
-            System.arraycopy(b, 0, cards, cl, 1);
+        int size = lc.size();
+        byte[] lcards = new byte[size];
+        for(int i = 0; i < size; i++) {
+            lcards[i] = TypeUtils.uint8ToByte(lc.get(i));
         }
-        DeckDealer.cards.clear();
+        cards.clear();
         count = 0;
-        return Buffer.DrawLeftNotification.newBuilder().setCards(ByteString.copyFrom(cards)).build();
+        //生成新盐
+        seed = CryptoUtils.sign(dsk, SHA256.getSHA256Bytes(seed));
+        byte[] s = SHA256.getSHA256Bytes(seed);
+        for(byte[] pk : pks) {
+            String pkk = Base64.toBase64String(pk);
+            salts.put(pkk, s);
+        }
+        return Buffer.DrawLeftNotification.newBuilder().setCards(ByteString.copyFrom(lcards)).setSalt(ByteString.copyFrom(s));
     }
 
 
     /**
      * 返还牌
      *
-     * @param pk    玩家公钥
-     * @param sig   签名
-     * @param ecies 牌信息
+     * @param pk  玩家公钥
+     * @param sig 签名
+     * @param cs  牌信息
      * @return 最新盐
      */
 
-    public Object[] returnCards(byte[] pk, byte[] sig, Buffer.EciesBody ecies) throws Exception {
-        byte[] msg = CryptoUtils.ECDHDecrypt(dsk, ecies);
-        List<byte[]> cs = new ArrayList<>();//byte[] msg 如何存储牌信息
+    public Object[] returnCards(byte[] pk, byte[] sig, List<byte[]> cs) throws Exception {
         //验证玩家身份
         String pkStr = Base64.toBase64String(pk);
         byte[] salt = salts.get(pkStr);
@@ -244,7 +248,7 @@ public class DeckDealer {
 
         //还牌
         for(byte[] c : cs) {
-            cards.add(TypeUtils.byteToUnit8(c[CARD_INDEX]));
+            cards.set(count, TypeUtils.byteToUnit8(c[CARD_INDEX]));
             count++;
         }
 
