@@ -11,22 +11,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class ListenerPlayEvent implements ApplicationListener<PlayEvent> {
 
-    private Integer num = 3;
 
     @Autowired
     private PlayService playService;
 
 
     /**
-     * 实现开始游戏
+     *
      *
      * @param playEvent
      */
     @Override
     public void onApplicationEvent(PlayEvent playEvent) {
-        if (playEvent.getCount().equals(num)) {
-            //开始游戏
-//            playService.openGame(playEvent.getWss());
-        }
     }
 }
