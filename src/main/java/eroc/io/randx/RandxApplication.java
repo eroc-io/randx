@@ -1,8 +1,10 @@
 package eroc.io.randx;
 
+import eroc.io.randx.controller.WebSocketServer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.context.ConfigurableApplicationContext;
 import tk.mybatis.spring.annotation.MapperScan;
 
 @SpringBootApplication
@@ -11,6 +13,8 @@ import tk.mybatis.spring.annotation.MapperScan;
 public class RandxApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(RandxApplication.class, args);
+        ConfigurableApplicationContext run = SpringApplication.run(RandxApplication.class, args);
+        WebSocketServer.setApplicationContext(run);
+
     }
 }

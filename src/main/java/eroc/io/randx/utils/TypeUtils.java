@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.Base64;
 
 public class TypeUtils {
 
@@ -279,5 +281,64 @@ public class TypeUtils {
         System.arraycopy(message, 0, msg, 1, l);
         return msg;
     }
+
+    private static final byte[] PK_SECP256R1 = Base64.getDecoder().decode("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgA");
+
+
+    public static byte[] bufferPk(byte[] publicKey) {
+        byte[] pk = new byte[65];
+        System.arraycopy(publicKey, PK_SECP256R1.length, pk, 0, 65);
+        return pk;
+    }
+
+    /**
+     * 给pk加上前缀
+     *
+     * @param publicKey PK.raw
+     * @return formatPK
+     */
+    public static byte[] formatPK(byte[] publicKey) {
+        byte[] prefix = PK_SECP256R1;
+        return TypeUtils.concatByteArrays(new byte[][]{prefix, publicKey});
+    }
+
+
+
+    /**
+     * 合并数组
+     *
+     * @param arrays
+     * @return
+     */
+    public static byte[] concatByteArrays(byte[][] arrays) {
+        int tl = 0;
+        for(byte[] bytes : arrays) {
+            tl += bytes.length;
+        }
+        byte[] r = new byte[tl];
+
+        int i = 0;
+        for(byte[] bytes : arrays) {
+            System.arraycopy(bytes, 0, r, i, bytes.length);
+            i += bytes.length;
+        }
+
+        return r;
+    }
+
+    /**
+     * 输出指定n长度的数组
+     *
+     * @param src
+     * @param n
+     * @return
+     */
+    public static byte[] lastNBytes(byte[] src, int n) {
+        byte[] prefix = new byte[src.length < n ? n - src.length : 0];
+        byte[] postfix = Arrays.copyOfRange(src, src.length - (src.length > n ? n : src.length), src.length);
+        return concatByteArrays(new byte[][]{prefix, postfix});
+    }
+
+
 
 }

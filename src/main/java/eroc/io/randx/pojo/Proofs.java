@@ -1,5 +1,6 @@
 package eroc.io.randx.pojo;
 
+import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -10,6 +11,8 @@ public class Proofs {
     private Integer id;
     private String proof;
     private String pk;
+    @Column(name = "deckId")
+    private String deckId;
 
     public Integer getId() {
         return id;
@@ -33,5 +36,13 @@ public class Proofs {
 
     public void setPk(String pk) {
         this.pk = pk;
+    }
+
+    public String getDeckId() {
+        return deckId;
+    }
+
+    public void setDeckId(String deckId) {
+        this.deckId = deckId;
     }
 }

@@ -5,7 +5,7 @@ import eroc.io.randx.service.PlayService;
 import eroc.io.randx.utils.TypeUtils;
 import eroc.io.randx.utils.UUIDUtils;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -21,8 +21,17 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Component
 public class WebSocketServer {
 
-    @Autowired
+//    @Resource
+//    private PlayService playService;
+
+    //此处是解决无法注入的关键
+    private static ApplicationContext applicationContext;
+    //你要注入的service或者dao
     private PlayService playService;
+
+    public static void setApplicationContext(ApplicationContext applicationContext) {
+        WebSocketServer.applicationContext = applicationContext;
+    }
 
     //concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象
     private static CopyOnWriteArraySet<WebSocketServer> webSocketSet = new CopyOnWriteArraySet<>();
@@ -33,16 +42,22 @@ public class WebSocketServer {
 
     private String uid;
 
+    private byte[] drawRequest;
+
 
     /**
      * 连接建立成功调用的方法
      */
     @OnOpen
     public void onOpen(Session session) {
-        WebSocketServer ws = new WebSocketServer();
-        ws.setSession(session);
-        ws.setUid(UUIDUtils.getUUID());
-        webSocketSet.add(ws);     //加入set中
+        playService = applicationContext.getBean(PlayService.class);
+//        WebSocketServer ws = new WebSocketServer();
+        String uuid = UUIDUtils.getUUID();
+//        ws.setSession(session);
+//        ws.setUid(uuid);
+        this.session = session;
+        this.uid = uuid;
+        webSocketSet.add(this);     //加入set中
         addOnlineCount();           //在线数加1
         System.out.println("有新连接加入！当前在线人数为" + getOnlineCount());
         //发布监听
@@ -67,35 +82,31 @@ public class WebSocketServer {
             sendMessage(TypeUtils.getMsg(oresp.toByteArray(), (byte) 0));
         } else if (b == 1) {
             //JoinReaquest
-            Buffer.JoinResponse jresp = playService.joinGame(msg, this);
+            Buffer.StartResponse jresp = playService.joinGame(msg, this);
             if (!StringUtils.isBlank(jresp.getErrMsg())) {
                 sendMessage(TypeUtils.getMsg(jresp.toByteArray(), (byte) 1));
             }
         } else if (b == 2) {
             //drawReaquest
             Buffer.DrawResponse dresp = playService.drawCard(msg, this);
-            if (!StringUtils.isBlank(dresp.getErrMsg())) {
+            if (null != dresp && !StringUtils.isBlank(dresp.getErrMsg())) {
                 sendMessage(TypeUtils.getMsg(dresp.toByteArray(), (byte) 2));
             }
         } else if (b == 3) {
             //drawLeftRequest
-            //取剩余牌，所有人的公钥和签名
-//            for(WebSocketServer ws : webSocketSet) {
-//                if (TypeUtils.bytesToHexString(ws.getPk()).equalsIgnoreCase(TypeUtils.bytesToHexString(player.getPk(0).toByteArray()))) {
-//                    byte[] sign = CryptoUtils.generateSign(player.getR(0), player.getS(0));
-//                    ws.setSign(sign);
-//                }
-//            }
-//            playService.drawLeftCards(webSocketSet);
+            Buffer.DrawLeftNotification dln = playService.drawLeftCards(msg, this);
+            if (!StringUtils.isBlank(dln.getErrMsg())) {
+                sendMessage(TypeUtils.getMsg(dln.toByteArray(), (byte) 4));
+            }
         } else if (b == 4) {
             //return request
-//            for(WebSocketServer ws : webSocketSet) {
-//                if (TypeUtils.bytesToHexString(ws.getPk()).equalsIgnoreCase(TypeUtils.bytesToHexString(player.getPk(0).toByteArray()))) {
-//                    playService.returnCards(player);
-//                }
-//            }
+            Buffer.ReturnResponse returnResponse = playService.returnCards(msg, this);
+            if (!StringUtils.isBlank(returnResponse.getErrMsg())) {
+                sendMessage(TypeUtils.getMsg(returnResponse.toByteArray(), (byte) 5));
+            }
         }
     }
+
 
     /**
      * 发送消息
@@ -120,6 +131,7 @@ public class WebSocketServer {
      */
     @OnClose
     public void onClose() {
+        playService.leavePlay(this);
         webSocketSet.remove(this);  //从set中删除
         subOnlineCount();           //在线数减1
         System.out.println("有一连接关闭！当前在线人数为" + getOnlineCount());
@@ -173,5 +185,13 @@ public class WebSocketServer {
 
     public void setUid(String uid) {
         this.uid = uid;
+    }
+
+    public byte[] getDrawRequest() {
+        return drawRequest;
+    }
+
+    public void setDrawRequest(byte[] drawRequest) {
+        this.drawRequest = drawRequest;
     }
 }
