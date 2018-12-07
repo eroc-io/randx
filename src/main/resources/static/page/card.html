@@ -3,11 +3,12 @@
 <head>
     <title>棋牌游戏</title>
     <meta charset="utf-8">
-    <script type="text/javascript" src="../js/protobuf.min.js"></script>
-    <script type="text/javascript" src="../js/typeUtils.js"></script>
-    <script type="text/javascript" src="../js/cryptoUtils.js"></script>
-    <script type="text/javascript" src="../js/pbfUtils.js"></script>
-    <script type="text/javascript" src="../js/playCards.js"></script>
+    <script type="text/javascript" src="protobuf.min.js"></script>
+    <script type="text/javascript" src="typeUtils.js"></script>
+    <script type="text/javascript" src="cryptoUtils.js"></script>
+    <script type="text/javascript" src="pbfUtils.js"></script>
+    <script type="text/javascript" src="playCards.js"></script>
+    <!--<script type="text/javascript" src="show.js"></script>-->
 
 </head>
 
@@ -15,26 +16,23 @@
 请选择牌桌
 <br/>
 1号牌桌：
-<input type="button" value="开局（选择牌桌）" onClick="openGame(1,54,1,3,17);"/>
-<input type="button" value="准备（加入本桌游戏）" onClick="joinGame();"/>
-<input type="button" value="开始游戏（抓牌）" onClick="drawCard();"/>
-<input type="button" value="掀底牌（一起查看底牌）" onClick="drawLeftCards();"/>
+<input type="button" value="准备（选好桌位）" onClick="readyGame(1,54,1,3,17);"/>
+<input type="button" value="开始游戏（发牌）" onClick="drawCard();"/>
+<input type="button" value="掀底牌" onClick="drawLeftCards();"/>
 <input type="button" value="还牌"
        onClick="returnCards(concatUint8Array([salts[1],salts[3], salts[5]]));"/>
 <br/><br/>
 2号牌桌：
-<input type="button" value="开局（选择牌桌）" onClick="openGame(2,54,1,4,12);"/>
-<input type="button" value="准备（加入本桌游戏）" onClick="joinGame();"/>
-<input type="button" value="开始游戏（抓牌）" onClick="drawCard();"/>
-<input type="button" value="掀底牌（一起查看底牌）" onClick="drawLeftCards();"/>
+<input type="button" value="准备（选好桌位）" onClick="readyGame(2,54,1,4,12);"/>
+<input type="button" value="开始游戏（发牌）" onClick="drawCard();"/>
+<input type="button" value="掀底牌（" onClick="drawLeftCards();"/>
 <input type="button" value="还牌"
        onClick="returnCards(concatUint8Array([salts[1],salts[3], salts[5],salts[7],salts[9], salts[11]]));"/>
 <br/><br/>
 3号牌桌：
-<input type="button" value="开局（选择牌桌）" onClick="openGame(3,54,2,4,25);"/>
-<input type="button" value="准备（加入本桌游戏）" onClick="joinGame();"/>
-<input type="button" value="开始游戏（抓牌）" onClick="drawCard();"/>
-<input type="button" value="掀底牌（一起查看底牌）" onClick="drawLeftCards();"/>
+<input type="button" value="准备（选好桌位）" onClick="readyGame(3,54,2,4,25);"/>
+<input type="button" value="开始游戏（发牌）" onClick="drawCard();"/>
+<input type="button" value="掀底牌" onClick="drawLeftCards();"/>
 <input type="button" value="还牌"
        onClick="returnCards(concatUint8Array([salts[2],salts[4], salts[6],salts[1],salts[3], salts[5],salts[7],salts[9]]));"/>
 <br/><br/>

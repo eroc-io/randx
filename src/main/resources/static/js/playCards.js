@@ -6,7 +6,9 @@ if (window.WebSocket) {
     alert('This browser does not supports WebSocket');
 }
 //.proto文件路径
-const protoUrl = "/js/comms.proto";
+const protoUrl = "comms.proto";
+
+const webSocketPath = "ws://192.168.11.153:8080/ws";
 
 const CARD_INDEX = 7;
 //大厅座位使用信息
@@ -32,7 +34,7 @@ var pks = [];
 //有次序的其他玩家的公钥
 var orderPks = {};
 
-var ws = new WebSocket("ws://192.168.11.153:8080/ws");
+var ws = new WebSocket(webSocketPath);
 ws.binaryType = "arraybuffer";
 
 ws.onopen = function (evt) {
@@ -195,17 +197,20 @@ ws.onclose = function (evt) {
 };
 
 
-//open游戏
-async function openGame(deckNo, cards, decks, players, rounds) {
+//准备游戏
+async function readyGame(deckNo, cards, decks, players, rounds) {
 
+    //发送本桌游戏规则信息  funcId = 0
     let payload = {deckNo: deckNo, numCards: cards, numDecks: decks, numPlayers: players, rounds: rounds};
 
     let buffer = await createPbf(protoUrl, "OpenRequest", payload);
 
     ws.send(addOneByte(0, buffer));
+
+    await joinGame();
 };
 
-//加入游戏 funcId = 1
+//生成公私钥，公钥发给服务器 funcId = 1
 async function joinGame() {
 
     await createKey();
@@ -215,8 +220,7 @@ async function joinGame() {
     let buffer = await createPbf(protoUrl, "JoinRequest", payload);
 
     ws.send(addOneByte(1, buffer));
-};
-
+}
 
 //抓牌 funcId = 2
 async function drawCard() {
@@ -230,6 +234,7 @@ async function drawCard() {
     ws.send(addOneByte(2, buffer));
 
 };
+
 
 //剩余牌 funcId = 3
 async function drawLeftCards() {
