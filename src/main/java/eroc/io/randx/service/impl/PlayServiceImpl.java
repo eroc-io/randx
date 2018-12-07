@@ -147,6 +147,7 @@ public class PlayServiceImpl implements PlayService {
                                 WebSocketServer.sendInfo(m, oid);
                             }
                         }
+                        sendHallMessage(null);
                     }
                     if (nump == players.size()) {
                         //开始游戏
