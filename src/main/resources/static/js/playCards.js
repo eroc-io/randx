@@ -5,7 +5,8 @@ if (window.WebSocket) {
     console.log('This browser does not supports WebSocket');
     alert('This browser does not supports WebSocket');
 }
-;
+//.proto文件路径
+const protoUrl = "/js/comms.proto";
 
 const CARD_INDEX = 7;
 //Uint8Array，桌编号
@@ -46,7 +47,7 @@ ws.onmessage = async function getMessage(evt) {
     switch (num) {
         case 0:
             //开局返回的deckId，responseId = 0
-            let obj = await readPbf("comms.proto", "OpenResponse", proBuffer);
+            let obj = await readPbf(protoUrl, "OpenResponse", proBuffer);
             deckId = obj.deckId;
             console.log('deckId:-----');
             console.log(deckId);
@@ -54,7 +55,7 @@ ws.onmessage = async function getMessage(evt) {
             break;
         case 1:
             //加入牌局返回的salt和服务器pk，responseId = 1
-            let obj1 = await readPbf("comms.proto", "StartResponse", proBuffer);
+            let obj1 = await readPbf(protoUrl, "StartResponse", proBuffer);
             salt = obj1.salt;
             dpk = obj1.dpk;
             console.log('salt------' + salt);
@@ -63,7 +64,7 @@ ws.onmessage = async function getMessage(evt) {
             break;
         case 2:
             //抓牌返回的salt，取得牌信息储存，responseId = 2
-            let obj2 = await readPbf("comms.proto", "DrawResponse", proBuffer);
+            let obj2 = await readPbf(protoUrl, "DrawResponse", proBuffer);
             console.log(obj2.errMsg);
             if (!obj2.errMsg) {
                 let cardCipher = obj2.cardCipher;
@@ -77,7 +78,7 @@ ws.onmessage = async function getMessage(evt) {
             break;
         case 3:
             //其他玩家抓到牌的proof， responseId = 3
-            let obj3 = await readPbf("comms.proto", "DrawNotification", proBuffer);
+            let obj3 = await readPbf(protoUrl, "DrawNotification", proBuffer);
             let pk = obj3.pk;
             let pkBase64 = window.btoa(Uint8ArrayToString(pk));
 
@@ -91,14 +92,14 @@ ws.onmessage = async function getMessage(evt) {
             break;
         case 4:
             //查看底牌返回的牌信息，取得牌信息储存，responseId = 4
-            let obj4 = await readPbf("comms.proto", "DrawLeftNotification", proBuffer);
+            let obj4 = await readPbf(protoUrl, "DrawLeftNotification", proBuffer);
             console.log('底牌-----' + obj4.cards);
             salt = obj4.salt;
             console.log(obj4.errMsg);
             break;
         case 5:
             //还牌信息, responseId = 5
-            let obj5 = await readPbf("comms.proto", "ReturnResponse", proBuffer);
+            let obj5 = await readPbf(protoUrl, "ReturnResponse", proBuffer);
             let numReturned = obj5.numReturned;
             console.log('还了 ' + numReturned + ' 张牌');
             salt = obj5.salt;
@@ -106,14 +107,14 @@ ws.onmessage = async function getMessage(evt) {
             break;
         case 6:
             //其他玩家还牌信息, responseId = 6
-            let obj6 = await readPbf("comms.proto", "ReturnNotification", proBuffer);
+            let obj6 = await readPbf(protoUrl, "ReturnNotification", proBuffer);
 
             console.log(window.btoa(Uint8ArrayToString(obj6.pk)) + '还了 ' + obj6.numReturned + ' 张牌');
 
             break;
         case 7:
             //加入牌局返回的自己编号和空桌信息，responseId = 7
-            let obj7 = await readPbf("comms.proto", "JoinResponse", proBuffer);
+            let obj7 = await readPbf(protoUrl, "JoinResponse", proBuffer);
             number = obj7.number;
             emptySeat = obj7.emptySeat;
             let joinNotifys = obj7.joinNotify;
@@ -137,7 +138,7 @@ ws.onmessage = async function getMessage(evt) {
             break;
         case 8:
             //其他玩家加入牌局返回的空桌信息，其他玩家编号和其他玩家pk，responseId = 8
-            let obj8 = await readPbf("comms.proto", "JoinNotification", proBuffer);
+            let obj8 = await readPbf(protoUrl, "JoinNotification", proBuffer);
             emptySeat = obj8.emptySeat;
             orderPks[obj8.joinSeat] = obj8.joinpk;
 
@@ -169,7 +170,7 @@ async function openGame(deckNo, cards, decks, players, rounds) {
 
     let payload = {deckNo: deckNo, numCards: cards, numDecks: decks, numPlayers: players, rounds: rounds};
 
-    let buffer = await createPbf("comms.proto", "OpenRequest", payload);
+    let buffer = await createPbf(protoUrl, "OpenRequest", payload);
 
     ws.send(addOneByte(0, buffer));
 };
@@ -181,7 +182,7 @@ async function joinGame() {
 
     let payload = {deckId: deckId, pk: new Uint8Array(pkBuffer)};
 
-    let buffer = await createPbf("comms.proto", "JoinRequest", payload);
+    let buffer = await createPbf(protoUrl, "JoinRequest", payload);
 
     ws.send(addOneByte(1, buffer));
 };
@@ -194,7 +195,7 @@ async function drawCard() {
 
     let payload = {deckId: deckId, pk: new Uint8Array(pkBuffer), sig: new Uint8Array(sign)};
 
-    let buffer = await createPbf("comms.proto", "DrawRequest", payload);
+    let buffer = await createPbf(protoUrl, "DrawRequest", payload);
 
     ws.send(addOneByte(2, buffer));
 
@@ -214,7 +215,7 @@ async function drawLeftCards() {
 
     let payload = {deckId: deckId, pk: new Uint8Array(pkBuffer), sig: new Uint8Array(sign)};
 
-    let buffer = await createPbf("comms.proto", "DrawLeftRequest", payload);
+    let buffer = await createPbf(protoUrl, "DrawLeftRequest", payload);
 
     ws.send(addOneByte(3, buffer));
 };
@@ -232,7 +233,7 @@ async function returnCards(reSalts) {
         cardsCipher: macObj
     };
 
-    let buffer = await createPbf("comms.proto", "ReturnRequest", payload);
+    let buffer = await createPbf(protoUrl, "ReturnRequest", payload);
 
     ws.send(addOneByte(4, buffer));
 };
