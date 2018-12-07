@@ -9,6 +9,8 @@ if (window.WebSocket) {
 const protoUrl = "/js/comms.proto";
 
 const CARD_INDEX = 7;
+//大厅座位使用信息
+var hallMessage = [];
 //Uint8Array，桌编号
 var deckId = null;
 //座位号信息
@@ -150,6 +152,26 @@ ws.onmessage = async function getMessage(evt) {
             }
 
             console.log(orderPks);
+            break;
+
+        case 9:
+            //玩家进入大厅返回的大厅信息，responseId = 9
+            let obj9 = await readPbf(protoUrl, "HallResponse", proBuffer);
+            hallMessage = obj9.DeckMsg;
+
+            if (hallMessage) {
+
+                console.log(hallMessage.deckNo + '号桌还有' + hallMessage.emptyNum + '个空位');
+                console.log('可选择');
+
+                for (let i of Array.from(hallMessage.seat)) {
+                    console.log(i);
+                }
+                console.log('号位置加入');
+            } else {
+                console.log('请选择牌桌')
+            }
+
             break;
     }
 };

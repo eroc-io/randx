@@ -7,6 +7,18 @@ message EciesBody {
   bytes mac = 4;
 }
 
+//responseId=9
+message HallResponse{
+	repeated DeckMsg deck=1;
+}
+
+message DeckMsg{
+	int32 deckNo=1;
+	bytes seat=2;
+	int32 emptyNum=3;
+}
+
+
 // to request a service: funcId (1 byte) + protobuf encoded binaries ()
 // open deck
 // endpoint: /wss/odeck or funcId = 0;
@@ -50,7 +62,6 @@ message JoinNotification{
 	int32 emptySeat=2;
 	bytes joinpk=3;
 }
-
 
 
 // draw card request & response
@@ -109,3 +120,4 @@ message ReturnNotification {
 	bytes pk = 1;
 	int32 numReturned = 2;
 }
+
