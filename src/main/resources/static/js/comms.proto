@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+message EciesBody {
+  bytes iv = 1;
+  bytes epk = 2;
+  bytes cipher = 3;
+  bytes mac = 4;
+}
+
+// to request a service: funcId (1 byte) + protobuf encoded binaries ()
+// open deck
+// endpoint: /wss/odeck or funcId = 0;
+message OpenRequest {
+	int32 deckNo = 1;
+	int32 numCards = 2;
+	int32 numDecks = 3;
+	int32 numPlayers = 4;
+	int32 rounds = 5;
+}
+
+//responseId=0
+message OpenResponse {
+	bytes deckId = 1;
+	string errMsg=2;
+}
+
+// open game request & response
+// endpoint: /wss/ogame or funcId = 1;
+message JoinRequest {
+	bytes deckId = 1;
+	bytes pk = 2;
+}
+
+//responseId=1
+message StartResponse {
+	bytes salt = 2;
+	string errMsg = 3;
+	bytes dpk=1;
+}
+
+//responseId=7
+message JoinResponse{
+	int32 number=1;
+	int32 emptySeat=2;
+	repeated JoinNotification joinNotify=3;
+}
+//responseId=8
+message JoinNotification{
+	int32 joinSeat=1;
+	int32 emptySeat=2;
+	bytes joinpk=3;
+}
+
+
+
+// draw card request & response
+// endpoint: /wss/draw or funcId = 2;
+message DrawRequest {
+	bytes deckId = 1;
+	bytes pk = 2;
+	bytes sig = 3;			// the P1363 signature, in R | S format
+}
+
+//responseId=2
+message DrawResponse {
+	EciesBody cardCipher = 1;
+	string errMsg = 2;
+}
+
+//responseId=3
+message DrawNotification {
+	bytes pk = 1;
+	bytes proof = 2;
+}
+
+// draw all request & response 抽剩余牌
+// endpoint: /wss/dleft or funcId = 3;
+message DrawLeftRequest {
+	bytes deckId = 1;
+	bytes pk = 2;
+	bytes sig = 3;
+}
+
+//responseId=4
+message DrawLeftNotification {
+	bytes cards = 1;
+	bytes salt = 2;
+	string errMsg = 3;
+}
+
+// return request & response	还牌
+// endpoint: /wss/ret or funcId = 4;
+message ReturnRequest {
+	bytes deckId = 1;
+	bytes pk = 2;
+	bytes sig = 3;
+	EciesBody cardsCipher = 4;
+}
+
+//responseId=5
+message ReturnResponse {
+	int32 numReturned = 1;
+	bytes salt = 2;
+	string errMsg = 3;
+}
+
+//responseId=6
+message ReturnNotification {
+	bytes pk = 1;
+	int32 numReturned = 2;
+}
