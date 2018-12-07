@@ -5,6 +5,8 @@ import eroc.io.randx.pojo.Buffer;
 
 public interface PlayService {
 
+    void sendHallMessage(WebSocketServer wss);
+
     Buffer.OpenResponse initPlay(byte[] msg);
 
     Buffer.StartResponse joinGame(byte[] msg, WebSocketServer wss);

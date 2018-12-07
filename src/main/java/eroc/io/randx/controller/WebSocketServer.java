@@ -51,14 +51,11 @@ public class WebSocketServer {
     @OnOpen
     public void onOpen(Session session) {
         playService = applicationContext.getBean(PlayService.class);
-//        WebSocketServer ws = new WebSocketServer();
-        String uuid = UUIDUtils.getUUID();
-//        ws.setSession(session);
-//        ws.setUid(uuid);
         this.session = session;
-        this.uid = uuid;
+        this.uid = UUIDUtils.getUUID();
         webSocketSet.add(this);     //加入set中
         addOnlineCount();           //在线数加1
+        playService.sendHallMessage(this);
         System.out.println("有新连接加入！当前在线人数为" + getOnlineCount());
         //发布监听
 //      applicationContext.publishEvent(new PlayEvent(this, i, webSocketSet));

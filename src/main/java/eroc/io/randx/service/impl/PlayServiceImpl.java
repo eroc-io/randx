@@ -1,5 +1,6 @@
 package eroc.io.randx.service.impl;
 
+import com.google.common.primitives.Bytes;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import eroc.io.randx.controller.WebSocketServer;
@@ -16,6 +17,7 @@ import eroc.io.randx.utils.TypeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +31,47 @@ public class PlayServiceImpl implements PlayService {
     //所有牌局信息
     private static List<PlayStatus> pss = new ArrayList<>();
 
+
+    /**
+     * 获取所有牌桌信息
+     *
+     * @param wss
+     */
+    @Override
+    public void sendHallMessage(WebSocketServer wss) {
+        if (0 == pss.size()) {
+            return;
+        }
+        Buffer.HallResponse.Builder hall = Buffer.HallResponse.newBuilder();
+        for(PlayStatus playStatus : pss) {
+            Buffer.DeckMsg.Builder deck = Buffer.DeckMsg.newBuilder();
+            deck.setDeckNo(playStatus.getDeckNo());
+            byte[][] seatSort = playStatus.getSeatSort();
+            int emptyNum = 0;
+            List<Byte> seats = new ArrayList<>();
+            int l = seatSort.length;
+            for(int i = 0; i < l; i++) {
+                if (null == seatSort[i]) {
+                    emptyNum++;
+                } else {
+                    seats.add((byte) (i + 1));
+                }
+            }
+            deck.setEmptyNum(emptyNum);
+            deck.setSeat(ByteString.copyFrom(Bytes.toArray(seats)));
+            hall.addDeck(deck.build());
+        }
+        byte[] msg = TypeUtils.getMsg(hall.build().toByteArray(), (byte) 9);
+        try {
+            if (wss != null) {
+                WebSocketServer.sendInfo(msg, wss.getUid());
+            } else {
+                WebSocketServer.sendInfo(msg, null);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * 开桌
@@ -46,11 +89,9 @@ public class PlayServiceImpl implements PlayService {
                 }
             }
             PlayStatus playStatus = new PlayStatus(open);//开桌
-            DeckDealer deckDealer = new DeckDealer();
-            String deckId = playStatus.getDeckId();
-            playStatus.setDeckDealer(deckDealer);
+            playStatus.setDeckDealer(new DeckDealer());
             pss.add(playStatus);
-            oresp.setDeckId(ByteString.copyFrom(deckId.getBytes()));
+            oresp.setDeckId(ByteString.copyFrom(playStatus.getDeckId().getBytes()));
         } catch (InvalidProtocolBufferException e) {
             errmsg = Error.getMsg(90000);
             oresp.setErrMsg(errmsg);
@@ -99,11 +140,11 @@ public class PlayServiceImpl implements PlayService {
                         //通知其他玩家
                         Buffer.JoinNotification.Builder joinNotification = Buffer.JoinNotification.newBuilder().setJoinSeat(i).setJoinpk(ByteString.copyFrom(TypeUtils.bufferPk(pk)));
                         js.add(joinNotification.build());
-                        Buffer.JoinNotification jnb = joinNotification.setEmptySeat(empty).build();
+                        byte[] m = TypeUtils.getMsg(joinNotification.setEmptySeat(empty).build().toByteArray(), (byte) 8);
                         for(Player p : players) {
                             String oid = p.getUid();
                             if (!oid.equalsIgnoreCase(uid)) {
-                                WebSocketServer.sendInfo(TypeUtils.getMsg(jnb.toByteArray(), (byte) 8), oid);
+                                WebSocketServer.sendInfo(m, oid);
                             }
                         }
                     }
@@ -126,8 +167,9 @@ public class PlayServiceImpl implements PlayService {
                             }
                         }
                         jresp.setSalt(ByteString.copyFrom((byte[]) obj[0])).setDpk(ByteString.copyFrom((byte[]) obj[1]));
+                        byte[] m = TypeUtils.getMsg(jresp.build().toByteArray(), (byte) 1);
                         for(Player player : players) {
-                            WebSocketServer.sendInfo(TypeUtils.getMsg(jresp.build().toByteArray(), (byte) 1), player.getUid());//发送开始游戏信息
+                            WebSocketServer.sendInfo(m, player.getUid());//发送开始游戏信息
                         }
                     } else {
                         jresp.setErrMsg(Error.getMsg(10001));
@@ -198,11 +240,12 @@ public class PlayServiceImpl implements PlayService {
                             WebSocketServer.sendInfo(TypeUtils.getMsg(c.toByteArray(), (byte) 2), uid);
                             index.remove(0);
                             wsl.remove(ws);
+                            byte[] msg = TypeUtils.getMsg(n.toByteArray(), (byte) 3);
                             //获取其他用户id
                             for(Player player : ps.getPlayers()) {
                                 String oid = player.getUid();
                                 if (!oid.equalsIgnoreCase(uid)) {
-                                    WebSocketServer.sendInfo(TypeUtils.getMsg(n.toByteArray(), (byte) 3), oid);
+                                    WebSocketServer.sendInfo(msg, oid);
                                 } else {
                                     //缓存玩家抽牌信息
                                     player.getSalt().add((byte[]) obj[2]);
@@ -265,9 +308,9 @@ public class PlayServiceImpl implements PlayService {
                             pks[seat] = player.getPk();
                             ss[seat] = player.getSign();
                         }
-                        Buffer.DrawLeftNotification.Builder dln = deckDealer.drawLeftCards(pks, ss);
+                        byte[] msg = TypeUtils.getMsg(deckDealer.drawLeftCards(pks, ss).build().toByteArray(), (byte) 4);
                         for(Player player : players) {
-                            WebSocketServer.sendInfo(TypeUtils.getMsg(dln.build().toByteArray(), (byte) 4), player.getUid());
+                            WebSocketServer.sendInfo(msg, player.getUid());
                         }
                         signs.clear();
                     }
@@ -276,11 +319,11 @@ public class PlayServiceImpl implements PlayService {
         } catch (InvalidProtocolBufferException e) {
             errmsg = Error.getMsg(90000);
             lresp.setErrMsg(errmsg);
-//            e.printStackTrace();
+            e.printStackTrace();
         } catch (Exception e) {
             errmsg = e.getMessage();
             lresp.setErrMsg(errmsg);
-//            e.printStackTrace();
+            e.printStackTrace();
         }
         return lresp.build();
     }
@@ -337,11 +380,11 @@ public class PlayServiceImpl implements PlayService {
         } catch (InvalidProtocolBufferException e) {
             errmsg = Error.getMsg(90000);
             rresp.setErrMsg(errmsg);
-//            e.printStackTrace();
+            e.printStackTrace();
         } catch (Exception e) {
             errmsg = e.getMessage();
             rresp.setErrMsg(errmsg);
-//            e.printStackTrace();
+            e.printStackTrace();
         }
         return rresp.build();
     }
@@ -364,6 +407,7 @@ public class PlayServiceImpl implements PlayService {
                         }
                     }
                     players.remove(player);
+                    sendHallMessage(null);
                 }
             }
         }
