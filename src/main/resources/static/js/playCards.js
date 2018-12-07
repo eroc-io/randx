@@ -10,7 +10,7 @@ const protoUrl = "/js/comms.proto";
 
 const CARD_INDEX = 7;
 //大厅座位使用信息
-var hallMessage = [];
+var hallMessages = [];
 //Uint8Array，桌编号
 var deckId = null;
 //座位号信息
@@ -157,15 +157,23 @@ ws.onmessage = async function getMessage(evt) {
         case 9:
             //玩家进入大厅返回的大厅信息，responseId = 9
             let obj9 = await readPbf(protoUrl, "HallResponse", proBuffer);
-            hallMessage = obj9.DeckMsg;
+            hallMessages = obj9.deck;
 
-            if (hallMessage) {
-                console.log(hallMessage.deckNo + '号桌还有' + hallMessage.emptyNum + '个空位');
-                console.log('可选择');
-                for (let i of Array.from(hallMessage.seat)) {
-                    console.log(i);
+            if (hallMessages) {
+
+                for (let hallMessage of hallMessages) {
+
+                    console.log(hallMessage.deckNo + '号桌还有' + hallMessage.emptyNum + '个空位');
+                    let seat = hallMessage.seat;
+                    if (seat) {
+                        for (let i of Array.from(seat)) {
+                            console.log(i);
+                        }
+                        console.log('号位置已有人，不能选择');
+                    } else {
+                        console.log('，此桌目前还无人');
+                    }
                 }
-                console.log('号位置加入');
             } else {
                 console.log('请选择牌桌')
             }
@@ -182,6 +190,8 @@ ws.onerror = function (evt) {
 ws.onclose = function (evt) {
 
     console.log("Connection closed.");
+    console.log(evt.code);
+    console.log(evt.reason);
 };
 
 
