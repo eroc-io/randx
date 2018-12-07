@@ -25,7 +25,7 @@ async function readPbf(protoName, messageName, buf) {
 
     let AwesomeMessage = root.lookupType(messageName);
 
-    let message = AwesomeMessage.decode(buf);
+    let message = AwesomeMessage.decode(new Uint8Array(buf));
 
     // Maybe convert the message back to a plain object
     let object = AwesomeMessage.toObject(message, {
