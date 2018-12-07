@@ -60,7 +60,8 @@ public class DeckDealer {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Object[] o = {dsk, dpk};
+        Object[] o = {dsk, TypeUtils.bufferPk(dpk)};
+//        Object[] o = {dsk, dpk};
         return o;
     }
 
@@ -97,7 +98,8 @@ public class DeckDealer {
         }
 
         count = cardNum * deckNum;
-        Object[] o = {s, dpk};
+        Object[] o = {s, TypeUtils.bufferPk(dpk)};
+//        Object[] o = {s, dpk};
         return o;
     }
 
@@ -109,6 +111,8 @@ public class DeckDealer {
      * @return object[0]给抽牌玩家的信息  object[1]给其他玩家的proof
      * @throws Exception
      */
+    private int i = 1;
+
     public Object[] drawCard(byte[] pk, byte[] sig) throws Exception {
         if (count <= 0) {
             throw new Exception("No more card can be drawn");
@@ -121,7 +125,9 @@ public class DeckDealer {
         if (s.length <= 0) {
             throw new Exception(String.format("Unknown player: %s", pkk));
         }
-
+        System.out.println("第" + i + "轮，盐： " + Base64.toBase64String(s));
+        System.out.println("第" + i + "轮，签名： " + Base64.toBase64String(sig));
+        i++;
         if (!CryptoUtils.verify(pk, sig, s)) {
             throw new Exception("pk owner have wrong signature!");
         }
@@ -133,23 +139,23 @@ public class DeckDealer {
         seed = CryptoUtils.sign(dsk, SHA256.getSHA256Bytes(seed));
         s = SHA256.getSHA256Bytes(seed);
         //抽取卡牌
-        BigInteger i = new BigInteger(TypeUtils.bytesToHexString(s), 16).multiply(new BigInteger(count.toString())).divide(max256b);
-        int index = i.intValue();
+        BigInteger i = new BigInteger(s).multiply(new BigInteger(count.toString())).divide(max256b);
+        int index = Math.abs(i.intValue());
         Short card = cards.get(index);
         cards.set(index, cards.get(--count));
+        cards.remove(count);//移除最后一张无用牌
         //将牌放入盐中并进行crc验证
         Arrays.fill(s, CARD_INDEX, CARD_INDEX + 1, TypeUtils.uint8ToByte(card));
         byte crc = CRC8Util.calcCrc8(s);
         Arrays.fill(s, s.length - 1, s.length, crc);
         //更新玩家的最新盐
         salts.put(pkk, s);
-        //将抽牌证明放入数据库
         List<String> p = proofs.get(pkk);
         String proof = Base64.toBase64String(SHA256.getSHA256Bytes(s));
         p.add(proof);
         Buffer.DrawResponse.Builder resp = Buffer.DrawResponse.newBuilder().setCardCipher(CryptoUtils.ECDHEncrypt(pk, s, pair));
-        Buffer.DrawNotification.Builder notify = Buffer.DrawNotification.newBuilder().setPk(ByteString.copyFrom(pk)).setProof(ByteString.copyFrom(proof, "utf-8"));
-        Object[] obj = {resp, notify};
+        Buffer.DrawNotification.Builder notify = Buffer.DrawNotification.newBuilder().setPk(ByteString.copyFrom(TypeUtils.bufferPk(pk))).setProof(ByteString.copyFrom(proof, "utf-8"));
+        Object[] obj = {resp, notify, s};
         return obj;
     }
 
@@ -161,7 +167,7 @@ public class DeckDealer {
      * @param signs 签名集合
      * @return 抓取的牌
      */
-    public Buffer.DrawLeftNotification.Builder drawLeftCards(List<byte[]> pks, List<byte[]> signs) throws Exception {
+    public Buffer.DrawLeftNotification.Builder drawLeftCards(byte[][] pks, byte[][] signs) throws Exception {
 
         //牌数小于等于零，抛出异常
         if (count <= 0) {
@@ -170,14 +176,15 @@ public class DeckDealer {
 
         //salt的数量与公钥数量和sign的数量不同，抛出异常
         int pc = salts.size();
-        if (pks.size() != pc || signs.size() != pc) {
+        if (pks.length != pc || signs.length != pc) {
             throw new DataException("Not a consented draw cards request");
         }
 
         //将所有的公钥合并
         byte[] initial = new byte[0];
         int length;
-        for(byte[] pk : pks) {
+        for(byte[] pk : pks) {//pk顺序
+            pk = TypeUtils.bufferPk(pk);
             length = initial.length;
             initial = Arrays.copyOf(initial, pk.length + length);
             System.arraycopy(pk, 0, initial, length, pk.length);
@@ -186,12 +193,12 @@ public class DeckDealer {
         byte[] h2s = SHA256.getSHA256Bytes(initial);
 
         //验证签名
-        for(int i = 0; i < pks.size(); i++) {
-            byte[] salt = salts.get(Base64.toBase64String(pks.get(i)));
+        for(int i = 0; i < pks.length; i++) {
+            byte[] salt = salts.get(Base64.toBase64String(pks[i]));
             if (salt == null || salt.length == 0) {
-                throw new DataException("Unknown player: " + Base64.toBase64String(pks.get(i)));
+                throw new DataException("Unknown player: " + Base64.toBase64String(pks[i]));
             }
-            boolean flag = ECDSA.verify(h2s, pks.get(i), "SHA256withECDSA", signs.get(i));
+            boolean flag = ECDSA.verify(h2s, pks[i], "SHA256withECDSA", signs[i]);
             //验证签名失败，抛出异常
             if (flag == false) {
                 throw new DataException("Signature verification failed");
@@ -248,7 +255,7 @@ public class DeckDealer {
 
         //还牌
         for(byte[] c : cs) {
-            cards.set(count, TypeUtils.byteToUnit8(c[CARD_INDEX]));
+            cards.add(TypeUtils.byteToUnit8(c[CARD_INDEX]));
             count++;
         }
 
@@ -261,7 +268,7 @@ public class DeckDealer {
         byte[] s = SHA256.getSHA256Bytes(seed);
         salts.put(pkStr, s);
         Buffer.ReturnResponse resp = Buffer.ReturnResponse.newBuilder().setNumReturned(cs.size()).setSalt(ByteString.copyFrom(s)).build();
-        Buffer.ReturnNotification notify = Buffer.ReturnNotification.newBuilder().setNumReturned(cs.size()).setPk(ByteString.copyFrom(pk)).build();
+        Buffer.ReturnNotification notify = Buffer.ReturnNotification.newBuilder().setNumReturned(cs.size()).setPk(ByteString.copyFrom(TypeUtils.bufferPk(pk))).build();
         Object[] o = {resp, notify};
         return o;
 

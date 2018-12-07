@@ -1,5 +1,6 @@
 package eroc.io.randx.pojo;
 
+import eroc.io.randx.controller.WebSocketServer;
 import eroc.io.randx.service.DeckDealer;
 import eroc.io.randx.utils.UUIDUtils;
 
@@ -23,6 +24,7 @@ public class PlayStatus {
         this.numPlayers = open.getNumPlayers();
         this.rounds = open.getRounds();
         this.deckId = UUIDUtils.getUUID();
+        this.seatSort = new byte[numPlayers][];
     }
 
 
@@ -48,8 +50,22 @@ public class PlayStatus {
 
     private byte[] dsk;//私钥
 
-    private byte[] dpk;
+    private byte[] dpk;//公钥
 
+    private List<WebSocketServer> wss = new ArrayList<>();//缓存区
+
+    private List<Buffer.JoinNotification> joinNotifyBuilder = new ArrayList<>();//已加入玩家信息
+
+    private byte[][] seatSort;//玩家座位顺序,pk:format之后的
+
+
+    public byte[][] getSeatSort() {
+        return seatSort;
+    }
+
+    public void setSeatSort(byte[][] seatSort) {
+        this.seatSort = seatSort;
+    }
 
     public Integer getDeckNo() {
         return deckNo;
@@ -146,4 +162,21 @@ public class PlayStatus {
     public void setDpk(byte[] dpk) {
         this.dpk = dpk;
     }
+
+    public List<WebSocketServer> getWss() {
+        return wss;
+    }
+
+    public void setWss(List<WebSocketServer> wss) {
+        this.wss = wss;
+    }
+
+    public List<Buffer.JoinNotification> getJoinNotifyBuilder() {
+        return joinNotifyBuilder;
+    }
+
+    public void setJoinNotifyBuilder(List<Buffer.JoinNotification> joinNotifyBuilder) {
+        this.joinNotifyBuilder = joinNotifyBuilder;
+    }
 }
+

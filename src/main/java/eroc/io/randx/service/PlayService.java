@@ -7,12 +7,14 @@ public interface PlayService {
 
     Buffer.OpenResponse initPlay(byte[] msg);
 
-    Buffer.JoinResponse joinGame(byte[] msg, WebSocketServer wss);
+    Buffer.StartResponse joinGame(byte[] msg, WebSocketServer wss);
 
     Buffer.DrawResponse drawCard(byte[] dr, WebSocketServer wss);
 
     Buffer.DrawLeftNotification drawLeftCards(byte[] dleftReq, WebSocketServer wss);
 
     Buffer.ReturnResponse returnCards(byte[] rr, WebSocketServer wss);
+
+    void leavePlay(WebSocketServer wss);
 
 }

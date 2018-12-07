@@ -1,18 +1,24 @@
 package eroc.io.randx.utils;
 
+import com.google.common.primitives.Bytes;
 import com.google.protobuf.ByteString;
 import eroc.io.randx.pojo.Buffer;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.DERSequenceGenerator;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyAgreement;
 import javax.crypto.NoSuchPaddingException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
+import java.util.*;
 
 //import org.bouncycastle.asn1.*;
 
@@ -21,27 +27,12 @@ public class CryptoUtils {
     private CryptoUtils() {
     }
 
-    private static final String PK_SECP256R1 = "3059301306072A8648CE3D020106082A8648CE3D030107034200";
+
     private static final String PK_SECP384R1 = "3076301006072A8648CE3D020106052B81040022036200";
     private static final String PK_SECP521R1 = "30819B301006072A8648CE3D020106052B8104002303818600";
 
+    private static final byte[] PK_SECP256R1 = Base64.getDecoder().decode("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgA");
 
-    /**
-     * 给pk加上前缀
-     *
-     * @param publicKey PK.raw
-     * @return formatPK
-     */
-    public static byte[] formatPK(byte[] publicKey) {
-        byte[] prefix = TypeUtils.hexStringToByte(PK_SECP256R1);
-        int fl = prefix.length;
-        int pl = publicKey.length;
-        int l = pl + fl;
-        byte[] pk = new byte[l];
-        System.arraycopy(prefix, 0, pk, 0, fl);
-        System.arraycopy(publicKey, 0, pk, fl, pl);
-        return pk;
-    }
 
 
     /**
@@ -55,31 +46,24 @@ public class CryptoUtils {
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey);
         KeyFactory keyFactory = KeyFactory.getInstance("EC");
         PublicKey pk = keyFactory.generatePublic(x509EncodedKeySpec);
-//        KeyPair keyPair = generatorKeyPair("EC", "secp256r1");//stdName:secp256k1
         PublicKey epk = keyPair.getPublic();
         KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
         keyAgreement.init(keyPair.getPrivate());
         keyAgreement.doPhase(pk, true);
         byte[] secret = keyAgreement.generateSecret();
+        secret = SHA256.getSHA256Bytes(secret);
         byte[] encKey = Arrays.copyOfRange(secret, 0, 16);
         byte[] macKey = Arrays.copyOfRange(secret, 16, 32);
         SecureRandom secureRandom = new SecureRandom();
         byte[] iv = new byte[16];//iv作为初始化向量
         secureRandom.nextBytes(iv);
         byte[] ct = AES256.AES_cbc_encrypt(msg, encKey, iv);//加密数据
-        ByteString pct = ByteString.copyFrom(ct);
-        ByteString pepk = ByteString.copyFrom(epk.getEncoded());
-        ByteString piv = ByteString.copyFrom(iv);
-        Buffer.EciesBody dataToMac = Buffer.EciesBody.newBuilder()
-                .setCipher(pct)
-                .setEpk(pepk)
-                .setIv(piv)
-                .build();
-        String mac = SHA256.sha256_HMAC(dataToMac.toString(), macKey);//hash（ct,epk,iv）
-        ByteString pmac = ByteString.copyFrom(mac, "utf-8");
-        return Buffer.EciesBody.newBuilder().setIv(piv).setEpk(pepk).setCipher(pct).setMac(pmac).build();
+        byte[] pepk = TypeUtils.bufferPk(epk.getEncoded());
+        byte[] dataToMac = TypeUtils.concatByteArrays(new byte[][]{iv, pepk, ct});
+        byte[] mac = SHA256.sha256_HMAC(dataToMac, macKey);
+        ByteString pmac = ByteString.copyFrom(mac);
+        return Buffer.EciesBody.newBuilder().setIv(ByteString.copyFrom(iv)).setEpk(ByteString.copyFrom(pepk)).setCipher(ByteString.copyFrom(ct)).setMac(pmac).build();
     }
-
 
     /**
      * ECDH解密
@@ -89,11 +73,10 @@ public class CryptoUtils {
      * @return
      */
     public static byte[] ECDHDecrypt(byte[] privateKey, Buffer.EciesBody ecies) throws Exception {
-//        Buffer.EciesBody ecies = Buffer.EciesBody.parseFrom(body);
         byte[] ct = ecies.getCipher().toByteArray();
         byte[] iv = ecies.getIv().toByteArray();
-        String bmac = ecies.getMac().toStringUtf8();
-        byte[] pepk = formatPK(ecies.getEpk().toByteArray());
+        byte[] bmac = ecies.getMac().toByteArray();
+        byte[] pepk = TypeUtils.formatPK(ecies.getEpk().toByteArray());//formart pk
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(pepk);
         KeyFactory kf = KeyFactory.getInstance("EC");
         PublicKey epk = kf.generatePublic(x509EncodedKeySpec);
@@ -104,15 +87,13 @@ public class CryptoUtils {
         keyAgreement.init(sk);
         keyAgreement.doPhase(epk, true);
         byte[] secret = keyAgreement.generateSecret();
+        secret = SHA256.getSHA256Bytes(secret);
         byte[] encKey = Arrays.copyOfRange(secret, 0, 16);
         byte[] macKey = Arrays.copyOfRange(secret, 16, 32);
-        Buffer.EciesBody dataToMac = Buffer.EciesBody.newBuilder()
-                .setCipher(ByteString.copyFrom(ct))
-                .setEpk(ByteString.copyFrom(pepk))
-                .setIv(ByteString.copyFrom(iv))
-                .build();
-        String mac = SHA256.sha256_HMAC(dataToMac.toString(), macKey);
-        if (!mac.equals(bmac)) {
+        byte[] bpk = TypeUtils.bufferPk(pepk);//buffer pk
+        byte[] dataToMac = TypeUtils.concatByteArrays(new byte[][]{iv, bpk, ct});
+        byte[] mac = SHA256.sha256_HMAC(dataToMac, macKey);
+        if (!Arrays.equals(mac, bmac)) {
             throw new Exception("Corrupted body - unmatched authentication code");
         }
         byte[] msg = AES256.AES_cbc_decrypt(ct, encKey, iv);
@@ -131,22 +112,15 @@ public class CryptoUtils {
     }
 
     public static boolean verify(byte[] publicKey, byte[] signed, byte[] message) throws Exception {
+        boolean verify = false;
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey);
         KeyFactory keyFactory = KeyFactory.getInstance("EC");
         PublicKey pk = keyFactory.generatePublic(x509EncodedKeySpec);
         Signature signature = Signature.getInstance("SHA256withECDSA");
         signature.initVerify(pk);
         signature.update(message);
-        return signature.verify(signed);
-    }
-
-    public static byte[] rsGnSign(byte[] msg) {
-        Integer l = msg.length / 2;
-        byte[] rb = new byte[l];
-        byte[] sb = new byte[l];
-        System.arraycopy(msg, 0, rb, 0, l);
-        System.arraycopy(msg, l, sb, 0, l);
-        return gnSign(rb, sb);
+        verify = signature.verify(signed);
+        return verify;
     }
 
 
@@ -181,6 +155,47 @@ public class CryptoUtils {
 //        }
 //    }
 
+
+    public static byte[] rsGenSign(byte[] msg) throws IOException {
+
+        byte[] r = Arrays.copyOfRange(msg, 0, 32);
+        byte[] s = Arrays.copyOfRange(msg, 32, 64);
+        if ((r[0] & 0x80) != 0) {
+            r = TypeUtils.concatByteArrays(new byte[][]{new byte[]{0}, r});
+        }
+        if ((s[0] & 0x80) != 0) {
+            s = TypeUtils.concatByteArrays(new byte[][]{new byte[]{0}, s});
+        }
+        return toolsGenSign(r, s);
+    }
+
+
+    public static byte[] encodeLength(int l) {
+        if (l < 0x80) {
+            return new byte[]{(byte) l};
+        } else {
+            List<Byte> t = new ArrayList<>();
+            while (l > 0) {
+                t.add((byte) (0x80 | (l & 0x7f)));
+                l >>= 7;
+            }
+            Collections.reverse(t);
+            return Bytes.toArray(t);
+        }
+    }
+
+
+    private static byte[] toolsGenSign(byte[] rb, byte[] sb) throws IOException {
+        BigInteger r = new BigInteger(rb);
+        BigInteger s = new BigInteger(sb);
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        DERSequenceGenerator seq = new DERSequenceGenerator(b);
+        seq.addObject(new ASN1Integer(r));
+        seq.addObject(new ASN1Integer(s));
+        seq.close();
+        return b.toByteArray();
+    }
+
     /**
      * r|s生成sign
      *
@@ -188,100 +203,23 @@ public class CryptoUtils {
      * @param s
      * @return
      */
-    private static byte[] gnSign(byte[] r, byte[] s) {
-        byte[] sign = {0x30};
-        byte tag = 0x02;
-        short i = TypeUtils.byteToUnit8((r[0]));
-        short j = TypeUtils.byteToUnit8((s[0]));
-        StringBuffer b = new StringBuffer();
-        byte[] rb = {0x00};
-        if ((i & 0x80) != 0) {
-            rb = Arrays.copyOf(rb, 1 + r.length);
-            System.arraycopy(r, 0, rb, 1, r.length);
-            b.append("r");
-        }
-
-        byte[] sb = {0x00};
-        if ((j & 0x80) != 0) {
-            sb = Arrays.copyOf(sb, 1 + s.length);
-            System.arraycopy(s, 0, sb, 1, s.length);
-            b.append("s");
-        }
-        byte rl, sl;
-        short bl, rlUint8, slUint8;
-        switch (b.toString()) {
-            case "r":
-                //计算r和s的长度
-                rl = (byte) rb.length;
-                sl = (byte) s.length;
-                rlUint8 = TypeUtils.byteToUnit8(rl);
-                slUint8 = TypeUtils.byteToUnit8(sl);
-                bl = (short) (rlUint8 + slUint8 + 4);
-                sign = Arrays.copyOf(sign, 2 + bl);
-                sign[1] = TypeUtils.uint8ToByte(bl);
-                sign[2] = tag;
-                sign[3] = rl;
-                System.arraycopy(rb, 0, sign, 4, rlUint8);
-                sign[4 + rlUint8] = tag;
-                sign[5 + rlUint8] = sl;
-                System.arraycopy(s, 0, sign, 6 + rlUint8, slUint8);
-                break;
-            case "s":
-                //计算r和s的长度
-                rl = (byte) r.length;
-                sl = (byte) sb.length;
-                rlUint8 = TypeUtils.byteToUnit8(rl);
-                slUint8 = TypeUtils.byteToUnit8(sl);
-                bl = (short) (rlUint8 + slUint8 + 4);
-                sign = Arrays.copyOf(sign, 2 + bl);
-                sign[1] = TypeUtils.uint8ToByte(bl);
-                sign[2] = tag;
-                sign[3] = rl;
-                System.arraycopy(r, 0, sign, 4, rlUint8);
-                sign[4 + rlUint8] = tag;
-                sign[5 + rlUint8] = sl;
-                System.arraycopy(sb, 0, sign, 6 + rlUint8, slUint8);
-                break;
-            case "rs":
-                //计算r和s的长度
-                rl = (byte) rb.length;
-                sl = (byte) sb.length;
-                rlUint8 = TypeUtils.byteToUnit8(rl);
-                slUint8 = TypeUtils.byteToUnit8(sl);
-                bl = (short) (rlUint8 + slUint8 + 4);
-                sign = Arrays.copyOf(sign, 2 + bl);
-                sign[1] = TypeUtils.uint8ToByte(bl);
-                sign[2] = tag;
-                sign[3] = rl;
-                System.arraycopy(rb, 0, sign, 4, rlUint8);
-                sign[4 + rlUint8] = tag;
-                sign[5 + rlUint8] = sl;
-                System.arraycopy(sb, 0, sign, 6 + rlUint8, slUint8);
-                break;
-            default:
-                //计算r和s的长度
-                rl = (byte) r.length;
-                sl = (byte) s.length;
-                rlUint8 = TypeUtils.byteToUnit8(rl);
-                slUint8 = TypeUtils.byteToUnit8(sl);
-                bl = (short) (rlUint8 + slUint8 + 4);
-                sign = Arrays.copyOf(sign, 2 + bl);
-                sign[1] = TypeUtils.uint8ToByte(bl);
-                sign[2] = tag;
-                sign[3] = rl;
-                System.arraycopy(r, 0, sign, 4, rlUint8);
-                sign[4 + rlUint8] = tag;
-                sign[5 + rlUint8] = sl;
-                System.arraycopy(s, 0, sign, 6 + rlUint8, slUint8);
-                break;
-        }
-        return sign;
+    private static byte[] genSign(byte[] r, byte[] s) {
+        BigInteger rint = new BigInteger(r);
+        BigInteger sint = new BigInteger(s);
+        byte[] rbytes = rint.toByteArray();
+        byte[] sbytes = sint.toByteArray();
+        byte[] tag = {0x02};
+        int rl = rbytes.length;
+        int sl = sbytes.length;
+        return TypeUtils.concatByteArrays(new byte[][]{new byte[]{0x30}, encodeLength(rl + sl), tag, encodeLength(rl), rbytes, tag, encodeLength(sl), sbytes});
     }
 
 
     public static void main(String[] args) throws Exception {
         //签名
         String m = "Hello World";
+
+
 //        String s = "b395b42d4a4976fe25ca3830a08b3f5f0261b565f0cf70ff834e7af96cc1e638138d15801158f36dd23bdc0c6228b9f76f1fb6583cf6036a3fea5841d7c58b0e";
 //        String pk = "0442b1c8e7daa30848f59e2d8d764882f088a8cfed054d0c91395f8cdb47b1dbecbf28ed6666f7aa7e19f14cc3725894c04ba1f805dcaecdc05e85d4fd1e9db56f";
 //        byte[] pk1 = formatPK(TypeUtils.hexStringToByte(pk));
@@ -304,9 +242,6 @@ public class CryptoUtils {
 //        System.out.println(new String(bytes));
 //        String mac = SHA256.sha256_HMAC(new String(bytes), mk);
 //        System.out.println(mac);
-
-
-
 
 
         //根据sign生成r s
@@ -336,17 +271,21 @@ public class CryptoUtils {
 //                }
 //            }
 //        }
-
+//        byte[] rb = {71, -74, 104, -19, -43, 67, 20, -112, 55, -103, 24, 59, 92, 8, 79, 38, -12, -79, -65, 31, -122, 19, 56, 2, 127, 9, -128, 102, -24, -124, -85, 67};
+//        byte[] sb = {0, 85, 31, -11, -115, 113, -114, 61, -3, 1, -45, -77, -109, -52, 61, -22, -50, -31, -47, -124, -86, 85, -107, 42, 24, -36, 3, 9, -32, 52, 127, 13,};
+//
+//        byte[] sign = genSign(rb, sb);
+//        System.out.println(Arrays.toString(sign));
 
         //根据 r 和s 生成sign
-//        BigInteger r = new BigInteger("4b4da36d6b22b4d0471c64bad49ee434280f07350463b58ef6a05856c2296a5c", 16);
-//        BigInteger s = new BigInteger("a26a184751c619dd5399ebe0eb72b843479a9cb304ad10d464a5184e3d2f1f6c", 16);
+//        BigInteger r = new BigInteger(rb);
+//        BigInteger s = new BigInteger(sb);
 //        ByteArrayOutputStream b = new ByteArrayOutputStream();
 //        DERSequenceGenerator seq = new DERSequenceGenerator(b);
 //        seq.addObject(new ASN1Integer(r));
 //        seq.addObject(new ASN1Integer(s));
 //        seq.close();
-//        System.out.println(TypeUtils.bytesToHexString(b.toByteArray()));
+//        System.out.println(Arrays.toString(b.toByteArray()));
 
 
         //设置x ,y点生成pk
