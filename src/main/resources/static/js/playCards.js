@@ -160,10 +160,8 @@ ws.onmessage = async function getMessage(evt) {
             hallMessage = obj9.DeckMsg;
 
             if (hallMessage) {
-
                 console.log(hallMessage.deckNo + '号桌还有' + hallMessage.emptyNum + '个空位');
                 console.log('可选择');
-
                 for (let i of Array.from(hallMessage.seat)) {
                     console.log(i);
                 }
