@@ -17,7 +17,8 @@ function hexString2Arr(str) {
     return new Uint8Array(arr);
 }
 
-function concat(uint8Arrays) {
+//合并Uint8Array
+function concatUint8Array(uint8Arrays) {
 
     let tlen = 0;
 
@@ -37,4 +38,26 @@ function concat(uint8Arrays) {
 
     return res;
 }
+
+// Uint8Array转字符串
+function Uint8ArrayToString(fileData) {
+    var dataString = "";
+    for (var i = 0; i < fileData.length; i++) {
+        dataString += String.fromCharCode(fileData[i]);
+    }
+
+    return dataString
+}
+
+// 字符串转Uint8Array
+function stringToUint8Array(str) {
+    var arr = [];
+    for (var i = 0, j = str.length; i < j; ++i) {
+        arr.push(str.charCodeAt(i));
+    }
+
+    var tmpUint8Array = new Uint8Array(arr);
+    return tmpUint8Array
+}
+
 

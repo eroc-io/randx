@@ -35,11 +35,11 @@ async function createKey() {
 }
 
 //ECDH返回秘密
-async function getSecret(otherPk) {
+async function getSecret(othersPk) {
 
     let temPk = await st.importKey(
         'raw',
-        otherPk,
+        othersPk,
         {
             name: 'ECDH',
             namedCurve: 'P-256'
@@ -189,7 +189,7 @@ async function encryptByECIES(otherPk, dataBuffer) {
         dataBuffer
     );
 
-    let dataToMac = concat([iv, new Uint8Array(pkBuffer), new Uint8Array(cipher)]);
+    let dataToMac = concatUint8Array([iv, new Uint8Array(pkBuffer), new Uint8Array(cipher)]);
 
 
     let temMacKey = await st.importKey(
@@ -210,7 +210,7 @@ async function encryptByECIES(otherPk, dataBuffer) {
             hash: {name: 'SHA-256'},
         },
         temMacKey,
-        dataToMac.buffer
+        dataToMac
     );
 
     //Uint8Array()
@@ -221,10 +221,10 @@ async function encryptByECIES(otherPk, dataBuffer) {
 
 
 //ECIES解密
-//body[iv,epk,cipher,mac],内部格式为Uint8Array()
-async function decryptByECIES(body) {
+//body{iv,epk,cipher,mac},内部格式为Uint8Array()
+async function decryptByECIES(bodyUint8Array) {
 
-    let secrtHash = await sha256(await getSecret(body.epk.buffer));
+    let secrtHash = await sha256(await getSecret(bodyUint8Array.epk));
     let encKey = secrtHash.slice(0, 16);
     let macKey = secrtHash.slice(16);
 
@@ -239,18 +239,18 @@ async function decryptByECIES(body) {
         false,
         ["sign", "verify"]
     )
-    let dataToMac = concat([body.iv, body.epk, body.cipher]);
+    let dataToMac = concatUint8Array([bodyUint8Array.iv, bodyUint8Array.epk, bodyUint8Array.cipher]);
 
-    let mac = await st.verify(
+    let macFlog = await st.verify(
         {
             name: 'HMAC',
             hash: {name: 'SHA-256'},
         }, temMacKey,
-        body.mac.buffer,
-        dataToMac.buffer
+        bodyUint8Array.mac,
+        dataToMac
     );
 
-    if (!mac)
+    if (!macFlog)
         throw new Error('Corrupted body - unmatched authentication code');
 
     let temEncKey = await st.importKey(
@@ -266,10 +266,10 @@ async function decryptByECIES(body) {
     let cipher = await st.decrypt(
         {
             name: 'AES-CBC',
-            iv: body.iv,
+            iv: bodyUint8Array.iv,
         },
         temEncKey,
-        body.cipher.buffer
+        bodyUint8Array.cipher
     );
 
     return cipher;
