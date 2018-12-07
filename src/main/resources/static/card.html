@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>棋牌游戏</title>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="./js/protobuf.min.js"></script>
+    <script type="text/javascript" src="./js/typeUtils.js"></script>
+    <script type="text/javascript" src="./js/cryptoUtils.js"></script>
+    <script type="text/javascript" src="./js/pbfUtils.js"></script>
+    <script type="text/javascript" src="./js/playCards.js"></script>
+
+</head>
+
+
+请选择牌桌
+<br/>
+1号牌桌：
+<input type="button" value="开局" onClick="openGame(1,54,1,3,17);"/>
+<input type="button" value="加入游戏" onClick="joinGame();"/>
+<input type="button" value="抓牌" onClick="drawCard();"/>
+<input type="button" value="摸底牌" onClick="drawLeftCards();"/>
+<input type="button" value="还牌" onClick="returnCards(concat([proof[1],proof[3], proof[5]]));"/>
+<br/><br/>
+2号牌桌：
+<input type="button" value="开局" onClick="openGame(2,54,1,4,12);"/>
+<input type="button" value="加入游戏" onClick="joinGame();"/>
+<input type="button" value="抓牌" onClick="drawCard();"/>
+<input type="button" value="摸底牌" onClick="drawLeftCards();"/>
+<input type="button" value="还牌"
+       onClick="returnCards(concat([proof[1],proof[3], proof[5], proof[7], proof[8], proof[9]]));"/>
+<br/><br/>
+3号牌桌：
+<input type="button" value="开局" onClick="openGame(3,54,2,4,25);"/>
+<input type="button" value="加入游戏" onClick="joinGame();"/>
+<input type="button" value="抓牌" onClick="drawCard();"/>
+<input type="button" value="摸底牌" onClick="drawLeftCards();"/>
+<input type="button" value="还牌"
+       onClick="returnCards(concat([proof[1],proof[3], proof[5], proof[7], proof[9], proof[10]]));"/>
+
+
+<script>
+    document.write(cards);
+</script>
+
+</body>
+</html>
