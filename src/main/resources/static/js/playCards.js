@@ -32,7 +32,7 @@ var pks = [];
 //有次序的其他玩家的公钥
 var orderPks = {};
 
-var ws = new WebSocket("ws://192.168.10.153:8080/ws");
+var ws = new WebSocket("ws://192.168.11.153:8080/ws");
 ws.binaryType = "arraybuffer";
 
 ws.onopen = function (evt) {
