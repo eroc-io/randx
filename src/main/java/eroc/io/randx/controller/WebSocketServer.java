@@ -109,6 +109,9 @@ public class WebSocketServer {
      * 发送消息
      */
     public static void sendInfo(byte[] message, String uid) throws IOException {
+        if (0 == webSocketSet.size()) {
+            return;
+        }
         for(WebSocketServer item : webSocketSet) {
             try {
                 if (uid == null) {
@@ -128,8 +131,8 @@ public class WebSocketServer {
      */
     @OnClose
     public void onClose() {
-        playService.leavePlay(this);
         webSocketSet.remove(this);  //从set中删除
+        playService.leavePlay(this);
         subOnlineCount();           //在线数减1
         System.out.println("有一连接关闭！当前在线人数为" + getOnlineCount());
     }

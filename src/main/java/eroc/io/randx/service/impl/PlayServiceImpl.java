@@ -408,6 +408,7 @@ public class PlayServiceImpl implements PlayService {
                     }
                     players.remove(player);
                     sendHallMessage(null);
+                    break;
                 }
             }
         }
