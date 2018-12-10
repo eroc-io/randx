@@ -78,7 +78,7 @@ ws.onmessage = async function getMessage(evt) {
                 salt = new Uint8Array(await decryptByECIES(cardCipher));
                 salts.push(salt);
                 cards.push(salt[CARD_INDEX]);
-                saltsObj[window.btoa(Uint8ArrayToString(salt))] = salt;
+                saltsObj[btoa(Uint8ArrayToString(salt))] = salt;
                 if (salt[CARD_INDEX]) {
 
                     showFunction(salt);
@@ -92,13 +92,13 @@ ws.onmessage = async function getMessage(evt) {
             //其他玩家抓到牌的proof， responseId = 3
             let obj3 = await readPbf(protoUrl, "DrawNotification", proBuffer);
             let pk = obj3.pk;
-            let pkBase64 = window.btoa(Uint8ArrayToString(pk));
+            let pkBase64 = btoa(Uint8ArrayToString(pk));
 
             if (pks.indexOf(pkBase64) == -1) {
                 pks.push(pkBase64);
                 proofs[pkBase64] = [];
             }
-            proofs[pkBase64].push(obj3.proof);
+            proofs[pkBase64].push(btoa(Uint8ArrayToString(obj3.proof)));
 
             break;
         case 4:
@@ -127,7 +127,7 @@ ws.onmessage = async function getMessage(evt) {
             //其他玩家还牌信息, responseId = 6
             let obj6 = await readPbf(protoUrl, "ReturnNotification", proBuffer);
             showMessage("p3", '牌主还了 ' + obj6.numReturned + ' 张牌');
-            console.log(window.btoa(Uint8ArrayToString(obj6.pk)) + '还了 ' + obj6.numReturned + ' 张牌');
+            console.log(btoa(Uint8ArrayToString(obj6.pk)) + '还了 ' + obj6.numReturned + ' 张牌');
 
             break;
         case 7:
@@ -182,20 +182,18 @@ ws.onmessage = async function getMessage(evt) {
             if (hallMessages) {
 
                 for (let hallMessage of hallMessages) {
-                    showMessage("p1", hallMessage.deckNo + '号桌还有' + hallMessage.emptyNum + '个空位');
-                    // console.log(hallMessage.deckNo + '号桌还有' + hallMessage.emptyNum + '个空位');
+
+                    console.log(hallMessage.emptyNum);
+                    console.log(hallMessage.deckNo + '号桌还有' + hallMessage.emptyNum + '个空位');
                     let seat = hallMessage.seat;
                     let msg = '';
                     if (seat) {
                         for (let i of Array.from(seat)) {
-                            console.log(i);
-                            msg += i;
+                            msg += i + ' ';
                         }
-                        showMessage("p2", msg + '号座位已有人，不能选择');
-                        // console.log(showMessage + '号座位已有人，不能选择');
+                        console.log(msg + '号座位已有人，不能选择');
                     } else {
-                        showMessage("p2", '此桌目前还无人');
-                        // console.log('，此桌目前还无人');
+                        console.log('，此桌目前还无人');
                     }
                 }
             } else {
@@ -214,15 +212,17 @@ ws.onmessage = async function getMessage(evt) {
 
             for (let outSalt of outSalts) {
 
-                let pkBase64 = window.btoa(Uint8ArrayToString(obj10.pk));
+                let outSaltBase64 = btoa(Uint8ArrayToString(new Uint8Array(await sha256(outSalt))));
 
-                if (proofs[pkBase64].indexOf(await sha256(outSalt)) == -1) {
+                console.log(proofs[btoa(Uint8ArrayToString(obj10.pk))].indexOf(outSaltBase64));
+
+                if (proofs[btoa(Uint8ArrayToString(obj10.pk))].indexOf(btoa(Uint8ArrayToString(new Uint8Array(await sha256(outSalt))))) < 0) {
 
                     throw new Error('Illegal card');
                 }
                 reCards2.push(cardNames[outSalt[CARD_INDEX]]);
             }
-            showMessage("p3", window.btoa(Uint8ArrayToString(obj10.pk)) + "出牌" + reCards2);
+            showMessage("p3", btoa(Uint8ArrayToString(obj10.pk)) + "出牌" + reCards2);
 
             break;
     }
