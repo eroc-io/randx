@@ -19,4 +19,5 @@ public interface PlayService {
 
     void leavePlay(WebSocketServer wss);
 
+    void disCard(byte[] disCards, WebSocketServer wss);
 }

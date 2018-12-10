@@ -13,6 +13,7 @@ import eroc.io.randx.pojo.Proofs;
 import eroc.io.randx.service.DeckDealer;
 import eroc.io.randx.service.PlayService;
 import eroc.io.randx.utils.CryptoUtils;
+import eroc.io.randx.utils.SHA256;
 import eroc.io.randx.utils.TypeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -393,9 +394,70 @@ public class PlayServiceImpl implements PlayService {
     }
 
 
-//    public void verifyCards(byte[] pk, Buffer.EciesBody eciesBody) {
-//
-//    }
+    /**
+     * 出牌
+     *
+     * @param disCards
+     */
+    public void disCard(byte[] disCards, WebSocketServer wss) {
+        Buffer.DisCard.Builder rresp = Buffer.DisCard.newBuilder();
+        try {
+            Buffer.DisCard dc = Buffer.DisCard.parseFrom(disCards);
+            String deckId = dc.getDeckId().toString("utf-8");
+            for(PlayStatus ps : pss) {
+                if (ps.getDeckId().equalsIgnoreCase(deckId)) {
+                    ByteString ppk = dc.getPk();
+                    String pk = Base64.getEncoder().encodeToString(TypeUtils.formatPK(ppk.toByteArray()));
+                    ByteString salts = dc.getSalt();
+                    byte[] cards = salts.toByteArray();
+                    int l = cards.length;
+                    if (l % 32 == 0 && l != 0) {
+                        //取出牌信息
+                        List<byte[]> cs = new ArrayList<>();
+                        byte[] card = new byte[32];
+                        int n = l / 32;
+                        for(int i = 0; i < n; i++) {
+                            System.arraycopy(cards, i * 32, card, 0, 32);
+                            cs.add(card);
+                        }
+                        boolean b = true;
+                        for(byte[] c : cs) {
+                            Proofs proof = new Proofs();
+                            proof.setDeckId(deckId);
+                            proof.setPk(pk);
+                            proof.setProof(Base64.getEncoder().encodeToString(SHA256.getSHA256Bytes(c)));
+                            List<Proofs> select = this.proofsDao.select(proof);
+                            if (null == select || 0 == select.size()) {
+                                b = false;
+                            }
+                        }
+                        if (b) {
+                            //通知其他人出牌信息
+                            String uid = wss.getUid();
+                            Buffer.DisCardsNotify notify = Buffer.DisCardsNotify.newBuilder().setPk(ppk).setSalt(salts).build();
+                            for(Player player : ps.getPlayers()) {
+                                String oid = player.getUid();
+                                if (!oid.equalsIgnoreCase(uid)) {
+                                    WebSocketServer.sendInfo(TypeUtils.getMsg(notify.toByteArray(), (byte) 10), oid);
+                                }
+                            }
+                        }
+                        //proof验证未通过
+                    }
+                    //salts有误
+                }
+                //没找到牌桌
+            }
+        } catch (InvalidProtocolBufferException e) {
+//            errmsg = Error.getMsg(90000);
+//            rresp.setErrMsg(errmsg);
+            e.printStackTrace();
+        } catch (Exception e) {
+//            errmsg = e.getMessage();
+//            rresp.setErrMsg(errmsg);
+            e.printStackTrace();
+        }
+    }
 
     /**
      * 玩家退出桌局

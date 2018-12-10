@@ -8225,6 +8225,845 @@ public final class Buffer {
     }
   }
 
+  public interface DisCardOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:DisCard)
+      com.google.protobuf.MessageLiteOrBuilder {
+
+    /**
+     * <code>bytes deckId = 1;</code>
+     */
+    com.google.protobuf.ByteString getDeckId();
+
+    /**
+     * <code>bytes pk = 2;</code>
+     */
+    com.google.protobuf.ByteString getPk();
+
+    /**
+     * <code>bytes salt = 3;</code>
+     */
+    com.google.protobuf.ByteString getSalt();
+  }
+  /**
+   * <pre>
+   *requestId=5  出牌
+   * </pre>
+   *
+   * Protobuf type {@code DisCard}
+   */
+  public  static final class DisCard extends
+      com.google.protobuf.GeneratedMessageLite<
+          DisCard, DisCard.Builder> implements
+      // @@protoc_insertion_point(message_implements:DisCard)
+      DisCardOrBuilder {
+    private DisCard() {
+      deckId_ = com.google.protobuf.ByteString.EMPTY;
+      pk_ = com.google.protobuf.ByteString.EMPTY;
+      salt_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    public static final int DECKID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString deckId_;
+    /**
+     * <code>bytes deckId = 1;</code>
+     */
+    @Override
+    public com.google.protobuf.ByteString getDeckId() {
+      return deckId_;
+    }
+    /**
+     * <code>bytes deckId = 1;</code>
+     */
+    private void setDeckId(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      deckId_ = value;
+    }
+    /**
+     * <code>bytes deckId = 1;</code>
+     */
+    private void clearDeckId() {
+      
+      deckId_ = getDefaultInstance().getDeckId();
+    }
+
+    public static final int PK_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString pk_;
+    /**
+     * <code>bytes pk = 2;</code>
+     */
+    @Override
+    public com.google.protobuf.ByteString getPk() {
+      return pk_;
+    }
+    /**
+     * <code>bytes pk = 2;</code>
+     */
+    private void setPk(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      pk_ = value;
+    }
+    /**
+     * <code>bytes pk = 2;</code>
+     */
+    private void clearPk() {
+      
+      pk_ = getDefaultInstance().getPk();
+    }
+
+    public static final int SALT_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString salt_;
+    /**
+     * <code>bytes salt = 3;</code>
+     */
+    @Override
+    public com.google.protobuf.ByteString getSalt() {
+      return salt_;
+    }
+    /**
+     * <code>bytes salt = 3;</code>
+     */
+    private void setSalt(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      salt_ = value;
+    }
+    /**
+     * <code>bytes salt = 3;</code>
+     */
+    private void clearSalt() {
+      
+      salt_ = getDefaultInstance().getSalt();
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!deckId_.isEmpty()) {
+        output.writeBytes(1, deckId_);
+      }
+      if (!pk_.isEmpty()) {
+        output.writeBytes(2, pk_);
+      }
+      if (!salt_.isEmpty()) {
+        output.writeBytes(3, salt_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @Override
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!deckId_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, deckId_);
+      }
+      if (!pk_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, pk_);
+      }
+      if (!salt_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, salt_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    public static DisCard parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static DisCard parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static DisCard parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static DisCard parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static DisCard parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static DisCard parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static DisCard parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static DisCard parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static DisCard parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input);
+    }
+    public static DisCard parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static DisCard parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static DisCard parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() {
+      return (Builder) DEFAULT_INSTANCE.createBuilder();
+    }
+    public static Builder newBuilder(DisCard prototype) {
+      return (Builder) DEFAULT_INSTANCE.createBuilder(prototype);
+    }
+
+    /**
+     * <pre>
+     *requestId=5  出牌
+     * </pre>
+     *
+     * Protobuf type {@code DisCard}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageLite.Builder<
+          DisCard, Builder> implements
+        // @@protoc_insertion_point(builder_implements:DisCard)
+        DisCardOrBuilder {
+      // Construct using Buffer.DisCard.newBuilder()
+      private Builder() {
+        super(DEFAULT_INSTANCE);
+      }
+
+
+      /**
+       * <code>bytes deckId = 1;</code>
+       */
+      @Override
+      public com.google.protobuf.ByteString getDeckId() {
+        return instance.getDeckId();
+      }
+      /**
+       * <code>bytes deckId = 1;</code>
+       */
+      public Builder setDeckId(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setDeckId(value);
+        return this;
+      }
+      /**
+       * <code>bytes deckId = 1;</code>
+       */
+      public Builder clearDeckId() {
+        copyOnWrite();
+        instance.clearDeckId();
+        return this;
+      }
+
+      /**
+       * <code>bytes pk = 2;</code>
+       */
+      @Override
+      public com.google.protobuf.ByteString getPk() {
+        return instance.getPk();
+      }
+      /**
+       * <code>bytes pk = 2;</code>
+       */
+      public Builder setPk(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setPk(value);
+        return this;
+      }
+      /**
+       * <code>bytes pk = 2;</code>
+       */
+      public Builder clearPk() {
+        copyOnWrite();
+        instance.clearPk();
+        return this;
+      }
+
+      /**
+       * <code>bytes salt = 3;</code>
+       */
+      @Override
+      public com.google.protobuf.ByteString getSalt() {
+        return instance.getSalt();
+      }
+      /**
+       * <code>bytes salt = 3;</code>
+       */
+      public Builder setSalt(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setSalt(value);
+        return this;
+      }
+      /**
+       * <code>bytes salt = 3;</code>
+       */
+      public Builder clearSalt() {
+        copyOnWrite();
+        instance.clearSalt();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:DisCard)
+    }
+    @Override
+    @SuppressWarnings({"unchecked", "fallthrough"})
+    protected final Object dynamicMethod(
+        MethodToInvoke method,
+        Object arg0, Object arg1) {
+      switch (method) {
+        case NEW_MUTABLE_INSTANCE: {
+          return new DisCard();
+        }
+        case NEW_BUILDER: {
+          return new Builder();
+        }
+        case IS_INITIALIZED: {
+          return DEFAULT_INSTANCE;
+        }
+        case MAKE_IMMUTABLE: {
+          return null;
+        }
+        case VISIT: {
+          Visitor visitor = (Visitor) arg0;
+          DisCard other = (DisCard) arg1;
+          deckId_ = visitor.visitByteString(deckId_ != com.google.protobuf.ByteString.EMPTY, deckId_,
+              other.deckId_ != com.google.protobuf.ByteString.EMPTY, other.deckId_);
+          pk_ = visitor.visitByteString(pk_ != com.google.protobuf.ByteString.EMPTY, pk_,
+              other.pk_ != com.google.protobuf.ByteString.EMPTY, other.pk_);
+          salt_ = visitor.visitByteString(salt_ != com.google.protobuf.ByteString.EMPTY, salt_,
+              other.salt_ != com.google.protobuf.ByteString.EMPTY, other.salt_);
+          if (visitor == MergeFromVisitor
+              .INSTANCE) {
+          }
+          return this;
+        }
+        case MERGE_FROM_STREAM: {
+          com.google.protobuf.CodedInputStream input =
+              (com.google.protobuf.CodedInputStream) arg0;
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry =
+              (com.google.protobuf.ExtensionRegistryLite) arg1;
+          if (extensionRegistry == null) {
+            throw new NullPointerException();
+          }
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+
+                  deckId_ = input.readBytes();
+                  break;
+                }
+                case 18: {
+
+                  pk_ = input.readBytes();
+                  break;
+                }
+                case 26: {
+
+                  salt_ = input.readBytes();
+                  break;
+                }
+                default: {
+                  if (!parseUnknownField(tag, input)) {
+                    done = true;
+                  }
+                  break;
+                }
+              }
+            }
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw new RuntimeException(e.setUnfinishedMessage(this));
+          } catch (java.io.IOException e) {
+            throw new RuntimeException(
+                new com.google.protobuf.InvalidProtocolBufferException(
+                    e.getMessage()).setUnfinishedMessage(this));
+          } finally {
+          }
+        }
+        // fall through
+        case GET_DEFAULT_INSTANCE: {
+          return DEFAULT_INSTANCE;
+        }
+        case GET_PARSER: {
+          com.google.protobuf.Parser<DisCard> parser = PARSER;
+          if (parser == null) {
+            synchronized (DisCard.class) {
+              parser = PARSER;
+              if (parser == null) {
+                parser = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
+                PARSER = parser;
+              }
+            }
+          }
+          return parser;
+      }
+      case GET_MEMOIZED_IS_INITIALIZED: {
+        return (byte) 1;
+      }
+      case SET_MEMOIZED_IS_INITIALIZED: {
+        return null;
+      }
+      }
+      throw new UnsupportedOperationException();
+    }
+
+
+    // @@protoc_insertion_point(class_scope:DisCard)
+    private static final DisCard DEFAULT_INSTANCE;
+    static {
+      // New instances are implicitly immutable so no need to make
+      // immutable.
+      DEFAULT_INSTANCE = new DisCard();
+    }
+
+    public static DisCard getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static volatile com.google.protobuf.Parser<DisCard> PARSER;
+
+    public static com.google.protobuf.Parser<DisCard> parser() {
+      return DEFAULT_INSTANCE.getParserForType();
+    }
+  }
+
+  public interface DisCardsNotifyOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:DisCardsNotify)
+      com.google.protobuf.MessageLiteOrBuilder {
+
+    /**
+     * <code>bytes salt = 1;</code>
+     */
+    com.google.protobuf.ByteString getSalt();
+
+    /**
+     * <code>bytes pk = 2;</code>
+     */
+    com.google.protobuf.ByteString getPk();
+  }
+  /**
+   * <pre>
+   *responseId=10
+   * </pre>
+   *
+   * Protobuf type {@code DisCardsNotify}
+   */
+  public  static final class DisCardsNotify extends
+      com.google.protobuf.GeneratedMessageLite<
+          DisCardsNotify, DisCardsNotify.Builder> implements
+      // @@protoc_insertion_point(message_implements:DisCardsNotify)
+      DisCardsNotifyOrBuilder {
+    private DisCardsNotify() {
+      salt_ = com.google.protobuf.ByteString.EMPTY;
+      pk_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    public static final int SALT_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString salt_;
+    /**
+     * <code>bytes salt = 1;</code>
+     */
+    @Override
+    public com.google.protobuf.ByteString getSalt() {
+      return salt_;
+    }
+    /**
+     * <code>bytes salt = 1;</code>
+     */
+    private void setSalt(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      salt_ = value;
+    }
+    /**
+     * <code>bytes salt = 1;</code>
+     */
+    private void clearSalt() {
+      
+      salt_ = getDefaultInstance().getSalt();
+    }
+
+    public static final int PK_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString pk_;
+    /**
+     * <code>bytes pk = 2;</code>
+     */
+    @Override
+    public com.google.protobuf.ByteString getPk() {
+      return pk_;
+    }
+    /**
+     * <code>bytes pk = 2;</code>
+     */
+    private void setPk(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      pk_ = value;
+    }
+    /**
+     * <code>bytes pk = 2;</code>
+     */
+    private void clearPk() {
+      
+      pk_ = getDefaultInstance().getPk();
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!salt_.isEmpty()) {
+        output.writeBytes(1, salt_);
+      }
+      if (!pk_.isEmpty()) {
+        output.writeBytes(2, pk_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @Override
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!salt_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, salt_);
+      }
+      if (!pk_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, pk_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    public static DisCardsNotify parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static DisCardsNotify parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static DisCardsNotify parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static DisCardsNotify parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static DisCardsNotify parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static DisCardsNotify parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static DisCardsNotify parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static DisCardsNotify parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static DisCardsNotify parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input);
+    }
+    public static DisCardsNotify parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static DisCardsNotify parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static DisCardsNotify parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() {
+      return (Builder) DEFAULT_INSTANCE.createBuilder();
+    }
+    public static Builder newBuilder(DisCardsNotify prototype) {
+      return (Builder) DEFAULT_INSTANCE.createBuilder(prototype);
+    }
+
+    /**
+     * <pre>
+     *responseId=10
+     * </pre>
+     *
+     * Protobuf type {@code DisCardsNotify}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageLite.Builder<
+          DisCardsNotify, Builder> implements
+        // @@protoc_insertion_point(builder_implements:DisCardsNotify)
+        DisCardsNotifyOrBuilder {
+      // Construct using Buffer.DisCardsNotify.newBuilder()
+      private Builder() {
+        super(DEFAULT_INSTANCE);
+      }
+
+
+      /**
+       * <code>bytes salt = 1;</code>
+       */
+      @Override
+      public com.google.protobuf.ByteString getSalt() {
+        return instance.getSalt();
+      }
+      /**
+       * <code>bytes salt = 1;</code>
+       */
+      public Builder setSalt(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setSalt(value);
+        return this;
+      }
+      /**
+       * <code>bytes salt = 1;</code>
+       */
+      public Builder clearSalt() {
+        copyOnWrite();
+        instance.clearSalt();
+        return this;
+      }
+
+      /**
+       * <code>bytes pk = 2;</code>
+       */
+      @Override
+      public com.google.protobuf.ByteString getPk() {
+        return instance.getPk();
+      }
+      /**
+       * <code>bytes pk = 2;</code>
+       */
+      public Builder setPk(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setPk(value);
+        return this;
+      }
+      /**
+       * <code>bytes pk = 2;</code>
+       */
+      public Builder clearPk() {
+        copyOnWrite();
+        instance.clearPk();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:DisCardsNotify)
+    }
+    @Override
+    @SuppressWarnings({"unchecked", "fallthrough"})
+    protected final Object dynamicMethod(
+        MethodToInvoke method,
+        Object arg0, Object arg1) {
+      switch (method) {
+        case NEW_MUTABLE_INSTANCE: {
+          return new DisCardsNotify();
+        }
+        case NEW_BUILDER: {
+          return new Builder();
+        }
+        case IS_INITIALIZED: {
+          return DEFAULT_INSTANCE;
+        }
+        case MAKE_IMMUTABLE: {
+          return null;
+        }
+        case VISIT: {
+          Visitor visitor = (Visitor) arg0;
+          DisCardsNotify other = (DisCardsNotify) arg1;
+          salt_ = visitor.visitByteString(salt_ != com.google.protobuf.ByteString.EMPTY, salt_,
+              other.salt_ != com.google.protobuf.ByteString.EMPTY, other.salt_);
+          pk_ = visitor.visitByteString(pk_ != com.google.protobuf.ByteString.EMPTY, pk_,
+              other.pk_ != com.google.protobuf.ByteString.EMPTY, other.pk_);
+          if (visitor == MergeFromVisitor
+              .INSTANCE) {
+          }
+          return this;
+        }
+        case MERGE_FROM_STREAM: {
+          com.google.protobuf.CodedInputStream input =
+              (com.google.protobuf.CodedInputStream) arg0;
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry =
+              (com.google.protobuf.ExtensionRegistryLite) arg1;
+          if (extensionRegistry == null) {
+            throw new NullPointerException();
+          }
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+
+                  salt_ = input.readBytes();
+                  break;
+                }
+                case 18: {
+
+                  pk_ = input.readBytes();
+                  break;
+                }
+                default: {
+                  if (!parseUnknownField(tag, input)) {
+                    done = true;
+                  }
+                  break;
+                }
+              }
+            }
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw new RuntimeException(e.setUnfinishedMessage(this));
+          } catch (java.io.IOException e) {
+            throw new RuntimeException(
+                new com.google.protobuf.InvalidProtocolBufferException(
+                    e.getMessage()).setUnfinishedMessage(this));
+          } finally {
+          }
+        }
+        // fall through
+        case GET_DEFAULT_INSTANCE: {
+          return DEFAULT_INSTANCE;
+        }
+        case GET_PARSER: {
+          com.google.protobuf.Parser<DisCardsNotify> parser = PARSER;
+          if (parser == null) {
+            synchronized (DisCardsNotify.class) {
+              parser = PARSER;
+              if (parser == null) {
+                parser = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
+                PARSER = parser;
+              }
+            }
+          }
+          return parser;
+      }
+      case GET_MEMOIZED_IS_INITIALIZED: {
+        return (byte) 1;
+      }
+      case SET_MEMOIZED_IS_INITIALIZED: {
+        return null;
+      }
+      }
+      throw new UnsupportedOperationException();
+    }
+
+
+    // @@protoc_insertion_point(class_scope:DisCardsNotify)
+    private static final DisCardsNotify DEFAULT_INSTANCE;
+    static {
+      // New instances are implicitly immutable so no need to make
+      // immutable.
+      DEFAULT_INSTANCE = new DisCardsNotify();
+    }
+
+    public static DisCardsNotify getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static volatile com.google.protobuf.Parser<DisCardsNotify> PARSER;
+
+    public static com.google.protobuf.Parser<DisCardsNotify> parser() {
+      return DEFAULT_INSTANCE.getParserForType();
+    }
+  }
+
 
   static {
   }

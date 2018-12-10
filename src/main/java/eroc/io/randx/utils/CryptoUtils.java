@@ -3,13 +3,13 @@ package eroc.io.randx.utils;
 import com.google.common.primitives.Bytes;
 import com.google.protobuf.ByteString;
 import eroc.io.randx.pojo.Buffer;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.DERSequenceGenerator;
+import org.bouncycastle.asn1.*;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyAgreement;
 import javax.crypto.NoSuchPaddingException;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -32,7 +32,6 @@ public class CryptoUtils {
     private static final String PK_SECP521R1 = "30819B301006072A8648CE3D020106052B8104002303818600";
 
     private static final byte[] PK_SECP256R1 = Base64.getDecoder().decode("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgA");
-
 
 
     /**
@@ -112,48 +111,44 @@ public class CryptoUtils {
     }
 
     public static boolean verify(byte[] publicKey, byte[] signed, byte[] message) throws Exception {
-        boolean verify = false;
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey);
         KeyFactory keyFactory = KeyFactory.getInstance("EC");
         PublicKey pk = keyFactory.generatePublic(x509EncodedKeySpec);
         Signature signature = Signature.getInstance("SHA256withECDSA");
         signature.initVerify(pk);
         signature.update(message);
-        verify = signature.verify(signed);
-        return verify;
+        return signature.verify(signed);
     }
 
 
-//    public static List<String> generateRS(byte[] sign) throws Exception {
-//        List<String> l = new ArrayList<>();
-//        ASN1Primitive asn1 = toAsn1Primitive(sign);
-//        if (asn1 instanceof ASN1Sequence) {
-//            ASN1Sequence asn1Sequence = (ASN1Sequence) asn1;
-//            ASN1Encodable[] asn1Encodables = asn1Sequence.toArray();
-//            for(ASN1Encodable asn1Encodable : asn1Encodables) {
-//                ASN1Primitive asn1Primitive = asn1Encodable.toASN1Primitive();
-//                if (asn1Primitive instanceof ASN1Integer) {
-//                    ASN1Integer asn1Integer = (ASN1Integer) asn1Primitive;
-//                    BigInteger value = asn1Integer.getValue();
-//                    String s = value.toString(16);
-//                    if (s.length() % 2 == 0) {
-//                        l.add(s);
-//                    } else {
-//                        s = "0" + s;
-//                        l.add(s);
-//                    }
-//                }
-//            }
-//        }
-//        return l;
-//    }
+    public static List<byte[]> generateRS(byte[] sign) throws Exception {
+        List<byte[]> l = new ArrayList<>();
+        ASN1Primitive asn1 = toAsn1Primitive(sign);
+        if (asn1 instanceof ASN1Sequence) {
+            ASN1Sequence asn1Sequence = (ASN1Sequence) asn1;
+            ASN1Encodable[] asn1Encodables = asn1Sequence.toArray();
+            for(ASN1Encodable asn1Encodable : asn1Encodables) {
+                ASN1Primitive asn1Primitive = asn1Encodable.toASN1Primitive();
+                if (asn1Primitive instanceof ASN1Integer) {
+                    ASN1Integer asn1Integer = (ASN1Integer) asn1Primitive;
+                    BigInteger value = asn1Integer.getValue();
+                    byte[] bytes = value.toByteArray();
+                    if (bytes.length > 32) {
+                        bytes = TypeUtils.lastNBytes(bytes, 32);
+                    }
+                    l.add(bytes);
+                }
+            }
+        }
+        return l;
+    }
 
-//    private static ASN1Primitive toAsn1Primitive(byte[] data) throws Exception {
-//        try(ByteArrayInputStream inStream = new ByteArrayInputStream(data);
-//            ASN1InputStream asnInputStream = new ASN1InputStream(inStream);) {
-//            return asnInputStream.readObject();
-//        }
-//    }
+    private static ASN1Primitive toAsn1Primitive(byte[] data) throws Exception {
+        try(ByteArrayInputStream inStream = new ByteArrayInputStream(data);
+            ASN1InputStream asnInputStream = new ASN1InputStream(inStream);) {
+            return asnInputStream.readObject();
+        }
+    }
 
 
     public static byte[] rsGenSign(byte[] msg) throws IOException {
@@ -166,7 +161,7 @@ public class CryptoUtils {
         if ((s[0] & 0x80) != 0) {
             s = TypeUtils.concatByteArrays(new byte[][]{new byte[]{0}, s});
         }
-        return toolsGenSign(r, s);
+        return genSign(r, s);
     }
 
 
@@ -211,21 +206,23 @@ public class CryptoUtils {
         byte[] tag = {0x02};
         int rl = rbytes.length;
         int sl = sbytes.length;
-        return TypeUtils.concatByteArrays(new byte[][]{new byte[]{0x30}, encodeLength(rl + sl), tag, encodeLength(rl), rbytes, tag, encodeLength(sl), sbytes});
+        byte[] rEncodl = encodeLength(rl);
+        byte[] sEncodl = encodeLength(sl);
+        return TypeUtils.concatByteArrays(new byte[][]{new byte[]{0x30}, encodeLength(rl + sl + 2 + rEncodl.length + sEncodl.length), tag, rEncodl, rbytes, tag, sEncodl, sbytes});
     }
 
 
     public static void main(String[] args) throws Exception {
         //签名
-        String m = "Hello World";
+        byte[] m = "Hello World".getBytes();
 
         //根据sign生成r s
 //        for(int i = 0; i < 10; i++) {
-//        BigInteger d = new BigInteger("628f142e96a2ba15f29f13ec85f3aeb9ec56fe0b3df30bea68870a19bbb7fba0", 16);
+//        BigInteger d = new BigInteger("628f142e96a2ba15f29f13ec85f3aeb9ec56fe0b3df30bea68870a19bbb7fba0",16);
 //        KeyPair pair = Secp256r1.generateKeyPair(d.toByteArray());
 //        System.out.println(TypeUtils.bytesToHexString(pair.getPublic().getEncoded()));
 //            PrivateKey aPrivate = pair.getPrivate();
-//            byte[] signature = sign(aPrivate.getEncoded(), msg.getBytes());
+//            byte[] signature = sign(aPrivate.getEncoded(),msg.getBytes());
 //            ASN1Primitive asn1 = toAsn1Primitive(signature);
 //            if (asn1 instanceof ASN1Sequence) {
 //                ASN1Sequence asn1Sequence = (ASN1Sequence) asn1;
@@ -251,24 +248,24 @@ public class CryptoUtils {
         //设置x ,y点生成pk
 //        BigInteger x = new BigInteger("61166327685726372633146956112430165093840350805695271212904644383394079735442");
 //        BigInteger y = new BigInteger("58046343023627330736346952573191938034837742142120314188975834647179723108352");
-//        ECPoint epk = new ECPoint(x, y);
+//        ECPoint epk = new ECPoint(x,y);
 //        X9ECParameters ecCurve = ECNamedCurveTable.getByName("secp256r1");
-//        ECParameterSpec ecps = new ECNamedCurveSpec("secp256r1", ecCurve.getCurve(), ecCurve.getG(), ecCurve.getN(), ecCurve.getH(), ecCurve.getSeed());
-//        ECPublicKeySpec ecpk = new ECPublicKeySpec(epk, ecps);
+//        ECParameterSpec ecps = new ECNamedCurveSpec("secp256r1",ecCurve.getCurve(),ecCurve.getG(),ecCurve.getN(),ecCurve.getH(),ecCurve.getSeed());
+//        ECPublicKeySpec ecpk = new ECPublicKeySpec(epk,ecps);
 //        KeyFactory keyFactory = KeyFactory.getInstance("EC");
 //        PublicKey publicKey = keyFactory.generatePublic(ecpk);
 
 
         //ECDH密钥交换
-//        KeyPair akeyPair = generatorKeyPair("EC", "secp256k1");
-//        KeyPair bkeyPair = generatorKeyPair("EC", "secp256k1");
+//        KeyPair akeyPair = generatorKeyPair("EC","secp256k1");
+//        KeyPair bkeyPair = generatorKeyPair("EC","secp256k1");
 //        KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");//akeyagreement
 //        keyAgreement.init(akeyPair.getPrivate());//ask
-//        keyAgreement.doPhase(bkeyPair.getPublic(), true);//bpk
+//        keyAgreement.doPhase(bkeyPair.getPublic(),true);//bpk
 //        byte[] bytes = keyAgreement.generateSecret();
 //        KeyAgreement bkeyAgreement = KeyAgreement.getInstance("ECDH");//bkeyagreement
 //        bkeyAgreement.init(bkeyPair.getPrivate());//bpk
-//        bkeyAgreement.doPhase(akeyPair.getPublic(), true);//ask
+//        bkeyAgreement.doPhase(akeyPair.getPublic(),true);//ask
 //        byte[] bbytes = keyAgreement.generateSecret();
 //        System.out.println(TypeUtils.bytesToHexString(bbytes).equals(TypeUtils.bytesToHexString(bytes)));
 
@@ -277,8 +274,8 @@ public class CryptoUtils {
         // security生成公私钥
 //        Security.addProvider(new BouncyCastleProvider());
 //        ECGenParameterSpec ecGenSpec = new ECGenParameterSpec("secp256k1");
-//        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("ECDSA", "BC");
-//        keyPairGenerator.initialize(ecGenSpec, new SecureRandom());
+//        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("ECDSA","BC");
+//        keyPairGenerator.initialize(ecGenSpec,new SecureRandom());
 //        java.security.KeyPair pair = keyPairGenerator.generateKeyPair();
 //        ECPrivateKey privateKey = (ECPrivateKey) pair.getPrivate();
 //        ECPublicKey publicKey = (ECPublicKey) pair.getPublic();
@@ -290,18 +287,16 @@ public class CryptoUtils {
 
         //手动设置privateKey，生成publicKey
 //        Security.addProvider(new BouncyCastleProvider());
-//        KeyFactory keyFactory = KeyFactory.getInstance("ECDH", "BC");
+//        KeyFactory keyFactory = KeyFactory.getInstance("ECDH","BC");
 //        ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("secp256k1");
-//        BigInteger k = new BigInteger("3", 16);
+//        BigInteger k = new BigInteger("3",16);
 //        ECPoint Q = ecSpec.getG().multiply(k);
 //        byte[] publicDerBytes = Q.getEncoded(false);
 //        ECPoint point = ecSpec.getCurve().decodePoint(publicDerBytes);
-//        ECPublicKeySpec pubSpec = new ECPublicKeySpec(point, ecSpec);
+//        ECPublicKeySpec pubSpec = new ECPublicKeySpec(point,ecSpec);
 //        ECPublicKey ecPublicKey = (ECPublicKey) keyFactory.generatePublic(pubSpec);
 //        System.out.println(TypeUtils.bytesToHexString(ecPublicKey.getEncoded()));
 
 
     }
-
-
 }

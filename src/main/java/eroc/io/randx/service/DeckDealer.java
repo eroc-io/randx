@@ -60,7 +60,6 @@ public class DeckDealer {
             e.printStackTrace();
         }
         Object[] o = {dsk, TypeUtils.bufferPk(dpk)};
-//        Object[] o = {dsk, dpk};
         return o;
     }
 

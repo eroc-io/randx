@@ -101,6 +101,12 @@ public class WebSocketServer {
             if (!StringUtils.isBlank(returnResponse.getErrMsg())) {
                 sendMessage(TypeUtils.getMsg(returnResponse.toByteArray(), (byte) 5));
             }
+        }else if (b == 5) {
+            //DisCard request
+            playService.disCard(msg, this);
+//            if (!StringUtils.isBlank(returnResponse.getErrMsg())) {
+//                sendMessage(TypeUtils.getMsg(returnResponse.toByteArray(), (byte) 5));
+//            }
         }
     }
 

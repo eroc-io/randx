@@ -285,6 +285,12 @@ public class TypeUtils {
     private static final byte[] PK_SECP256R1 = Base64.getDecoder().decode("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgA");
 
 
+    /**
+     * 给pk删去前缀
+     *
+     * @param publicKey
+     * @return
+     */
     public static byte[] bufferPk(byte[] publicKey) {
         byte[] pk = new byte[65];
         System.arraycopy(publicKey, PK_SECP256R1.length, pk, 0, 65);
@@ -301,7 +307,6 @@ public class TypeUtils {
         byte[] prefix = PK_SECP256R1;
         return TypeUtils.concatByteArrays(new byte[][]{prefix, publicKey});
     }
-
 
 
     /**
@@ -327,7 +332,7 @@ public class TypeUtils {
     }
 
     /**
-     * 输出指定n长度的数组
+     * 输出数组从最后开始指定n长度的数组
      *
      * @param src
      * @param n
@@ -338,7 +343,6 @@ public class TypeUtils {
         byte[] postfix = Arrays.copyOfRange(src, src.length - (src.length > n ? n : src.length), src.length);
         return concatByteArrays(new byte[][]{prefix, postfix});
     }
-
 
 
 }
