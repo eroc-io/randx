@@ -121,3 +121,16 @@ message ReturnNotification {
 	int32 numReturned = 2;
 }
 
+//requestId=5  出牌
+message DisCard{
+	bytes deckId = 1;
+	bytes pk = 2;
+	bytes salt = 3;
+}
+
+//responseId=10
+message DisCardsNotify{
+	bytes salt=1;
+	bytes pk=2;
+}
+
