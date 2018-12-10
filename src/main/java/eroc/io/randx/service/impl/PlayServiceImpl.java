@@ -268,11 +268,11 @@ public class PlayServiceImpl implements PlayService {
         } catch (InvalidProtocolBufferException e) {
             errmsg = Error.getMsg(90000);
             dresp.setErrMsg(errmsg);
-//            e.printStackTrace();
+            e.printStackTrace();
         } catch (Exception e) {
             errmsg = e.getMessage();
             dresp.setErrMsg(errmsg);
-//            e.printStackTrace();
+            e.printStackTrace();
         }
         return dresp.build();
     }
