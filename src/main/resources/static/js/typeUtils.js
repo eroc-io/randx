@@ -39,6 +39,20 @@ function concatUint8Array(uint8Arrays) {
     return res;
 }
 
+
+//等长度拆分Uint8Array
+function sliceUint8Array(uint8Arrays, size) {
+
+    var result = [];
+    for (let i = 0; i < uint8Arrays.length / size; i++) {
+        let start = i * size;
+        let end = start + size;
+        result.push(uint8Arrays.slice(start, end));
+    }
+
+    return result;
+}
+
 // Uint8Array转字符串
 function Uint8ArrayToString(fileData) {
     var dataString = "";
