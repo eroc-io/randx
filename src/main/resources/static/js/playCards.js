@@ -210,7 +210,7 @@ ws.onmessage = async function getMessage(evt) {
 
             let outSalts = sliceUint8Array(obj10.salt, 32);
 
-            let reCards = [];
+            let reCards2 = [];
 
             for (let outSalt of outSalts) {
 
@@ -220,9 +220,9 @@ ws.onmessage = async function getMessage(evt) {
 
                     throw new Error('Illegal card');
                 }
-                reCards.push(cardNames[outSalt[CARD_INDEX]]);
+                reCards2.push(cardNames[outSalt[CARD_INDEX]]);
             }
-            showMessage("p3", window.btoa(Uint8ArrayToString(obj10.pk)) + "出牌" + reCards);
+            showMessage("p3", window.btoa(Uint8ArrayToString(obj10.pk)) + "出牌" + reCards2);
 
             break;
     }
