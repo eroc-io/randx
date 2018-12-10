@@ -177,7 +177,10 @@ public class PlayServiceImpl implements PlayService {
                     } else {
                         jresp.setErrMsg(Error.getMsg(10001));
                     }
+                } else {
+                    throw new Exception("未找到该牌桌");
                 }
+
             }
 
         } catch (InvalidProtocolBufferException e) {
@@ -237,7 +240,7 @@ public class PlayServiceImpl implements PlayService {
                             Buffer.DrawNotification n = notify.build();
                             //存入数据库
                             Proofs proofs = new Proofs();
-                            proofs.setProof(n.getProof().toString("utf-8"));
+                            proofs.setProof((String) obj[3]);
                             proofs.setDeckId(deckId);
                             proofs.setPk(Base64.getEncoder().encodeToString(pk));
                             this.proofsDao.insertSelective(proofs);
@@ -258,6 +261,8 @@ public class PlayServiceImpl implements PlayService {
                             break;
                         }
                     }
+                } else {
+                    throw new Exception("未找到该牌桌");
                 }
             }
         } catch (InvalidProtocolBufferException e) {
@@ -318,6 +323,8 @@ public class PlayServiceImpl implements PlayService {
                         }
                         signs.clear();
                     }
+                } else {
+                    throw new Exception("未找到该牌桌");
                 }
             }
         } catch (InvalidProtocolBufferException e) {
@@ -379,6 +386,8 @@ public class PlayServiceImpl implements PlayService {
                         errmsg = Error.getMsg(10002);
                         rresp.setErrMsg(errmsg);
                     }
+                } else {
+                    throw new Exception("未找到该牌桌");
                 }
             }
         } catch (InvalidProtocolBufferException e) {
@@ -441,12 +450,15 @@ public class PlayServiceImpl implements PlayService {
                                     WebSocketServer.sendInfo(TypeUtils.getMsg(notify.toByteArray(), (byte) 10), oid);
                                 }
                             }
+                        } else {
+                            throw new Exception("抽牌证明验证未通过");
                         }
-                        //proof验证未通过
+                    } else {
+                        throw new Exception("出牌salts不对应");
                     }
-                    //salts有误
+                } else {
+                    throw new Exception("未找到该牌桌");
                 }
-                //没找到牌桌
             }
         } catch (InvalidProtocolBufferException e) {
 //            errmsg = Error.getMsg(90000);
