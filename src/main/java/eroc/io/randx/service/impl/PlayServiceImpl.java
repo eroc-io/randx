@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -236,7 +237,7 @@ public class PlayServiceImpl implements PlayService {
                             Proofs proofs = new Proofs();
                             proofs.setProof(n.getProof().toString("utf-8"));
                             proofs.setDeckId(deckId);
-                            proofs.setPk(TypeUtils.bytesToHexString(pk));
+                            proofs.setPk(Base64.getEncoder().encodeToString(pk));
                             this.proofsDao.insertSelective(proofs);
                             WebSocketServer.sendInfo(TypeUtils.getMsg(c.toByteArray(), (byte) 2), uid);
                             index.remove(0);
@@ -390,6 +391,10 @@ public class PlayServiceImpl implements PlayService {
         return rresp.build();
     }
 
+
+//    public void verifyCards(byte[] pk, Buffer.EciesBody eciesBody) {
+//
+//    }
 
     /**
      * 玩家退出桌局

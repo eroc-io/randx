@@ -4,7 +4,6 @@ import com.google.protobuf.ByteString;
 import eroc.io.randx.exception.DataException;
 import eroc.io.randx.pojo.Buffer;
 import eroc.io.randx.utils.*;
-import org.bouncycastle.util.encoders.Base64;
 
 import java.math.BigInteger;
 import java.security.KeyPair;
@@ -92,7 +91,7 @@ public class DeckDealer {
         byte[] s = SHA256.getSHA256Bytes(seed);
 
         for(byte[] pk : pks) {
-            String pkk = Base64.toBase64String(pk);
+            String pkk = Base64.getEncoder().encodeToString(pk);
             salts.put(pkk, s);
             proofs.put(pkk, new ArrayList<>());
         }
@@ -118,15 +117,15 @@ public class DeckDealer {
             throw new Exception("No more card can be drawn");
         }
 
-        String pkk = Base64.toBase64String(pk);
+        String pkk = Base64.getEncoder().encodeToString(pk);
 
         byte[] s = salts.get(pkk);
 
         if (s.length <= 0) {
             throw new Exception(String.format("Unknown player: %s", pkk));
         }
-        System.out.println("第" + i + "轮，盐： " + Base64.toBase64String(s));
-        System.out.println("第" + i + "轮，签名： " + Base64.toBase64String(sig));
+        System.out.println("第" + i + "轮，盐： " + Base64.getEncoder().encodeToString(s));
+        System.out.println("第" + i + "轮，签名： " + Base64.getEncoder().encodeToString(sig));
         i++;
         if (!CryptoUtils.verify(pk, sig, s)) {
             throw new Exception("pk owner have wrong signature!");
@@ -151,7 +150,7 @@ public class DeckDealer {
         //更新玩家的最新盐
         salts.put(pkk, s);
         List<String> p = proofs.get(pkk);
-        String proof = Base64.toBase64String(SHA256.getSHA256Bytes(s));
+        String proof = Base64.getEncoder().encodeToString(SHA256.getSHA256Bytes(s));
         p.add(proof);
         Buffer.DrawResponse.Builder resp = Buffer.DrawResponse.newBuilder().setCardCipher(CryptoUtils.ECDHEncrypt(pk, s, pair));
         Buffer.DrawNotification.Builder notify = Buffer.DrawNotification.newBuilder().setPk(ByteString.copyFrom(TypeUtils.bufferPk(pk))).setProof(ByteString.copyFrom(proof, "utf-8"));
@@ -194,9 +193,9 @@ public class DeckDealer {
 
         //验证签名
         for(int i = 0; i < pks.length; i++) {
-            byte[] salt = salts.get(Base64.toBase64String(pks[i]));
+            byte[] salt = salts.get(Base64.getEncoder().encodeToString(pks[i]));
             if (salt == null || salt.length == 0) {
-                throw new DataException("Unknown player: " + Base64.toBase64String(pks[i]));
+                throw new DataException("Unknown player: " + Base64.getEncoder().encodeToString(pks[i]));
             }
             boolean flag = ECDSA.verify(h2s, pks[i], "SHA256withECDSA", signs[i]);
             //验证签名失败，抛出异常
@@ -217,7 +216,7 @@ public class DeckDealer {
         seed = CryptoUtils.sign(dsk, SHA256.getSHA256Bytes(seed));
         byte[] s = SHA256.getSHA256Bytes(seed);
         for(byte[] pk : pks) {
-            String pkk = Base64.toBase64String(pk);
+            String pkk = Base64.getEncoder().encodeToString(pk);
             salts.put(pkk, s);
         }
         return Buffer.DrawLeftNotification.newBuilder().setCards(ByteString.copyFrom(lcards)).setSalt(ByteString.copyFrom(s));
@@ -235,7 +234,7 @@ public class DeckDealer {
 
     public Object[] returnCards(byte[] pk, byte[] sig, List<byte[]> cs) throws Exception {
         //验证玩家身份
-        String pkStr = Base64.toBase64String(pk);
+        String pkStr = Base64.getEncoder().encodeToString(pk);
         byte[] salt = salts.get(pkStr);
         if (salt == null || salt.length == 0) {
             throw new DataException("Unknown player: " + pkStr);
@@ -248,7 +247,7 @@ public class DeckDealer {
 
         //验证欲返回牌库的牌是否合理
         for(byte[] c : cs) {
-            if (proofs.get(pkStr).indexOf(Base64.toBase64String(SHA256.getSHA256Bytes(c))) < 0) {
+            if (proofs.get(pkStr).indexOf(Base64.getEncoder().encodeToString(SHA256.getSHA256Bytes(c))) < 0) {
                 throw new DataException("Unproven card" + TypeUtils.bytesToHexString(c) + "to return");
             }
         }
