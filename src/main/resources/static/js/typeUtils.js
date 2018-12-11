@@ -54,13 +54,9 @@ function sliceUint8Array(uint8Arrays, size) {
 }
 
 // Uint8Array转字符串
-function Uint8ArrayToString(fileData) {
-    var dataString = "";
-    for (var i = 0; i < fileData.length; i++) {
-        dataString += String.fromCharCode(fileData[i]);
-    }
+function uint8ArrayToString(raw) {
 
-    return dataString
+    return [].slice.call(raw).map(v => String.fromCharCode(v)).join('');
 }
 
 // 字符串转Uint8Array
