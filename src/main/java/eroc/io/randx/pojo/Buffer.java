@@ -1040,6 +1040,8 @@ public final class Buffer {
      * <code>int32 emptyNum = 3;</code>
      */
     int getEmptyNum();
+
+    public DeckMsg.AvailableCase getAvailableCase();
   }
   /**
    * Protobuf type {@code DeckMsg}
@@ -1052,6 +1054,49 @@ public final class Buffer {
     private DeckMsg() {
       seat_ = com.google.protobuf.ByteString.EMPTY;
     }
+    private int availableCase_ = 0;
+    private Object available_;
+    public enum AvailableCase
+        implements com.google.protobuf.Internal.EnumLite {
+      EMPTYNUM(3),
+      AVAILABLE_NOT_SET(0);
+      private final int value;
+      private AvailableCase(int value) {
+        this.value = value;
+      }
+      /**
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @Deprecated
+      public static AvailableCase valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static AvailableCase forNumber(int value) {
+        switch (value) {
+          case 3: return EMPTYNUM;
+          case 0: return AVAILABLE_NOT_SET;
+          default: return null;
+        }
+      }
+      @Override
+      public int getNumber() {
+        return this.value;
+      }
+    };
+
+    @Override
+    public AvailableCase
+    getAvailableCase() {
+      return AvailableCase.forNumber(
+          availableCase_);
+    }
+
+    private void clearAvailable() {
+      availableCase_ = 0;
+      available_ = null;
+    }
+
     public static final int DECKNO_FIELD_NUMBER = 1;
     private int deckNo_;
     /**
@@ -1104,27 +1149,31 @@ public final class Buffer {
     }
 
     public static final int EMPTYNUM_FIELD_NUMBER = 3;
-    private int emptyNum_;
     /**
      * <code>int32 emptyNum = 3;</code>
      */
     @Override
     public int getEmptyNum() {
-      return emptyNum_;
+      if (availableCase_ == 3) {
+        return (Integer) available_;
+      }
+      return 0;
     }
     /**
      * <code>int32 emptyNum = 3;</code>
      */
     private void setEmptyNum(int value) {
-      
-      emptyNum_ = value;
+      availableCase_ = 3;
+      available_ = value;
     }
     /**
      * <code>int32 emptyNum = 3;</code>
      */
     private void clearEmptyNum() {
-      
-      emptyNum_ = 0;
+      if (availableCase_ == 3) {
+        availableCase_ = 0;
+        available_ = null;
+      }
     }
 
     @Override
@@ -1136,8 +1185,9 @@ public final class Buffer {
       if (!seat_.isEmpty()) {
         output.writeBytes(2, seat_);
       }
-      if (emptyNum_ != 0) {
-        output.writeInt32(3, emptyNum_);
+      if (availableCase_ == 3) {
+        output.writeInt32(
+            3, (int)((Integer) available_));
       }
       unknownFields.writeTo(output);
     }
@@ -1156,9 +1206,10 @@ public final class Buffer {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(2, seat_);
       }
-      if (emptyNum_ != 0) {
+      if (availableCase_ == 3) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(3, emptyNum_);
+          .computeInt32Size(
+              3, (int)((Integer) available_));
       }
       size += unknownFields.getSerializedSize();
       memoizedSerializedSize = size;
@@ -1257,6 +1308,18 @@ public final class Buffer {
       // Construct using Buffer.DeckMsg.newBuilder()
       private Builder() {
         super(DEFAULT_INSTANCE);
+      }
+
+      @Override
+      public AvailableCase
+          getAvailableCase() {
+        return instance.getAvailableCase();
+      }
+
+      public Builder clearAvailable() {
+        copyOnWrite();
+        instance.clearAvailable();
+        return this;
       }
 
 
@@ -1359,10 +1422,22 @@ public final class Buffer {
               other.deckNo_ != 0, other.deckNo_);
           seat_ = visitor.visitByteString(seat_ != com.google.protobuf.ByteString.EMPTY, seat_,
               other.seat_ != com.google.protobuf.ByteString.EMPTY, other.seat_);
-          emptyNum_ = visitor.visitInt(emptyNum_ != 0, emptyNum_,
-              other.emptyNum_ != 0, other.emptyNum_);
+          switch (other.getAvailableCase()) {
+            case EMPTYNUM: {
+              available_ = visitor.visitOneofInt(
+                  availableCase_ == 3, available_, other.available_);
+              break;
+            }
+            case AVAILABLE_NOT_SET: {
+              visitor.visitOneofNotSet(availableCase_ != 0);
+              break;
+            }
+          }
           if (visitor == MergeFromVisitor
               .INSTANCE) {
+            if (other.availableCase_ != 0) {
+              availableCase_ = other.availableCase_;
+            }
           }
           return this;
         }
@@ -1393,8 +1468,8 @@ public final class Buffer {
                   break;
                 }
                 case 24: {
-
-                  emptyNum_ = input.readInt32();
+                  availableCase_ = 3;
+                  available_ = input.readInt32();
                   break;
                 }
                 default: {

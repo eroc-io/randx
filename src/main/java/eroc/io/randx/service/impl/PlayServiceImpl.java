@@ -177,7 +177,10 @@ public class PlayServiceImpl implements PlayService {
                     } else {
                         jresp.setErrMsg(Error.getMsg(10001));
                     }
+                } else {
+                    throw new Exception("未找到该牌桌");
                 }
+
             }
 
         } catch (InvalidProtocolBufferException e) {
@@ -210,10 +213,16 @@ public class PlayServiceImpl implements PlayService {
                         wss.setDrawRequest(dreq);
                         wsl.add(wss);
                     }
+                    //判断人数是否凑齐
+                    if (ps.getPlayers().size() != ps.getNumPlayers()) {
+                        Buffer.DrawResponse build = dresp.setErrMsg(Error.getMsg(10004)).build();
+                        WebSocketServer.sendInfo(TypeUtils.getMsg(build.toByteArray(), (byte) 2), wss.getUid());
+                        return null;
+                    }
                     //当前牌局
                     List<String> index = ps.getIndex();
                     if (index.size() <= 0) {
-                        Buffer.DrawResponse build = dresp.setErrMsg("抽牌结束").build();
+                        Buffer.DrawResponse build = dresp.setErrMsg(Error.getMsg(10003)).build();
                         for(Player player : ps.getPlayers()) {
                             WebSocketServer.sendInfo(TypeUtils.getMsg(build.toByteArray(), (byte) 2), player.getUid());
                         }
@@ -237,7 +246,7 @@ public class PlayServiceImpl implements PlayService {
                             Buffer.DrawNotification n = notify.build();
                             //存入数据库
                             Proofs proofs = new Proofs();
-                            proofs.setProof(n.getProof().toString("utf-8"));
+                            proofs.setProof((String) obj[3]);
                             proofs.setDeckId(deckId);
                             proofs.setPk(Base64.getEncoder().encodeToString(pk));
                             this.proofsDao.insertSelective(proofs);
@@ -258,16 +267,18 @@ public class PlayServiceImpl implements PlayService {
                             break;
                         }
                     }
+                } else {
+                    throw new Exception("未找到该牌桌");
                 }
             }
         } catch (InvalidProtocolBufferException e) {
             errmsg = Error.getMsg(90000);
             dresp.setErrMsg(errmsg);
-//            e.printStackTrace();
+            e.printStackTrace();
         } catch (Exception e) {
-            errmsg = e.getMessage();
-            dresp.setErrMsg(errmsg);
-//            e.printStackTrace();
+//            errmsg = e.getMessage();
+//            dresp.setErrMsg(errmsg);
+            e.printStackTrace();
         }
         return dresp.build();
     }
@@ -318,6 +329,8 @@ public class PlayServiceImpl implements PlayService {
                         }
                         signs.clear();
                     }
+                } else {
+                    throw new Exception("未找到该牌桌");
                 }
             }
         } catch (InvalidProtocolBufferException e) {
@@ -379,6 +392,8 @@ public class PlayServiceImpl implements PlayService {
                         errmsg = Error.getMsg(10002);
                         rresp.setErrMsg(errmsg);
                     }
+                } else {
+                    throw new Exception("未找到该牌桌");
                 }
             }
         } catch (InvalidProtocolBufferException e) {
@@ -441,12 +456,15 @@ public class PlayServiceImpl implements PlayService {
                                     WebSocketServer.sendInfo(TypeUtils.getMsg(notify.toByteArray(), (byte) 10), oid);
                                 }
                             }
+                        } else {
+                            throw new Exception("抽牌证明验证未通过");
                         }
-                        //proof验证未通过
+                    } else {
+                        throw new Exception("出牌salts不对应");
                     }
-                    //salts有误
+                } else {
+                    throw new Exception("未找到该牌桌");
                 }
-                //没找到牌桌
             }
         } catch (InvalidProtocolBufferException e) {
 //            errmsg = Error.getMsg(90000);
@@ -468,6 +486,10 @@ public class PlayServiceImpl implements PlayService {
         for(PlayStatus ps : pss) {
             List<Player> players = ps.getPlayers();
             byte[][] seatSort = ps.getSeatSort();
+            List<WebSocketServer> wss1 = ps.getWss();
+            if (wss1.contains(wss)) {
+                wss1.remove(wss);
+            }
             for(Player player : players) {
                 if (player.getUid().equalsIgnoreCase(wss.getUid())) {
                     for(int i = 0; i < seatSort.length; i++) {

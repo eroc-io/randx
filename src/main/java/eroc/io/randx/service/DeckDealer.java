@@ -52,6 +52,10 @@ public class DeckDealer {
                 dsk = pair.getPrivate().getEncoded();
                 dpk = pair.getPublic().getEncoded();
                 max256b = new BigInteger("10000000000000000000000000000000000000000000000000000000000000000", 16);
+                salts.clear();
+                proofs.clear();
+                cards.clear();
+                count = 0;
             } else {
                 seed = SHA256.getSHA256Bytes(seed);
                 resetOrStart();
@@ -149,11 +153,12 @@ public class DeckDealer {
         //更新玩家的最新盐
         salts.put(pkk, s);
         List<String> p = proofs.get(pkk);
+        byte[] sendProof = SHA256.getSHA256Bytes(s);
         String proof = Base64.getEncoder().encodeToString(SHA256.getSHA256Bytes(s));
         p.add(proof);
         Buffer.DrawResponse.Builder resp = Buffer.DrawResponse.newBuilder().setCardCipher(CryptoUtils.ECDHEncrypt(pk, s, pair));
-        Buffer.DrawNotification.Builder notify = Buffer.DrawNotification.newBuilder().setPk(ByteString.copyFrom(TypeUtils.bufferPk(pk))).setProof(ByteString.copyFrom(proof, "utf-8"));
-        Object[] obj = {resp, notify, s};
+        Buffer.DrawNotification.Builder notify = Buffer.DrawNotification.newBuilder().setPk(ByteString.copyFrom(TypeUtils.bufferPk(pk))).setProof(ByteString.copyFrom(sendProof));
+        Object[] obj = {resp, notify, s, proof};
         return obj;
     }
 
