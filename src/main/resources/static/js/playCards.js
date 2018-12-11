@@ -105,7 +105,7 @@ ws.onmessage = async function getMessage(evt) {
             //查看底牌返回的牌信息，取得牌信息储存，responseId = 4
             let obj4 = await readPbf(protoUrl, "DrawLeftNotification", proBuffer);
             let reCards = [];
-            for (let i in obj4.cards) {
+            for (let i of obj4.cards) {
 
                 reCards.push(cardNames[i]);
             }
