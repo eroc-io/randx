@@ -78,7 +78,7 @@ ws.onmessage = async function getMessage(evt) {
 
                 if (salt[CARD_INDEX]) {
 
-                    showCardFunction("player" + myNumber, salt);
+                    showOneCard("player" + myNumber, salt);
                 }
                 await drawCard();
             }
@@ -119,15 +119,21 @@ ws.onmessage = async function getMessage(evt) {
             //还牌信息, responseId = 5
             let obj5 = await readPbf(protoUrl, "ReturnResponse", proBuffer);
             let numReturned = obj5.numReturned;
-            showMessage("p3", '还了 ' + numReturned + ' 张牌' + backCard);
+            showMessage("p3", '您还了 ' + numReturned + ' 张牌' + backCard);
             salt = obj5.salt;
             console.log(obj5.errMsg);
             break;
         case 6:
             //其他玩家还牌信息, responseId = 6
             let obj6 = await readPbf(protoUrl, "ReturnNotification", proBuffer);
-            showMessage("p3", '牌主还了 ' + obj6.numReturned + ' 张牌' + backCard);
-            console.log(btoa(uint8ArrayToString(obj6.pk)) + '还了 ' + obj6.numReturned + ' 张牌' + backCard);
+
+            for (let num in orderPks) {
+
+                if (btoa(uint8ArrayToString(orderPks[num])) == btoa(uint8ArrayToString(obj6.pk))) {
+
+                    showMessage("p3", 'player' + num + '还了' + obj6.numReturned + ' 张牌' + backCard);
+                }
+            }
 
             break;
         case 7:
@@ -144,15 +150,14 @@ ws.onmessage = async function getMessage(evt) {
             }
             orderPks[myNumber] = new Uint8Array(pkBuffer);
 
-            // console.log(orderPks);
             showMessage("p1", '分配的座位号：' + myNumber);
-            // console.log('分配的座位号------：' + myNumber);
+
             if (emptySeat) {
                 showMessage("p2", '还缺' + emptySeat + '个人可开始游戏');
-                // console.log('还缺' + emptySeat + '个人可开始游戏');
+
             } else {
                 showMessage("p2", '玩家全部准备完毕，可以开始游戏了');
-                // console.log('玩家全部准备完毕，可以开始游戏了')
+
             }
 
             break;
@@ -162,16 +167,14 @@ ws.onmessage = async function getMessage(evt) {
             emptySeat = obj8.emptySeat;
             orderPks[obj8.joinSeat] = obj8.joinpk;
             showMessage("p1", obj8.joinSeat + '号座位加入了');
-            // console.log(obj8.joinSeat + '号座位加入了');
+
             if (emptySeat) {
                 showMessage("p2", '还缺' + emptySeat + '个人可开始游戏');
-                // console.log('还缺' + emptySeat + '个人可开始游戏');
+
             } else {
                 showMessage("p2", '玩家全部准备完毕，可以开始游戏了');
-                // console.log('玩家全部准备完毕，可以开始游戏了')
             }
 
-            // console.log(orderPks);
             break;
 
         case 9:
@@ -277,9 +280,10 @@ async function drawLeftCards() {
 
     let allPk = [];
 
-    for (var i in orderPks) {
+    for (let i = 1; i <= Object.keys(orderPks).length; i++) {
         //合并所有人的pk
         allPk.push(orderPks[i]);
+
     }
 
     let sign = await signByECDSA(await sha256(concatUint8Array(allPk)));

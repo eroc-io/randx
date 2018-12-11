@@ -48,7 +48,7 @@ function showMessage(divId, showMes) {
 
 
 //展示手牌
-function showCardFunction(seatDivId, salt) {
+function showOneCard(seatDivId, salt) {
 
     let generateDiv = document.getElementById(seatDivId);
     //创建div，如果存在就不创建
