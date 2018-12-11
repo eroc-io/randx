@@ -46,8 +46,6 @@ public class PlayStatus {
 
     private List<String> index = new ArrayList<>();//抽牌顺序
 
-    private List<byte[]> signs = new ArrayList<>();//还牌
-
     private byte[] dsk;//私钥
 
     private byte[] dpk;//公钥
@@ -137,14 +135,6 @@ public class PlayStatus {
 
     public void setIndex(List<String> index) {
         this.index = index;
-    }
-
-    public List<byte[]> getSigns() {
-        return signs;
-    }
-
-    public void setSigns(List<byte[]> signs) {
-        this.signs = signs;
     }
 
     public byte[] getDsk() {

@@ -298,11 +298,13 @@ public class PlayServiceImpl implements PlayService {
             String deckId = dl.getDeckId().toString("utf-8");
             for(PlayStatus ps : pss) {
                 if (ps.getDeckId().equalsIgnoreCase(deckId)) {
-                    List<byte[]> signs = ps.getSigns();
+                    List<WebSocketServer> wssl = ps.getWss();
                     Integer nump = ps.getNumPlayers();
                     byte[] sign = CryptoUtils.rsGenSign(dl.getSig().toByteArray());
-                    if (signs.size() < nump) {
-                        signs.add(sign);
+                    if (wssl.size() < nump) {
+                        if (!wssl.contains(wss)) {
+                            wssl.add(wss);
+                        }
                         // 存储玩家pk和签名
                         byte[] leftpk = TypeUtils.formatPK(dl.getPk().toByteArray());
                         for(Player player : ps.getPlayers()) {
@@ -312,7 +314,7 @@ public class PlayServiceImpl implements PlayService {
                             }
                         }
                     }
-                    if (signs.size() == nump) {
+                    if (wssl.size() == nump) {
                         // 抽剩余牌
                         DeckDealer deckDealer = ps.getDeckDealer();
                         byte[][] pks = new byte[nump][];
@@ -328,7 +330,7 @@ public class PlayServiceImpl implements PlayService {
                         for(Player player : players) {
                             WebSocketServer.sendInfo(msg, player.getUid());
                         }
-                        signs.clear();
+                        wssl.clear();
                     }
                 } else {
                     throw new Exception("未找到该牌桌");
