@@ -40,9 +40,9 @@ function showMessage(divId, showMes) {
 }
 
 //展示手牌
-function showFunction(salt) {
+function showCardFunction(seatDivId,salt) {
 
-    var executerDiv = document.getElementById("cards");
+    var executerDiv = document.getElementById(seatDivId);
     let showCard = salt[CARD_INDEX];
 
 // 加入复选框
