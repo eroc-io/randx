@@ -270,8 +270,8 @@ public class PlayServiceImpl implements PlayService {
             dresp.setErrMsg(errmsg);
             e.printStackTrace();
         } catch (Exception e) {
-            errmsg = e.getMessage();
-            dresp.setErrMsg(errmsg);
+//            errmsg = e.getMessage();
+//            dresp.setErrMsg(errmsg);
             e.printStackTrace();
         }
         return dresp.build();
