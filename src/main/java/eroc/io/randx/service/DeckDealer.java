@@ -168,9 +168,10 @@ public class DeckDealer {
      *
      * @param pks   玩家公钥集合
      * @param signs 签名集合
+     * @param n     抓取剩余牌数,null即为全取
      * @return 抓取的牌
      */
-    public Buffer.DrawLeftNotification.Builder drawLeftCards(byte[][] pks, byte[][] signs) throws Exception {
+    public Buffer.DrawLeftNotification.Builder drawLeftCards(byte[][] pks, byte[][] signs, Integer n) throws Exception {
 
         //牌数小于等于零，抛出异常
         if (count <= 0) {
@@ -208,7 +209,7 @@ public class DeckDealer {
             }
         }
         //验证成功，取出所有牌
-        List<Short> lc = cards.subList(0, count);
+        List<Short> lc = cards.subList(n == null || n > count ? 0 : count - n, count);
         int size = lc.size();
         byte[] lcards = new byte[size];
         for(int i = 0; i < size; i++) {

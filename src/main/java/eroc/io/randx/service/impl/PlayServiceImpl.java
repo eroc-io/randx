@@ -326,7 +326,7 @@ public class PlayServiceImpl implements PlayService {
                             pks[seat] = player.getPk();
                             ss[seat] = player.getSign();
                         }
-                        byte[] msg = TypeUtils.getMsg(deckDealer.drawLeftCards(pks, ss).build().toByteArray(), (byte) 4);
+                        byte[] msg = TypeUtils.getMsg(deckDealer.drawLeftCards(pks, ss, null).build().toByteArray(), (byte) 4);
                         for(Player player : players) {
                             WebSocketServer.sendInfo(msg, player.getUid());
                         }
