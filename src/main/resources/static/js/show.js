@@ -49,7 +49,7 @@ function showFunction(salt) {
     var checkBox = document.createElement("input");
     checkBox.setAttribute("type", "checkbox");
     checkBox.setAttribute("name", "card");
-    checkBox.setAttribute("value", window.btoa(Uint8ArrayToString(salt)));
+    checkBox.setAttribute("value", window.btoa(uint8ArrayToString(salt)));
 
 
     executerDiv.appendChild(checkBox);

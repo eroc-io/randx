@@ -78,7 +78,7 @@ ws.onmessage = async function getMessage(evt) {
                 salt = new Uint8Array(await decryptByECIES(cardCipher));
                 salts.push(salt);
                 cards.push(salt[CARD_INDEX]);
-                saltsObj[btoa(Uint8ArrayToString(salt))] = salt;
+                saltsObj[btoa(uint8ArrayToString(salt))] = salt;
                 if (salt[CARD_INDEX]) {
 
                     showFunction(salt);
@@ -92,13 +92,13 @@ ws.onmessage = async function getMessage(evt) {
             //其他玩家抓到牌的proof， responseId = 3
             let obj3 = await readPbf(protoUrl, "DrawNotification", proBuffer);
             let pk = obj3.pk;
-            let pkBase64 = btoa(Uint8ArrayToString(pk));
+            let pkBase64 = btoa(uint8ArrayToString(pk));
 
             if (pks.indexOf(pkBase64) == -1) {
                 pks.push(pkBase64);
                 proofs[pkBase64] = [];
             }
-            proofs[pkBase64].push(btoa(Uint8ArrayToString(obj3.proof)));
+            proofs[pkBase64].push(btoa(uint8ArrayToString(obj3.proof)));
 
             break;
         case 4:
@@ -127,7 +127,7 @@ ws.onmessage = async function getMessage(evt) {
             //其他玩家还牌信息, responseId = 6
             let obj6 = await readPbf(protoUrl, "ReturnNotification", proBuffer);
             showMessage("p3", '牌主还了 ' + obj6.numReturned + ' 张牌');
-            console.log(btoa(Uint8ArrayToString(obj6.pk)) + '还了 ' + obj6.numReturned + ' 张牌');
+            console.log(btoa(uint8ArrayToString(obj6.pk)) + '还了 ' + obj6.numReturned + ' 张牌');
 
             break;
         case 7:
@@ -212,17 +212,17 @@ ws.onmessage = async function getMessage(evt) {
 
             for (let outSalt of outSalts) {
 
-                let outSaltBase64 = btoa(Uint8ArrayToString(new Uint8Array(await sha256(outSalt))));
+                let outSaltBase64 = btoa(uint8ArrayToString(new Uint8Array(await sha256(outSalt))));
 
-                console.log(proofs[btoa(Uint8ArrayToString(obj10.pk))].indexOf(outSaltBase64));
+                console.log(proofs[btoa(uint8ArrayToString(obj10.pk))].indexOf(outSaltBase64));
 
-                if (proofs[btoa(Uint8ArrayToString(obj10.pk))].indexOf(btoa(Uint8ArrayToString(new Uint8Array(await sha256(outSalt))))) < 0) {
+                if (proofs[btoa(uint8ArrayToString(obj10.pk))].indexOf(btoa(uint8ArrayToString(new Uint8Array(await sha256(outSalt))))) < 0) {
 
                     throw new Error('Illegal card');
                 }
                 reCards2.push(cardNames[outSalt[CARD_INDEX]]);
             }
-            showMessage("p3", btoa(Uint8ArrayToString(obj10.pk)) + "出牌" + reCards2);
+            showMessage("p3", btoa(uint8ArrayToString(obj10.pk)) + "出牌" + reCards2);
 
             break;
     }
