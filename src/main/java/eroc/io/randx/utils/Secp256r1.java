@@ -1,10 +1,6 @@
 package eroc.io.randx.utils;
 
 
-//import eroc.io.randx.pojo.Buffer;
-//import org.bouncycastle.asn1.x9.ECNamedCurveTable;
-//import org.bouncycastle.asn1.x9.X9ECParameters;
-//import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
