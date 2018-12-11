@@ -52,7 +52,7 @@ public class PlayStatus {
 
     private byte[] dpk;//公钥
 
-    private List<WebSocketServer> wss = new ArrayList<>();//缓存区
+    private List<WebSocketServer> wss = new ArrayList<>();//缓存玩家抽牌请求
 
     private List<Buffer.JoinNotification> joinNotifyBuilder = new ArrayList<>();//已加入玩家信息
 

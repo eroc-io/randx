@@ -213,10 +213,16 @@ public class PlayServiceImpl implements PlayService {
                         wss.setDrawRequest(dreq);
                         wsl.add(wss);
                     }
+                    //判断人数是否凑齐
+                    if (ps.getPlayers().size() != ps.getNumPlayers()) {
+                        Buffer.DrawResponse build = dresp.setErrMsg(Error.getMsg(10004)).build();
+                        WebSocketServer.sendInfo(TypeUtils.getMsg(build.toByteArray(), (byte) 2), wss.getUid());
+                        return null;
+                    }
                     //当前牌局
                     List<String> index = ps.getIndex();
                     if (index.size() <= 0) {
-                        Buffer.DrawResponse build = dresp.setErrMsg("抽牌结束").build();
+                        Buffer.DrawResponse build = dresp.setErrMsg(Error.getMsg(10003)).build();
                         for(Player player : ps.getPlayers()) {
                             WebSocketServer.sendInfo(TypeUtils.getMsg(build.toByteArray(), (byte) 2), player.getUid());
                         }
@@ -480,6 +486,10 @@ public class PlayServiceImpl implements PlayService {
         for(PlayStatus ps : pss) {
             List<Player> players = ps.getPlayers();
             byte[][] seatSort = ps.getSeatSort();
+            List<WebSocketServer> wss1 = ps.getWss();
+            if (wss1.contains(wss)) {
+                wss1.remove(wss);
+            }
             for(Player player : players) {
                 if (player.getUid().equalsIgnoreCase(wss.getUid())) {
                     for(int i = 0; i < seatSort.length; i++) {
