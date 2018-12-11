@@ -8,16 +8,16 @@ if (window.WebSocket) {
 //.proto文件路径
 const protoUrl = "/js/comms.proto";
 
-const webSocketPath = "ws://192.168.10.153:8080/ws";
-// const webSocketPath = "ws://localhost:8080/ws";
+// const webSocketPath = "ws://192.168.10.153:8080/ws";
+const webSocketPath = "ws://localhost:8080/ws";
 
 const CARD_INDEX = 7;
 //大厅座位使用信息
 var hallMessages = [];
 //Uint8Array，桌编号
 var deckId = null;
-//座位号信息
-var number = null;
+//自己的座位号信息
+var myNumber = null;
 //空桌信息
 var emptySeat = null;
 //Uint8Array，盐信息
@@ -34,7 +34,7 @@ var proofs = {};
 var cards = [];
 //其他玩家的公钥
 var pks = [];
-//有次序的其他玩家的公钥
+//有次序的玩家的公钥
 var orderPks = {};
 
 var ws = new WebSocket(webSocketPath);
@@ -56,8 +56,6 @@ ws.onmessage = async function getMessage(evt) {
             //开局返回的deckId，responseId = 0
             let obj = await readPbf(protoUrl, "OpenResponse", proBuffer);
             deckId = obj.deckId;
-            // console.log('deckId:-----');
-            // console.log(deckId);
             console.log(obj.errMsg);
             break;
         case 1:
@@ -65,8 +63,6 @@ ws.onmessage = async function getMessage(evt) {
             let obj1 = await readPbf(protoUrl, "StartResponse", proBuffer);
             salt = obj1.salt;
             dpk = obj1.dpk;
-            // console.log('salt------' + salt);
-            // console.log('服务器pk-----' + dpk);
             console.log(obj1.errMsg);
             break;
         case 2:
@@ -79,12 +75,11 @@ ws.onmessage = async function getMessage(evt) {
                 salts.push(salt);
                 cards.push(salt[CARD_INDEX]);
                 saltsObj[btoa(uint8ArrayToString(salt))] = salt;
+
                 if (salt[CARD_INDEX]) {
 
-                    showFunction(salt);
+                    showCardFunction("player" + myNumber, salt);
                 }
-
-                // console.log('手牌-----' + cards);
                 await drawCard();
             }
             break;
@@ -100,6 +95,13 @@ ws.onmessage = async function getMessage(evt) {
             }
             proofs[pkBase64].push(btoa(uint8ArrayToString(obj3.proof)));
 
+            for (let num in orderPks) {
+
+                if (btoa(uint8ArrayToString(orderPks[num])) == btoa(uint8ArrayToString(pk))) {
+
+                    createOtherCard("player" + num, btoa(uint8ArrayToString(obj3.proof)));
+                }
+            }
             break;
         case 4:
             //查看底牌返回的牌信息，取得牌信息储存，responseId = 4
@@ -109,8 +111,7 @@ ws.onmessage = async function getMessage(evt) {
 
                 reCards.push(cardNames[i]);
             }
-            showMessage("p3", reCards);
-            // console.log('底牌-----' + obj4.cards);
+            showMessage("p3", "底牌:" + reCards);
             salt = obj4.salt;
             console.log(obj4.errMsg);
             break;
@@ -118,22 +119,21 @@ ws.onmessage = async function getMessage(evt) {
             //还牌信息, responseId = 5
             let obj5 = await readPbf(protoUrl, "ReturnResponse", proBuffer);
             let numReturned = obj5.numReturned;
-            showMessage("p3", '还了 ' + numReturned + ' 张牌');
-            // console.log('还了 ' + numReturned + ' 张牌');
+            showMessage("p3", '还了 ' + numReturned + ' 张牌' + backCard);
             salt = obj5.salt;
             console.log(obj5.errMsg);
             break;
         case 6:
             //其他玩家还牌信息, responseId = 6
             let obj6 = await readPbf(protoUrl, "ReturnNotification", proBuffer);
-            showMessage("p3", '牌主还了 ' + obj6.numReturned + ' 张牌');
-            console.log(btoa(uint8ArrayToString(obj6.pk)) + '还了 ' + obj6.numReturned + ' 张牌');
+            showMessage("p3", '牌主还了 ' + obj6.numReturned + ' 张牌' + backCard);
+            console.log(btoa(uint8ArrayToString(obj6.pk)) + '还了 ' + obj6.numReturned + ' 张牌' + backCard);
 
             break;
         case 7:
             //加入牌局返回的自己编号和空桌信息，responseId = 7
             let obj7 = await readPbf(protoUrl, "JoinResponse", proBuffer);
-            number = obj7.number;
+            myNumber = obj7.number;
             emptySeat = obj7.emptySeat;
             let joinNotifys = obj7.joinNotify;
 
@@ -142,11 +142,11 @@ ws.onmessage = async function getMessage(evt) {
                     orderPks[join.joinSeat] = join.joinpk;
                 }
             }
-            orderPks[number] = new Uint8Array(pkBuffer);
+            orderPks[myNumber] = new Uint8Array(pkBuffer);
 
             // console.log(orderPks);
-            showMessage("p1", '分配的座位号：' + number);
-            // console.log('分配的座位号------：' + number);
+            showMessage("p1", '分配的座位号：' + myNumber);
+            // console.log('分配的座位号------：' + myNumber);
             if (emptySeat) {
                 showMessage("p2", '还缺' + emptySeat + '个人可开始游戏');
                 // console.log('还缺' + emptySeat + '个人可开始游戏');
@@ -205,24 +205,19 @@ ws.onmessage = async function getMessage(evt) {
         case 10:
             //返回其他玩家出牌信息和其他玩家pk，responseId = 10
             let obj10 = await readPbf(protoUrl, "DisCardsNotify", proBuffer);
-
             let outSalts = sliceUint8Array(obj10.salt, 32);
-
-            let reCards2 = [];
-
+            let outSaltBase64;
             for (let outSalt of outSalts) {
 
-                let outSaltBase64 = btoa(uint8ArrayToString(new Uint8Array(await sha256(outSalt))));
+                outSaltBase64 = btoa(uint8ArrayToString(new Uint8Array(await sha256(outSalt))));
 
-                console.log(proofs[btoa(uint8ArrayToString(obj10.pk))].indexOf(outSaltBase64));
-
-                if (proofs[btoa(uint8ArrayToString(obj10.pk))].indexOf(btoa(uint8ArrayToString(new Uint8Array(await sha256(outSalt))))) < 0) {
+                if (proofs[btoa(uint8ArrayToString(obj10.pk))].indexOf(outSaltBase64) < 0) {
 
                     throw new Error('Illegal card');
                 }
-                reCards2.push(cardNames[outSalt[CARD_INDEX]]);
+
+                showOtherCard(outSaltBase64, cardNames[outSalt[CARD_INDEX]]);
             }
-            showMessage("p3", btoa(uint8ArrayToString(obj10.pk)) + "出牌" + reCards2);
 
             break;
     }
@@ -300,14 +295,7 @@ async function drawLeftCards() {
 //还牌 funcId = 4
 async function returnCards() {
 
-    //获取复选框选择的牌
-    let retCards = document.getElementsByName("card");
-    let checkVal = [];
-    for (let key in retCards) {
-        if (retCards[key].checked)
-
-            checkVal.push(saltsObj[retCards[key].value]);
-    }
+    let checkVal = removeCard("player" + myNumber);
 
     let sign = await signByECDSA(salt);
 
@@ -326,14 +314,7 @@ async function returnCards() {
 //亮牌 funcId = 5
 async function outCards() {
 
-    //获取复选框选择的牌
-    let retCards = document.getElementsByName("card");
-    let checkVal = [];
-    for (let key in retCards) {
-        if (retCards[key].checked)
-
-            checkVal.push(saltsObj[retCards[key].value]);
-    }
+    let checkVal = removeCard("player" + myNumber);
 
     let payload = {deckId: deckId, pk: new Uint8Array(pkBuffer), salt: concatUint8Array(checkVal)};
 

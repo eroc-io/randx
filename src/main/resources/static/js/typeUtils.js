@@ -57,6 +57,7 @@ function sliceUint8Array(uint8Arrays, size) {
 function uint8ArrayToString(raw) {
 
     return [].slice.call(raw).map(v => String.fromCharCode(v)).join('');
+
 }
 
 // 字符串转Uint8Array
