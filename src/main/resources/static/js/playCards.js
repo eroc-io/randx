@@ -254,6 +254,7 @@ ws.onmessage = async function getMessage(evt) {
                 if (btoa(uint8ArrayToString(orderPks[num])) == btoa(uint8ArrayToString(obj11.pk))) {
 
                     showMessage("p3", 'player' + num + '抢到底牌。');
+                    document.getElementById("drawLeft1" + deckNo).style.display = "none";
                     await drawCard();
                 }
             }
