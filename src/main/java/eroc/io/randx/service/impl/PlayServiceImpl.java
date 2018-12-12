@@ -231,6 +231,7 @@ public class PlayServiceImpl implements PlayService {
                     // 当前牌局
                     List<String> index = ps.getIndex();
                     if (index.size() <= 0) {
+                        wsl.clear();
                         Buffer.DrawResponse build = dresp.setErrMsg(Error.getMsg(10003)).build();
                         for(Player player : ps.getPlayers()) {
                             WebSocketServer.sendInfo(TypeUtils.getMsg(build.toByteArray(), (byte) 2), player.getUid());
@@ -319,6 +320,7 @@ public class PlayServiceImpl implements PlayService {
                             }
                         }
                     }
+
                     if (wssl.size() == nump) {
                         // 抽剩余牌
                         DeckDealer deckDealer = ps.getDeckDealer();
@@ -462,7 +464,7 @@ public class PlayServiceImpl implements PlayService {
                             throw new Exception("抽牌证明验证未通过");
                         }
                     } else {
-                        throw new Exception("出牌salts不对应");
+                        throw new Exception("出牌salts数不对应");
                     }
                 } else {
                     throw new Exception("未找到该牌桌");

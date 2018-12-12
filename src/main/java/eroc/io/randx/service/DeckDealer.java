@@ -185,7 +185,15 @@ public class DeckDealer {
         }
 
         // Hash public key array, get Abstract
-        byte[] h2s = SHA256.getSHA256Bytes(TypeUtils.concatByteArrays(pks));
+        byte[] initial = new byte[0];
+        int length;
+        for(byte[] pk : pks) {//pk顺序
+            pk = TypeUtils.bufferPk(pk);
+            length = initial.length;
+            initial = Arrays.copyOf(initial, pk.length + length);
+            System.arraycopy(pk, 0, initial, length, pk.length);
+        }
+        byte[] h2s = SHA256.getSHA256Bytes(initial);
 
         // Verifying signature
         for(int i = 0; i < pks.length; i++) {
@@ -201,14 +209,15 @@ public class DeckDealer {
         }
 
         // If n is empty, take out all cards, if n < count, take out n cards
-        List<Short> lc = null;
+        List<Short> lc = new ArrayList<>();
         if (n == null || n > count) {
-            lc = cards.subList(0, count);
+            lc.addAll(cards.subList(0, count));
             cards.clear();
             count = 0;
         } else {
-            lc = cards.subList(count - n, count);
-            cards = cards.subList(0, count - n);
+            List<Short> sub = cards.subList(count - n, count);
+            lc.addAll(sub);
+            sub.clear();
             count -= n;
         }
         int size = lc.size();
