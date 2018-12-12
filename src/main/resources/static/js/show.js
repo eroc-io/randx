@@ -121,12 +121,13 @@ function eventListenerFunction(event) {
 
         //未选中从数组里去除
     } else {
-        let index = checkBoxValueList.indexOf(target.value);
-        checkBoxValueList.splice(index, 1);
-        checkBoxList.splice(index, 1);
 
+        if (target.type == "checkbox") {
+            let index = checkBoxValueList.indexOf(target.value);
+            checkBoxValueList.splice(index, 1);
+            checkBoxList.splice(index, 1);
+        }
     }
-
 }
 
 
