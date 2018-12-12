@@ -15,10 +15,12 @@ import eroc.io.randx.service.PlayService;
 import eroc.io.randx.utils.CryptoUtils;
 import eroc.io.randx.utils.SHA256;
 import eroc.io.randx.utils.TypeUtils;
+import org.dom4j.DocumentException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -102,6 +104,10 @@ public class PlayServiceImpl implements PlayService {
             oresp.setDeckId(ByteString.copyFrom(playStatus.getDeckId().getBytes()));
         } catch (InvalidProtocolBufferException e) {
             oresp.setErrMsg(Error.getMsg(90000));
+            e.printStackTrace();
+        } catch (DocumentException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return oresp.build();
@@ -221,17 +227,25 @@ public class PlayServiceImpl implements PlayService {
             String deckId = dr.getDeckId().toString("utf-8");
             for(PlayStatus ps : pss) {
                 if (ps.getDeckId().equalsIgnoreCase(deckId)) {
+                    Integer nump = ps.getNumPlayers();
+                    // Determine if the number of people is in order
+                    if (ps.getPlayers().size() != nump) {
+                        Buffer.DrawResponse build = dresp.setErrMsg(Error.getMsg(10004)).build();
+                        WebSocketServer.sendInfo(TypeUtils.getMsg(build.toByteArray(), (byte) 2), wss.getUid());
+                        return null;
+                    }
+
                     // Cache draw request
                     List<WebSocketServer> wsl = ps.getWss();
                     if (null == wsl || !wsl.contains(wss)) {
                         wss.setDrawRequest(dreq);
                         wsl.add(wss);
                     }
+                    System.out.println("当前牌桌抽牌请求数" + wsl.size());
+                    System.out.println("第" + ps.getDeckNo() + "桌的" + wss.getUid() + "请求抓牌");
 
-                    // Determine if the number of people is in order
-                    if (ps.getPlayers().size() != ps.getNumPlayers()) {
-                        Buffer.DrawResponse build = dresp.setErrMsg(Error.getMsg(10004)).build();
-                        WebSocketServer.sendInfo(TypeUtils.getMsg(build.toByteArray(), (byte) 2), wss.getUid());
+                    // Insufficient number of draw requests
+                    if (wsl.size() != nump) {
                         return null;
                     }
 
@@ -345,7 +359,7 @@ public class PlayServiceImpl implements PlayService {
                             pks[seat] = player.getPk();
                             ss[seat] = player.getSign();
                         }
-                        byte[] msg = TypeUtils.getMsg(deckDealer.drawLeftCards(pks, ss, null).build().toByteArray(), (byte) 4);
+                        byte[] msg = TypeUtils.getMsg(deckDealer.drawLeftCards(pks, ss, ps.getDrawLeftCardsNum()).build().toByteArray(), (byte) 4);
                         for(Player player : players) {
                             WebSocketServer.sendInfo(msg, player.getUid());
                         }
@@ -392,6 +406,9 @@ public class PlayServiceImpl implements PlayService {
                         for(int i = 0; i < n; i++) {
                             System.arraycopy(cards, i * 32, card, 0, 32);
                             cs.add(card);
+                        }
+                        if (ps.getReturnCardsNum() != cs.size()) {
+                            return rresp.setErrMsg(Error.getMsg(10002)).build();
                         }
 
                         // returnCards and return Buffer.ReturnResponse
@@ -497,10 +514,51 @@ public class PlayServiceImpl implements PlayService {
     }
 
     /**
+     * Determine which player to give the remaining cards to
+     *
+     * @param catchReq Buffer.catchCardsRequest
+     * @param wss
+     */
+    @Override
+    public void catchCard(byte[] catchReq, WebSocketServer wss) {
+        try {
+            Buffer.catchCardsRequest ccr = Buffer.catchCardsRequest.parseFrom(catchReq);
+            String deckId = ccr.getDeckId().toString("utf-8");
+            for(PlayStatus ps : pss) {
+                if (ps.getDeckId().equalsIgnoreCase(deckId)) {
+                    byte[] pk = ccr.getPk().toByteArray();
+                    List<String> index = ps.getIndex();
+                    Integer num = ps.getDrawLeftCardsNum();
+                    String uid = wss.getUid();
+                    for(Integer i = 0; i < num; i++) {
+                        index.add(uid);
+                    }
+                    for(Player player : ps.getPlayers()) {
+                        String oid = player.getUid();
+                        if (!oid.equalsIgnoreCase(uid)) {
+                            WebSocketServer.sendInfo(TypeUtils.getMsg(
+                                    Buffer.catchCardsResponse.newBuilder().setPk(ByteString.copyFrom(pk)).build().toByteArray(), (byte) 11), oid);
+                        }
+                    }
+                }
+            }
+        } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    /**
      * Player exits the table
      *
      * @param wss The currently requested websocket
      */
+
     public synchronized void leavePlay(WebSocketServer wss) {
         for(PlayStatus ps : pss) {
             List<WebSocketServer> wss1 = ps.getWss();

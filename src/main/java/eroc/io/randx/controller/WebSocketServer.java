@@ -102,6 +102,9 @@ public class WebSocketServer {
         } else if (b == 5) {
             //DisCard request
             playService.disCard(msg, this);
+        } else if (b == 6) {
+            //DisCard request
+            playService.catchCard(msg, this);
         }
     }
 

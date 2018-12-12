@@ -212,13 +212,13 @@ public class DeckDealer {
         List<Short> lc = new ArrayList<>();
         if (n == null || n > count) {
             lc.addAll(cards.subList(0, count));
-            cards.clear();
-            count = 0;
+//            cards.clear();
+//            count = 0;
         } else {
             List<Short> sub = cards.subList(count - n, count);
             lc.addAll(sub);
-            sub.clear();
-            count -= n;
+//            sub.clear();
+//            count -= n;
         }
         int size = lc.size();
         byte[] lcards = new byte[size];
