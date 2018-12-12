@@ -8,8 +8,8 @@ if (window.WebSocket) {
 //.proto文件路径
 const protoUrl = "/js/comms.proto";
 
-const webSocketPath = "ws://192.168.10.153:8080/ws";
-// const webSocketPath = "ws://localhost:8080/ws";
+// const webSocketPath = "ws://192.168.10.153:8080/ws";
+const webSocketPath = "ws://localhost:8080/ws";
 
 const CARD_INDEX = 7;
 //大厅座位使用信息
