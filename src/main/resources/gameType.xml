@@ -1,0 +1,16 @@
+<project version="1.0">
+    <game name="演示接口" code="0001">
+        <basicparam numCards="54" numDecks="1" numPlayers="3" rounds="17"/>
+        <!--drawLeftCardNum:每次查看剩余牌的数量-->
+        <!--returnCardNum:还牌的数量-->
+        <otherparam drawLeftCardsNum="3" returnCardsNum="3"/>
+    </game>
+    <game name="升级" code="0002">
+        <basicparam numCards="54" numDecks="1" numPlayers="4" rounds="16"/>
+        <otherparam drawLeftCardsNum="1" returnCardsNum="6"/>
+    </game>
+    <game name="扎金花" code="0003">
+        <basicparam numCards="54" numDecks="1" numPlayers="3" rounds="3"/>
+        <otherparam returnCardsNum="3"/>
+    </game>
+</project>

@@ -1546,24 +1546,14 @@ public final class Buffer {
     int getDeckNo();
 
     /**
-     * <code>int32 numCards = 2;</code>
+     * <code>string code = 2;</code>
      */
-    int getNumCards();
-
+    String getCode();
     /**
-     * <code>int32 numDecks = 3;</code>
+     * <code>string code = 2;</code>
      */
-    int getNumDecks();
-
-    /**
-     * <code>int32 numPlayers = 4;</code>
-     */
-    int getNumPlayers();
-
-    /**
-     * <code>int32 rounds = 5;</code>
-     */
-    int getRounds();
+    com.google.protobuf.ByteString
+        getCodeBytes();
   }
   /**
    * <pre>
@@ -1580,6 +1570,7 @@ public final class Buffer {
       // @@protoc_insertion_point(message_implements:OpenRequest)
       OpenRequestOrBuilder {
     private OpenRequest() {
+      code_ = "";
     }
     public static final int DECKNO_FIELD_NUMBER = 1;
     private int deckNo_;
@@ -1605,100 +1596,52 @@ public final class Buffer {
       deckNo_ = 0;
     }
 
-    public static final int NUMCARDS_FIELD_NUMBER = 2;
-    private int numCards_;
+    public static final int CODE_FIELD_NUMBER = 2;
+    private String code_;
     /**
-     * <code>int32 numCards = 2;</code>
+     * <code>string code = 2;</code>
      */
     @Override
-    public int getNumCards() {
-      return numCards_;
+    public String getCode() {
+      return code_;
     }
     /**
-     * <code>int32 numCards = 2;</code>
-     */
-    private void setNumCards(int value) {
-      
-      numCards_ = value;
-    }
-    /**
-     * <code>int32 numCards = 2;</code>
-     */
-    private void clearNumCards() {
-      
-      numCards_ = 0;
-    }
-
-    public static final int NUMDECKS_FIELD_NUMBER = 3;
-    private int numDecks_;
-    /**
-     * <code>int32 numDecks = 3;</code>
+     * <code>string code = 2;</code>
      */
     @Override
-    public int getNumDecks() {
-      return numDecks_;
+    public com.google.protobuf.ByteString
+        getCodeBytes() {
+      return com.google.protobuf.ByteString.copyFromUtf8(code_);
     }
     /**
-     * <code>int32 numDecks = 3;</code>
+     * <code>string code = 2;</code>
      */
-    private void setNumDecks(int value) {
+    private void setCode(
+        String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      code_ = value;
+    }
+    /**
+     * <code>string code = 2;</code>
+     */
+    private void clearCode() {
       
-      numDecks_ = value;
+      code_ = getDefaultInstance().getCode();
     }
     /**
-     * <code>int32 numDecks = 3;</code>
+     * <code>string code = 2;</code>
      */
-    private void clearNumDecks() {
+    private void setCodeBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
       
-      numDecks_ = 0;
-    }
-
-    public static final int NUMPLAYERS_FIELD_NUMBER = 4;
-    private int numPlayers_;
-    /**
-     * <code>int32 numPlayers = 4;</code>
-     */
-    @Override
-    public int getNumPlayers() {
-      return numPlayers_;
-    }
-    /**
-     * <code>int32 numPlayers = 4;</code>
-     */
-    private void setNumPlayers(int value) {
-      
-      numPlayers_ = value;
-    }
-    /**
-     * <code>int32 numPlayers = 4;</code>
-     */
-    private void clearNumPlayers() {
-      
-      numPlayers_ = 0;
-    }
-
-    public static final int ROUNDS_FIELD_NUMBER = 5;
-    private int rounds_;
-    /**
-     * <code>int32 rounds = 5;</code>
-     */
-    @Override
-    public int getRounds() {
-      return rounds_;
-    }
-    /**
-     * <code>int32 rounds = 5;</code>
-     */
-    private void setRounds(int value) {
-      
-      rounds_ = value;
-    }
-    /**
-     * <code>int32 rounds = 5;</code>
-     */
-    private void clearRounds() {
-      
-      rounds_ = 0;
+      code_ = value.toStringUtf8();
     }
 
     @Override
@@ -1707,17 +1650,8 @@ public final class Buffer {
       if (deckNo_ != 0) {
         output.writeInt32(1, deckNo_);
       }
-      if (numCards_ != 0) {
-        output.writeInt32(2, numCards_);
-      }
-      if (numDecks_ != 0) {
-        output.writeInt32(3, numDecks_);
-      }
-      if (numPlayers_ != 0) {
-        output.writeInt32(4, numPlayers_);
-      }
-      if (rounds_ != 0) {
-        output.writeInt32(5, rounds_);
+      if (!code_.isEmpty()) {
+        output.writeString(2, getCode());
       }
       unknownFields.writeTo(output);
     }
@@ -1732,21 +1666,9 @@ public final class Buffer {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, deckNo_);
       }
-      if (numCards_ != 0) {
+      if (!code_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, numCards_);
-      }
-      if (numDecks_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(3, numDecks_);
-      }
-      if (numPlayers_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(4, numPlayers_);
-      }
-      if (rounds_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(5, rounds_);
+          .computeStringSize(2, getCode());
       }
       size += unknownFields.getSerializedSize();
       memoizedSerializedSize = size;
@@ -1879,98 +1801,44 @@ public final class Buffer {
       }
 
       /**
-       * <code>int32 numCards = 2;</code>
+       * <code>string code = 2;</code>
        */
       @Override
-      public int getNumCards() {
-        return instance.getNumCards();
+      public String getCode() {
+        return instance.getCode();
       }
       /**
-       * <code>int32 numCards = 2;</code>
-       */
-      public Builder setNumCards(int value) {
-        copyOnWrite();
-        instance.setNumCards(value);
-        return this;
-      }
-      /**
-       * <code>int32 numCards = 2;</code>
-       */
-      public Builder clearNumCards() {
-        copyOnWrite();
-        instance.clearNumCards();
-        return this;
-      }
-
-      /**
-       * <code>int32 numDecks = 3;</code>
+       * <code>string code = 2;</code>
        */
       @Override
-      public int getNumDecks() {
-        return instance.getNumDecks();
+      public com.google.protobuf.ByteString
+          getCodeBytes() {
+        return instance.getCodeBytes();
       }
       /**
-       * <code>int32 numDecks = 3;</code>
+       * <code>string code = 2;</code>
        */
-      public Builder setNumDecks(int value) {
+      public Builder setCode(
+          String value) {
         copyOnWrite();
-        instance.setNumDecks(value);
+        instance.setCode(value);
         return this;
       }
       /**
-       * <code>int32 numDecks = 3;</code>
+       * <code>string code = 2;</code>
        */
-      public Builder clearNumDecks() {
+      public Builder clearCode() {
         copyOnWrite();
-        instance.clearNumDecks();
-        return this;
-      }
-
-      /**
-       * <code>int32 numPlayers = 4;</code>
-       */
-      @Override
-      public int getNumPlayers() {
-        return instance.getNumPlayers();
-      }
-      /**
-       * <code>int32 numPlayers = 4;</code>
-       */
-      public Builder setNumPlayers(int value) {
-        copyOnWrite();
-        instance.setNumPlayers(value);
+        instance.clearCode();
         return this;
       }
       /**
-       * <code>int32 numPlayers = 4;</code>
+       * <code>string code = 2;</code>
        */
-      public Builder clearNumPlayers() {
+      public Builder setCodeBytes(
+          com.google.protobuf.ByteString value) {
         copyOnWrite();
-        instance.clearNumPlayers();
-        return this;
-      }
-
-      /**
-       * <code>int32 rounds = 5;</code>
-       */
-      @Override
-      public int getRounds() {
-        return instance.getRounds();
-      }
-      /**
-       * <code>int32 rounds = 5;</code>
-       */
-      public Builder setRounds(int value) {
-        copyOnWrite();
-        instance.setRounds(value);
-        return this;
-      }
-      /**
-       * <code>int32 rounds = 5;</code>
-       */
-      public Builder clearRounds() {
-        copyOnWrite();
-        instance.clearRounds();
+        instance.setCodeBytes(value);
         return this;
       }
 
@@ -1999,14 +1867,8 @@ public final class Buffer {
           OpenRequest other = (OpenRequest) arg1;
           deckNo_ = visitor.visitInt(deckNo_ != 0, deckNo_,
               other.deckNo_ != 0, other.deckNo_);
-          numCards_ = visitor.visitInt(numCards_ != 0, numCards_,
-              other.numCards_ != 0, other.numCards_);
-          numDecks_ = visitor.visitInt(numDecks_ != 0, numDecks_,
-              other.numDecks_ != 0, other.numDecks_);
-          numPlayers_ = visitor.visitInt(numPlayers_ != 0, numPlayers_,
-              other.numPlayers_ != 0, other.numPlayers_);
-          rounds_ = visitor.visitInt(rounds_ != 0, rounds_,
-              other.rounds_ != 0, other.rounds_);
+          code_ = visitor.visitString(!code_.isEmpty(), code_,
+              !other.code_.isEmpty(), other.code_);
           if (visitor == MergeFromVisitor
               .INSTANCE) {
           }
@@ -2033,24 +1895,10 @@ public final class Buffer {
                   deckNo_ = input.readInt32();
                   break;
                 }
-                case 16: {
+                case 18: {
+                  String s = input.readStringRequireUtf8();
 
-                  numCards_ = input.readInt32();
-                  break;
-                }
-                case 24: {
-
-                  numDecks_ = input.readInt32();
-                  break;
-                }
-                case 32: {
-
-                  numPlayers_ = input.readInt32();
-                  break;
-                }
-                case 40: {
-
-                  rounds_ = input.readInt32();
+                  code_ = s;
                   break;
                 }
                 default: {
@@ -9135,6 +8983,703 @@ public final class Buffer {
     private static volatile com.google.protobuf.Parser<DisCardsNotify> PARSER;
 
     public static com.google.protobuf.Parser<DisCardsNotify> parser() {
+      return DEFAULT_INSTANCE.getParserForType();
+    }
+  }
+
+  public interface catchCardsRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:catchCardsRequest)
+      com.google.protobuf.MessageLiteOrBuilder {
+
+    /**
+     * <code>bytes deckId = 1;</code>
+     */
+    com.google.protobuf.ByteString getDeckId();
+
+    /**
+     * <code>bytes pk = 2;</code>
+     */
+    com.google.protobuf.ByteString getPk();
+  }
+  /**
+   * <pre>
+   *requestId=6
+   * </pre>
+   *
+   * Protobuf type {@code catchCardsRequest}
+   */
+  public  static final class catchCardsRequest extends
+      com.google.protobuf.GeneratedMessageLite<
+          catchCardsRequest, catchCardsRequest.Builder> implements
+      // @@protoc_insertion_point(message_implements:catchCardsRequest)
+      catchCardsRequestOrBuilder {
+    private catchCardsRequest() {
+      deckId_ = com.google.protobuf.ByteString.EMPTY;
+      pk_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    public static final int DECKID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString deckId_;
+    /**
+     * <code>bytes deckId = 1;</code>
+     */
+    @Override
+    public com.google.protobuf.ByteString getDeckId() {
+      return deckId_;
+    }
+    /**
+     * <code>bytes deckId = 1;</code>
+     */
+    private void setDeckId(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      deckId_ = value;
+    }
+    /**
+     * <code>bytes deckId = 1;</code>
+     */
+    private void clearDeckId() {
+      
+      deckId_ = getDefaultInstance().getDeckId();
+    }
+
+    public static final int PK_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString pk_;
+    /**
+     * <code>bytes pk = 2;</code>
+     */
+    @Override
+    public com.google.protobuf.ByteString getPk() {
+      return pk_;
+    }
+    /**
+     * <code>bytes pk = 2;</code>
+     */
+    private void setPk(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      pk_ = value;
+    }
+    /**
+     * <code>bytes pk = 2;</code>
+     */
+    private void clearPk() {
+      
+      pk_ = getDefaultInstance().getPk();
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!deckId_.isEmpty()) {
+        output.writeBytes(1, deckId_);
+      }
+      if (!pk_.isEmpty()) {
+        output.writeBytes(2, pk_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @Override
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!deckId_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, deckId_);
+      }
+      if (!pk_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, pk_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    public static catchCardsRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static catchCardsRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static catchCardsRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static catchCardsRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static catchCardsRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static catchCardsRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static catchCardsRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static catchCardsRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static catchCardsRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input);
+    }
+    public static catchCardsRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static catchCardsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static catchCardsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() {
+      return (Builder) DEFAULT_INSTANCE.createBuilder();
+    }
+    public static Builder newBuilder(catchCardsRequest prototype) {
+      return (Builder) DEFAULT_INSTANCE.createBuilder(prototype);
+    }
+
+    /**
+     * <pre>
+     *requestId=6
+     * </pre>
+     *
+     * Protobuf type {@code catchCardsRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageLite.Builder<
+          catchCardsRequest, Builder> implements
+        // @@protoc_insertion_point(builder_implements:catchCardsRequest)
+        catchCardsRequestOrBuilder {
+      // Construct using Buffer.catchCardsRequest.newBuilder()
+      private Builder() {
+        super(DEFAULT_INSTANCE);
+      }
+
+
+      /**
+       * <code>bytes deckId = 1;</code>
+       */
+      @Override
+      public com.google.protobuf.ByteString getDeckId() {
+        return instance.getDeckId();
+      }
+      /**
+       * <code>bytes deckId = 1;</code>
+       */
+      public Builder setDeckId(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setDeckId(value);
+        return this;
+      }
+      /**
+       * <code>bytes deckId = 1;</code>
+       */
+      public Builder clearDeckId() {
+        copyOnWrite();
+        instance.clearDeckId();
+        return this;
+      }
+
+      /**
+       * <code>bytes pk = 2;</code>
+       */
+      @Override
+      public com.google.protobuf.ByteString getPk() {
+        return instance.getPk();
+      }
+      /**
+       * <code>bytes pk = 2;</code>
+       */
+      public Builder setPk(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setPk(value);
+        return this;
+      }
+      /**
+       * <code>bytes pk = 2;</code>
+       */
+      public Builder clearPk() {
+        copyOnWrite();
+        instance.clearPk();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:catchCardsRequest)
+    }
+    @Override
+    @SuppressWarnings({"unchecked", "fallthrough"})
+    protected final Object dynamicMethod(
+        MethodToInvoke method,
+        Object arg0, Object arg1) {
+      switch (method) {
+        case NEW_MUTABLE_INSTANCE: {
+          return new catchCardsRequest();
+        }
+        case NEW_BUILDER: {
+          return new Builder();
+        }
+        case IS_INITIALIZED: {
+          return DEFAULT_INSTANCE;
+        }
+        case MAKE_IMMUTABLE: {
+          return null;
+        }
+        case VISIT: {
+          Visitor visitor = (Visitor) arg0;
+          catchCardsRequest other = (catchCardsRequest) arg1;
+          deckId_ = visitor.visitByteString(deckId_ != com.google.protobuf.ByteString.EMPTY, deckId_,
+              other.deckId_ != com.google.protobuf.ByteString.EMPTY, other.deckId_);
+          pk_ = visitor.visitByteString(pk_ != com.google.protobuf.ByteString.EMPTY, pk_,
+              other.pk_ != com.google.protobuf.ByteString.EMPTY, other.pk_);
+          if (visitor == MergeFromVisitor
+              .INSTANCE) {
+          }
+          return this;
+        }
+        case MERGE_FROM_STREAM: {
+          com.google.protobuf.CodedInputStream input =
+              (com.google.protobuf.CodedInputStream) arg0;
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry =
+              (com.google.protobuf.ExtensionRegistryLite) arg1;
+          if (extensionRegistry == null) {
+            throw new NullPointerException();
+          }
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+
+                  deckId_ = input.readBytes();
+                  break;
+                }
+                case 18: {
+
+                  pk_ = input.readBytes();
+                  break;
+                }
+                default: {
+                  if (!parseUnknownField(tag, input)) {
+                    done = true;
+                  }
+                  break;
+                }
+              }
+            }
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw new RuntimeException(e.setUnfinishedMessage(this));
+          } catch (java.io.IOException e) {
+            throw new RuntimeException(
+                new com.google.protobuf.InvalidProtocolBufferException(
+                    e.getMessage()).setUnfinishedMessage(this));
+          } finally {
+          }
+        }
+        // fall through
+        case GET_DEFAULT_INSTANCE: {
+          return DEFAULT_INSTANCE;
+        }
+        case GET_PARSER: {
+          com.google.protobuf.Parser<catchCardsRequest> parser = PARSER;
+          if (parser == null) {
+            synchronized (catchCardsRequest.class) {
+              parser = PARSER;
+              if (parser == null) {
+                parser = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
+                PARSER = parser;
+              }
+            }
+          }
+          return parser;
+      }
+      case GET_MEMOIZED_IS_INITIALIZED: {
+        return (byte) 1;
+      }
+      case SET_MEMOIZED_IS_INITIALIZED: {
+        return null;
+      }
+      }
+      throw new UnsupportedOperationException();
+    }
+
+
+    // @@protoc_insertion_point(class_scope:catchCardsRequest)
+    private static final catchCardsRequest DEFAULT_INSTANCE;
+    static {
+      // New instances are implicitly immutable so no need to make
+      // immutable.
+      DEFAULT_INSTANCE = new catchCardsRequest();
+    }
+
+    public static catchCardsRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static volatile com.google.protobuf.Parser<catchCardsRequest> PARSER;
+
+    public static com.google.protobuf.Parser<catchCardsRequest> parser() {
+      return DEFAULT_INSTANCE.getParserForType();
+    }
+  }
+
+  public interface catchCardsResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:catchCardsResponse)
+      com.google.protobuf.MessageLiteOrBuilder {
+
+    /**
+     * <code>bytes pk = 1;</code>
+     */
+    com.google.protobuf.ByteString getPk();
+  }
+  /**
+   * <pre>
+   *responseId=11
+   * </pre>
+   *
+   * Protobuf type {@code catchCardsResponse}
+   */
+  public  static final class catchCardsResponse extends
+      com.google.protobuf.GeneratedMessageLite<
+          catchCardsResponse, catchCardsResponse.Builder> implements
+      // @@protoc_insertion_point(message_implements:catchCardsResponse)
+      catchCardsResponseOrBuilder {
+    private catchCardsResponse() {
+      pk_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    public static final int PK_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString pk_;
+    /**
+     * <code>bytes pk = 1;</code>
+     */
+    @Override
+    public com.google.protobuf.ByteString getPk() {
+      return pk_;
+    }
+    /**
+     * <code>bytes pk = 1;</code>
+     */
+    private void setPk(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      pk_ = value;
+    }
+    /**
+     * <code>bytes pk = 1;</code>
+     */
+    private void clearPk() {
+      
+      pk_ = getDefaultInstance().getPk();
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!pk_.isEmpty()) {
+        output.writeBytes(1, pk_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @Override
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!pk_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, pk_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    public static catchCardsResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static catchCardsResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static catchCardsResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static catchCardsResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static catchCardsResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static catchCardsResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static catchCardsResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static catchCardsResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static catchCardsResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input);
+    }
+    public static catchCardsResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static catchCardsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static catchCardsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() {
+      return (Builder) DEFAULT_INSTANCE.createBuilder();
+    }
+    public static Builder newBuilder(catchCardsResponse prototype) {
+      return (Builder) DEFAULT_INSTANCE.createBuilder(prototype);
+    }
+
+    /**
+     * <pre>
+     *responseId=11
+     * </pre>
+     *
+     * Protobuf type {@code catchCardsResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageLite.Builder<
+          catchCardsResponse, Builder> implements
+        // @@protoc_insertion_point(builder_implements:catchCardsResponse)
+        catchCardsResponseOrBuilder {
+      // Construct using Buffer.catchCardsResponse.newBuilder()
+      private Builder() {
+        super(DEFAULT_INSTANCE);
+      }
+
+
+      /**
+       * <code>bytes pk = 1;</code>
+       */
+      @Override
+      public com.google.protobuf.ByteString getPk() {
+        return instance.getPk();
+      }
+      /**
+       * <code>bytes pk = 1;</code>
+       */
+      public Builder setPk(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setPk(value);
+        return this;
+      }
+      /**
+       * <code>bytes pk = 1;</code>
+       */
+      public Builder clearPk() {
+        copyOnWrite();
+        instance.clearPk();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:catchCardsResponse)
+    }
+    @Override
+    @SuppressWarnings({"unchecked", "fallthrough"})
+    protected final Object dynamicMethod(
+        MethodToInvoke method,
+        Object arg0, Object arg1) {
+      switch (method) {
+        case NEW_MUTABLE_INSTANCE: {
+          return new catchCardsResponse();
+        }
+        case NEW_BUILDER: {
+          return new Builder();
+        }
+        case IS_INITIALIZED: {
+          return DEFAULT_INSTANCE;
+        }
+        case MAKE_IMMUTABLE: {
+          return null;
+        }
+        case VISIT: {
+          Visitor visitor = (Visitor) arg0;
+          catchCardsResponse other = (catchCardsResponse) arg1;
+          pk_ = visitor.visitByteString(pk_ != com.google.protobuf.ByteString.EMPTY, pk_,
+              other.pk_ != com.google.protobuf.ByteString.EMPTY, other.pk_);
+          if (visitor == MergeFromVisitor
+              .INSTANCE) {
+          }
+          return this;
+        }
+        case MERGE_FROM_STREAM: {
+          com.google.protobuf.CodedInputStream input =
+              (com.google.protobuf.CodedInputStream) arg0;
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry =
+              (com.google.protobuf.ExtensionRegistryLite) arg1;
+          if (extensionRegistry == null) {
+            throw new NullPointerException();
+          }
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+
+                  pk_ = input.readBytes();
+                  break;
+                }
+                default: {
+                  if (!parseUnknownField(tag, input)) {
+                    done = true;
+                  }
+                  break;
+                }
+              }
+            }
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw new RuntimeException(e.setUnfinishedMessage(this));
+          } catch (java.io.IOException e) {
+            throw new RuntimeException(
+                new com.google.protobuf.InvalidProtocolBufferException(
+                    e.getMessage()).setUnfinishedMessage(this));
+          } finally {
+          }
+        }
+        // fall through
+        case GET_DEFAULT_INSTANCE: {
+          return DEFAULT_INSTANCE;
+        }
+        case GET_PARSER: {
+          com.google.protobuf.Parser<catchCardsResponse> parser = PARSER;
+          if (parser == null) {
+            synchronized (catchCardsResponse.class) {
+              parser = PARSER;
+              if (parser == null) {
+                parser = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
+                PARSER = parser;
+              }
+            }
+          }
+          return parser;
+      }
+      case GET_MEMOIZED_IS_INITIALIZED: {
+        return (byte) 1;
+      }
+      case SET_MEMOIZED_IS_INITIALIZED: {
+        return null;
+      }
+      }
+      throw new UnsupportedOperationException();
+    }
+
+
+    // @@protoc_insertion_point(class_scope:catchCardsResponse)
+    private static final catchCardsResponse DEFAULT_INSTANCE;
+    static {
+      // New instances are implicitly immutable so no need to make
+      // immutable.
+      DEFAULT_INSTANCE = new catchCardsResponse();
+    }
+
+    public static catchCardsResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static volatile com.google.protobuf.Parser<catchCardsResponse> PARSER;
+
+    public static com.google.protobuf.Parser<catchCardsResponse> parser() {
       return DEFAULT_INSTANCE.getParserForType();
     }
   }

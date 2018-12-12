@@ -3,7 +3,10 @@ package eroc.io.randx.pojo;
 import eroc.io.randx.controller.WebSocketServer;
 import eroc.io.randx.service.DeckDealer;
 import eroc.io.randx.utils.UUIDUtils;
+import eroc.io.randx.utils.XMLReader;
+import org.dom4j.DocumentException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,34 +20,43 @@ public class PlayStatus {
      *
      * @param open
      */
-    public PlayStatus(Buffer.OpenRequest open) {
+    public PlayStatus(Buffer.OpenRequest open) throws IOException, DocumentException {
         this.deckNo = open.getDeckNo();
-        this.numCards = open.getNumCards();
-        this.numDecks = open.getNumDecks();
-        this.numPlayers = open.getNumPlayers();
-        this.rounds = open.getRounds();
+        GameType gameType = XMLReader.getGameType(open.getCode());
+        BasicParam basicParam = gameType.getBasicParam();
+        this.numCards = basicParam.getNumCards();
+        this.numDecks = basicParam.getNumDecks();
+        this.numPlayers = basicParam.getNumPlayers();
+        this.rounds = basicParam.getRounds();
         this.deckId = UUIDUtils.getUUID();
         this.seatSort = new byte[numPlayers][];
+        OtherParam otherParam = gameType.getOtherParam();
+        this.drawLeftCardsNum = null != otherParam.getDrawLeftCardsNum() ? otherParam.getDrawLeftCardsNum() : null;
+        this.returnCardsNum = null != otherParam.getReturnCardsNum() ? otherParam.getReturnCardsNum() : null;
     }
 
 
-    private Integer deckNo;//桌号
+    private Integer deckNo; // 桌号
 
-    private String deckId;//id
+    private String deckId;  // id
 
-    private DeckDealer deckDealer;//牌局
+    private DeckDealer deckDealer;  // 牌局
 
-    private Integer numCards;//一副牌的数量
+    private Integer numCards;   // 一副牌的数量
 
-    private Integer numDecks;//几副牌
+    private Integer numDecks;   // 几副牌
 
-    private Integer numPlayers;//玩家数
+    private Integer numPlayers;     // 玩家数
 
-    private Integer rounds;//抽几轮牌
+    private Integer rounds;     // 抽几轮牌
 
-    private List<Player> players = new ArrayList<>();//本桌玩家
+    private Integer drawLeftCardsNum;   // 每次查看剩余牌的数量
 
-    private List<String> index = new ArrayList<>();//抽牌顺序
+    private Integer returnCardsNum;     // 还牌的数量
+
+    private List<Player> players = new ArrayList<>();   // 本桌玩家
+
+    private List<String> index = new ArrayList<>(); // 抽牌顺序
 
     private byte[] dsk;//私钥
 
@@ -167,6 +179,22 @@ public class PlayStatus {
 
     public void setJoinNotifyBuilder(List<Buffer.JoinNotification> joinNotifyBuilder) {
         this.joinNotifyBuilder = joinNotifyBuilder;
+    }
+
+    public Integer getDrawLeftCardsNum() {
+        return drawLeftCardsNum;
+    }
+
+    public void setDrawLeftCardsNum(Integer drawLeftCardsNum) {
+        this.drawLeftCardsNum = drawLeftCardsNum;
+    }
+
+    public Integer getReturnCardsNum() {
+        return returnCardsNum;
+    }
+
+    public void setReturnCardsNum(Integer returnCardsNum) {
+        this.returnCardsNum = returnCardsNum;
     }
 }
 
