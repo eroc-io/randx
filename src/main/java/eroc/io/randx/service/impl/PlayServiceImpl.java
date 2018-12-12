@@ -30,14 +30,14 @@ public class PlayServiceImpl implements PlayService {
     @Autowired
     private ProofsDao proofsDao;
 
-    //所有牌局信息
+    // All hand information
     private static List<PlayStatus> pss = new ArrayList<>();
 
 
     /**
-     * 获取所有牌桌信息
+     * Get all the table information
      *
-     * @param wss
+     * @param wss The currently established websocket request, if null, is sent to all players
      */
     @Override
     public void sendHallMessage(WebSocketServer wss) {
@@ -63,6 +63,7 @@ public class PlayServiceImpl implements PlayService {
             deck.setSeat(ByteString.copyFrom(Bytes.toArray(seats)));
             hall.addDeck(deck.build());
         }
+
         byte[] msg = TypeUtils.getMsg(hall.build().toByteArray(), (byte) 9);
         try {
             if (wss != null) {
@@ -76,51 +77,57 @@ public class PlayServiceImpl implements PlayService {
     }
 
     /**
-     * 开桌
+     * Open the table
+     *
+     * @param msg Buffer.OpenRequest
+     * @return Table deckId
      */
     @Override
     public Buffer.OpenResponse initPlay(byte[] msg) {
-        String errmsg = null;
         Buffer.OpenResponse.Builder oresp = Buffer.OpenResponse.newBuilder();
         try {
             Buffer.OpenRequest open = Buffer.OpenRequest.parseFrom(msg);
             int deckNo = open.getDeckNo();
-            for(PlayStatus ps : pss) {//判断是否开桌
+            for(PlayStatus ps : pss) {
+                // If you have already opened the table and return directly to the deckId
                 if (ps.getDeckNo() == deckNo) {
                     return oresp.setDeckId(ByteString.copyFrom(ps.getDeckId().getBytes())).build();
                 }
             }
-            PlayStatus playStatus = new PlayStatus(open);//开桌
+
+            // Open the table
+            PlayStatus playStatus = new PlayStatus(open);
             playStatus.setDeckDealer(new DeckDealer());
             pss.add(playStatus);
             oresp.setDeckId(ByteString.copyFrom(playStatus.getDeckId().getBytes()));
         } catch (InvalidProtocolBufferException e) {
-            errmsg = Error.getMsg(90000);
-            oresp.setErrMsg(errmsg);
-//            e.printStackTrace();
+            oresp.setErrMsg(Error.getMsg(90000));
+            e.printStackTrace();
         }
         return oresp.build();
     }
 
     /**
-     * 加入游戏
+     * Join the game and start the game when the number of players reaches the upper limit
+     *
+     * @param msg Buffer.JoinRequest
+     * @param wss The currently requested websocket
+     * @return Buffer.StartResponse
      */
     public synchronized Buffer.StartResponse joinGame(byte[] msg, WebSocketServer wss) {
-        String errmsg;
         Buffer.StartResponse.Builder jresp = Buffer.StartResponse.newBuilder();
         try {
             Buffer.JoinRequest jmsg = Buffer.JoinRequest.parseFrom(msg);
-            // 牌桌id
             String deckId = jmsg.getDeckId().toString("utf-8");
             for(PlayStatus ps : pss) {
-                // 当前牌局
+                // Find the current hand
                 if (ps.getDeckId().equalsIgnoreCase(deckId)) {
                     List<Player> players = ps.getPlayers();
                     Integer nump = ps.getNumPlayers();
                     String uid = wss.getUid();
-                    int psize = players.size();
-                    if (nump > psize) {
-                        // 加入游戏
+
+                    // Insufficient number of players ,join game
+                    if (nump > players.size()) {
                         Player player = new Player();
                         byte[] pk = TypeUtils.formatPK(jmsg.getPk().toByteArray());
                         byte[][] seatSort = ps.getSeatSort();
@@ -132,15 +139,17 @@ public class PlayServiceImpl implements PlayService {
                             }
                         }
                         player.setPk(pk);
-                        player.setUid(uid);// 加入uid
-                        player.setSeat(i);// 座位号
+                        player.setUid(uid);// set uid
+                        player.setSeat(i);// seat number
                         players.add(player);
-                        int empty = nump - players.size();// 空座数
-                        // 通知当前玩家
+                        int empty = nump - players.size();// available seat
+
+                        // Notify the current player to join the message
                         List<Buffer.JoinNotification> js = ps.getJoinNotifyBuilder();
                         Buffer.JoinResponse joinResponse = Buffer.JoinResponse.newBuilder().setNumber(i).setEmptySeat(empty).addAllJoinNotify(js).build();
                         WebSocketServer.sendInfo(TypeUtils.getMsg(joinResponse.toByteArray(), (byte) 7), uid);
-                        // 通知其他玩家
+
+                        // Notify other players of the player's joining information
                         Buffer.JoinNotification.Builder joinNotification = Buffer.JoinNotification.newBuilder().setJoinSeat(i).setJoinpk(ByteString.copyFrom(TypeUtils.bufferPk(pk)));
                         js.add(joinNotification.build());
                         byte[] m = TypeUtils.getMsg(joinNotification.setEmptySeat(empty).build().toByteArray(), (byte) 8);
@@ -150,17 +159,20 @@ public class PlayServiceImpl implements PlayService {
                                 WebSocketServer.sendInfo(m, oid);
                             }
                         }
+                        // Notice to the owner of the hall to update this table information
                         sendHallMessage(null);
                     }
+
+
+                    // The player limit has been reached and the game is started.
                     if (nump == players.size()) {
-                        // 开始游戏
                         DeckDealer deckDealer = ps.getDeckDealer();
                         Object[] o = deckDealer.resetOrStart();
                         ps.setDsk((byte[]) o[0]);
                         ps.setDpk((byte[]) o[1]);
-                        List<byte[]> pks = new ArrayList<>();
-                        for(Player player : players) {
-                            pks.add(player.getPk());
+                        byte[][] pks = new byte[nump][];
+                        for(int i = 0; i < nump; i++) {
+                            pks[i] = players.get(i).getPk();
                         }
                         Object[] obj = deckDealer.openGame(ps.getNumCards(), ps.getNumDecks(), pks);
                         // 设置抽牌顺序
@@ -185,13 +197,10 @@ public class PlayServiceImpl implements PlayService {
             }
 
         } catch (InvalidProtocolBufferException e) {
-            errmsg = Error.getMsg(90000);
-            jresp.setErrMsg(errmsg);
-//            e.printStackTrace();
+            jresp.setErrMsg(Error.getMsg(90000));
         } catch (Exception e) {
-            errmsg = e.getMessage();
-            jresp.setErrMsg(errmsg);
-//            e.printStackTrace();
+            jresp.setErrMsg(e.getMessage());
+            e.printStackTrace();
         }
         return jresp.build();
     }
@@ -201,7 +210,6 @@ public class PlayServiceImpl implements PlayService {
      * 斗地主抽牌,抽17轮，剩3张
      */
     public synchronized Buffer.DrawResponse drawCard(byte[] dreq, WebSocketServer wss) {
-        String errmsg;
         Buffer.DrawResponse.Builder dresp = Buffer.DrawResponse.newBuilder();
         try {
             Buffer.DrawRequest dr = Buffer.DrawRequest.parseFrom(dreq);
@@ -261,7 +269,7 @@ public class PlayServiceImpl implements PlayService {
                                 if (!oid.equalsIgnoreCase(uid)) {
                                     WebSocketServer.sendInfo(msg, oid);
                                 } else {
-                                    // 缓存玩家抽牌信息
+                                    // 存储玩家最新盐
                                     player.getSalt().add((byte[]) obj[2]);
                                 }
                             }
@@ -273,12 +281,10 @@ public class PlayServiceImpl implements PlayService {
                 }
             }
         } catch (InvalidProtocolBufferException e) {
-            errmsg = Error.getMsg(90000);
-            dresp.setErrMsg(errmsg);
+            dresp.setErrMsg(Error.getMsg(90000));
             e.printStackTrace();
         } catch (Exception e) {
-//            errmsg = e.getMessage();
-//            dresp.setErrMsg(errmsg);
+            dresp.setErrMsg(e.getMessage());
             e.printStackTrace();
         }
         return dresp.build();
@@ -291,7 +297,6 @@ public class PlayServiceImpl implements PlayService {
      * @param
      */
     public synchronized Buffer.DrawLeftNotification drawLeftCards(byte[] dleftReq, WebSocketServer wss) {
-        String errmsg;
         Buffer.DrawLeftNotification.Builder lresp = Buffer.DrawLeftNotification.newBuilder();
         try {
             Buffer.DrawLeftRequest dl = Buffer.DrawLeftRequest.parseFrom(dleftReq);
@@ -337,12 +342,10 @@ public class PlayServiceImpl implements PlayService {
                 }
             }
         } catch (InvalidProtocolBufferException e) {
-            errmsg = Error.getMsg(90000);
-            lresp.setErrMsg(errmsg);
+            lresp.setErrMsg(Error.getMsg(90000));
             e.printStackTrace();
         } catch (Exception e) {
-            errmsg = e.getMessage();
-            lresp.setErrMsg(errmsg);
+            lresp.setErrMsg(e.getMessage());
             e.printStackTrace();
         }
         return lresp.build();
@@ -356,7 +359,6 @@ public class PlayServiceImpl implements PlayService {
      */
     @Override
     public Buffer.ReturnResponse returnCards(byte[] returnReq, WebSocketServer wss) {
-        String errmsg;
         Buffer.ReturnResponse.Builder rresp = Buffer.ReturnResponse.newBuilder();
         try {
             Buffer.ReturnRequest rr = Buffer.ReturnRequest.parseFrom(returnReq);
@@ -392,20 +394,17 @@ public class PlayServiceImpl implements PlayService {
                             }
                         }
                     } else {
-                        errmsg = Error.getMsg(10002);
-                        rresp.setErrMsg(errmsg);
+                        rresp.setErrMsg(Error.getMsg(10002));
                     }
                 } else {
                     throw new Exception("未找到该牌桌");
                 }
             }
         } catch (InvalidProtocolBufferException e) {
-            errmsg = Error.getMsg(90000);
-            rresp.setErrMsg(errmsg);
+            rresp.setErrMsg(Error.getMsg(90000));
             e.printStackTrace();
         } catch (Exception e) {
-            errmsg = e.getMessage();
-            rresp.setErrMsg(errmsg);
+            rresp.setErrMsg(e.getMessage());
             e.printStackTrace();
         }
         return rresp.build();
@@ -470,12 +469,10 @@ public class PlayServiceImpl implements PlayService {
                 }
             }
         } catch (InvalidProtocolBufferException e) {
-//            errmsg = Error.getMsg(90000);
-//            rresp.setErrMsg(errmsg);
+//            rresp.setErrMsg(Error.getMsg(90000));
             e.printStackTrace();
         } catch (Exception e) {
-//            errmsg = e.getMessage();
-//            rresp.setErrMsg(errmsg);
+//            rresp.setErrMsg(e.getMessage());
             e.printStackTrace();
         }
     }
