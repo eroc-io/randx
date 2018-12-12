@@ -14,6 +14,8 @@ const webSocketPath = "ws://localhost:8080/ws";
 const CARD_INDEX = 7;
 //大厅座位使用信息
 var hallMessages = [];
+//桌号
+var deckNo = null;
 //Uint8Array，桌编号
 var deckId = null;
 //自己的座位号信息
@@ -82,6 +84,11 @@ ws.onmessage = async function getMessage(evt) {
                 }
                 await drawCard();
             }
+
+            if (obj2.errMsg == "抽牌结束") {
+
+                document.getElementById("drawLeft" + deckNo).removeAttribute("disabled");
+            }
             break;
         case 3:
             //其他玩家抓到牌的proof， responseId = 3
@@ -120,6 +127,7 @@ ws.onmessage = async function getMessage(evt) {
             let obj5 = await readPbf(protoUrl, "ReturnResponse", proBuffer);
             let numReturned = obj5.numReturned;
             showMessage("p3", '您还了 ' + numReturned + ' 张牌' + backCard);
+            document.getElementById("returnCards" + deckNo).style.display = "none";
             salt = obj5.salt;
             console.log(obj5.errMsg);
             break;
@@ -132,6 +140,7 @@ ws.onmessage = async function getMessage(evt) {
                 if (btoa(uint8ArrayToString(orderPks[num])) == btoa(uint8ArrayToString(obj6.pk))) {
 
                     showMessage("p3", 'player' + num + '还了' + obj6.numReturned + ' 张牌' + backCard);
+                    document.getElementById("returnCards" + deckNo).style.display = "none";
                 }
             }
 
@@ -156,6 +165,8 @@ ws.onmessage = async function getMessage(evt) {
                 showMessage("p2", '还缺' + emptySeat + '个人可开始游戏');
 
             } else {
+                //开始按钮可选，可以开始游戏了
+                document.getElementById("draw" + deckNo).removeAttribute("disabled");
                 showMessage("p2", '玩家全部准备完毕，可以开始游戏了');
 
             }
@@ -173,6 +184,8 @@ ws.onmessage = async function getMessage(evt) {
 
             } else {
                 showMessage("p2", '玩家全部准备完毕，可以开始游戏了');
+                //开始按钮可选，可以开始游戏了
+                document.getElementById("draw" + deckNo).removeAttribute("disabled");
             }
 
             break;
@@ -240,7 +253,8 @@ ws.onclose = function (evt) {
 
 
 //open游戏
-async function openGame(deckNo, cards, decks, players, rounds) {
+async function openGame(deckNum, cards, decks, players, rounds) {
+    deckNo = deckNum;
 
     let payload = {deckNo: deckNo, numCards: cards, numDecks: decks, numPlayers: players, rounds: rounds};
 

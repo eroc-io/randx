@@ -7,8 +7,6 @@ const cardNames = [
 ];
 
 const backCard = '█';
-
-
 var checkBoxValueList = [];
 var checkBoxList = [];
 
@@ -26,6 +24,37 @@ window.onload = function () {
     });
     document.getElementById("drawLeft1").addEventListener("click", function () {
         changeCancel("drawLeft1", "returnCards1");
+        document.getElementById("outCards1").style.display = "block";
+    });
+
+    document.getElementById("open2").addEventListener("click", function () {
+        changeCancel("open2", "join2");
+        nonoCancel(["cardTable1", "cardTable3"])
+    });
+    document.getElementById("join2").addEventListener("click", function () {
+        changeCancel("join2", "draw2");
+    });
+    document.getElementById("draw2").addEventListener("click", function () {
+        changeCancel("draw2", "drawLeft2");
+    });
+    document.getElementById("drawLeft2").addEventListener("click", function () {
+        changeCancel("drawLeft2", "returnCards2");
+        document.getElementById("outCards2").style.display = "block";
+    });
+
+    document.getElementById("open3").addEventListener("click", function () {
+        changeCancel("open3", "join3");
+        nonoCancel(["cardTable1", "cardTable2"])
+    });
+    document.getElementById("join3").addEventListener("click", function () {
+        changeCancel("join3", "draw3");
+    });
+    document.getElementById("draw3").addEventListener("click", function () {
+        changeCancel("draw3", "drawLeft3");
+    });
+    document.getElementById("drawLeft3").addEventListener("click", function () {
+        changeCancel("drawLeft3", "returnCards3");
+        document.getElementById("outCards3").style.display = "block";
     });
 }
 
