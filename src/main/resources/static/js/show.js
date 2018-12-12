@@ -10,7 +10,7 @@ const backCard = '█';
 var checkBoxValueList = [];
 var checkBoxList = [];
 
-
+//按钮事件监听，状态修改
 window.onload = function () {
     document.getElementById("open1").addEventListener("click", function () {
         changeCancel("open1", "join1");

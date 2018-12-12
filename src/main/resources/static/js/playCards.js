@@ -58,19 +58,19 @@ ws.onmessage = async function getMessage(evt) {
             //开局返回的deckId，responseId = 0
             let obj = await readPbf(protoUrl, "OpenResponse", proBuffer);
             deckId = obj.deckId;
-            console.log(obj.errMsg);
+            console.log("error message " + obj.errMsg);
             break;
         case 1:
             //加入牌局返回的salt和服务器pk，responseId = 1
             let obj1 = await readPbf(protoUrl, "StartResponse", proBuffer);
             salt = obj1.salt;
             dpk = obj1.dpk;
-            console.log(obj1.errMsg);
+            console.log("message " + obj1.errMsg);
             break;
         case 2:
             //抓牌返回的salt，取得牌信息储存，responseId = 2
             let obj2 = await readPbf(protoUrl, "DrawResponse", proBuffer);
-            console.log(obj2.errMsg);
+            console.log("message " + obj2.errMsg);
             if (!obj2.errMsg) {
                 let cardCipher = obj2.cardCipher;
                 salt = new Uint8Array(await decryptByECIES(cardCipher));
@@ -120,7 +120,7 @@ ws.onmessage = async function getMessage(evt) {
             }
             showMessage("p3", "底牌:" + reCards);
             salt = obj4.salt;
-            console.log(obj4.errMsg);
+            console.log("error message " + obj4.errMsg);
             break;
         case 5:
             //还牌信息, responseId = 5
@@ -129,7 +129,7 @@ ws.onmessage = async function getMessage(evt) {
             showMessage("p3", '您还了 ' + numReturned + ' 张牌' + backCard);
             document.getElementById("returnCards" + deckNo).style.display = "none";
             salt = obj5.salt;
-            console.log(obj5.errMsg);
+            console.log("error message " + obj5.errMsg);
             break;
         case 6:
             //其他玩家还牌信息, responseId = 6
@@ -199,7 +199,6 @@ ws.onmessage = async function getMessage(evt) {
 
                 for (let hallMessage of hallMessages) {
 
-                    console.log(hallMessage.emptyNum);
                     console.log(hallMessage.deckNo + '号桌还有' + hallMessage.emptyNum + '个空位');
                     let seat = hallMessage.seat;
                     let msg = '';
