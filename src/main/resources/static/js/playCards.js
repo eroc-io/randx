@@ -8,8 +8,8 @@ if (window.WebSocket) {
 //.proto文件路径
 const protoUrl = "/js/comms.proto";
 
-// const webSocketPath = "ws://192.168.10.153:8080/ws";
-const webSocketPath = "ws://localhost:8080/ws";
+const webSocketPath = "ws://192.168.10.153:8080/ws";
+// const webSocketPath = "ws://localhost:8080/ws";
 
 const CARD_INDEX = 7;
 //大厅座位使用信息
@@ -120,17 +120,25 @@ ws.onmessage = async function getMessage(evt) {
                 reCards.push(cardNames[i]);
             }
             showMessage("p3", "底牌:" + reCards);
+            document.getElementById("drawLeft1" + deckNo).removeAttribute("disabled");
             salt = obj4.salt;
             console.log("error message " + obj4.errMsg);
             break;
         case 5:
             //还牌信息, responseId = 5
             let obj5 = await readPbf(protoUrl, "ReturnResponse", proBuffer);
-            let numReturned = obj5.numReturned;
-            showMessage("p3", '您还了 ' + numReturned + ' 张牌' + backCard);
-            document.getElementById("returnCards" + deckNo).style.display = "none";
-            salt = obj5.salt;
-            console.log("error message " + obj5.errMsg);
+            if (obj5.errMsg == "还牌数量有误，请检查后重新操作") {
+
+                showMessage("p3", "还牌数量有误，请检查后重新操作!");
+                console.log("error message " + obj5.errMsg)
+            } else {
+                removeCard("player" + myNumber);
+                let numReturned = obj5.numReturned;
+                showMessage("p3", '您还了 ' + numReturned + ' 张牌' + backCard);
+                document.getElementById("returnCards" + deckNo).style.display = "none";
+                salt = obj5.salt;
+                console.log("error message " + obj5.errMsg);
+            }
             break;
         case 6:
             //其他玩家还牌信息, responseId = 6
@@ -236,6 +244,20 @@ ws.onmessage = async function getMessage(evt) {
             }
 
             break;
+
+        case 11:
+            //返回抓底牌玩家pk，responseId = 11
+            let obj11 = await readPbf(protoUrl, "catchCardsResponse", proBuffer);
+
+            for (let num in orderPks) {
+
+                if (btoa(uint8ArrayToString(orderPks[num])) == btoa(uint8ArrayToString(obj11.pk))) {
+
+                    showMessage("p3", 'player' + num + '抢到底牌。');
+                    await drawCard();
+                }
+            }
+            break;
     }
 };
 
@@ -253,10 +275,10 @@ ws.onclose = function (evt) {
 
 
 //open游戏
-async function openGame(deckNum, code) {
+async function openGame(deckNum, gameCode) {
     deckNo = deckNum;
 
-    let payload = {deckNo: deckNo, code: code};
+    let payload = {deckNo: deckNo, code: gameCode};
 
     let buffer = await createPbf(protoUrl, "OpenRequest", payload);
 
@@ -310,24 +332,10 @@ async function lookLeftCards() {
 };
 
 
-//抓底牌 funcId = 5
-async function drawLeftCards() {
-
-    let sign = await signByECDSA(salt);
-
-    let payload = {deckId: deckId, pk: new Uint8Array(pkBuffer), sig: new Uint8Array(sign)};
-
-    let buffer = await createPbf(protoUrl, "DrawRequest", payload);
-
-    ws.send(addOneByte(5, buffer));
-
-};
-
-
 //还牌 funcId = 4
 async function returnCards() {
 
-    let checkVal = removeCard("player" + myNumber);
+    let checkVal = checkCard();
 
     let sign = await signByECDSA(salt);
 
@@ -346,7 +354,8 @@ async function returnCards() {
 //亮牌 funcId = 5
 async function outCards() {
 
-    let checkVal = removeCard("player" + myNumber);
+    let checkVal = checkCard();
+    removeCard("player" + myNumber);
 
     let payload = {deckId: deckId, pk: new Uint8Array(pkBuffer), salt: concatUint8Array(checkVal)};
 
@@ -355,6 +364,21 @@ async function outCards() {
     ws.send(addOneByte(5, buffer));
 
 }
+
+
+//请求抓底牌 funcId = 6
+async function drawLeftCards() {
+
+    let payload = {deckId: deckId, pk: new Uint8Array(pkBuffer)};
+
+    let buffer = await createPbf(protoUrl, "catchCardsRequest", payload);
+
+    ws.send(addOneByte(6, buffer));
+
+    await drawCard();
+
+};
+
 
 function onError(evt) {
     writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);

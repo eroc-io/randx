@@ -23,7 +23,10 @@ window.onload = function () {
         changeCancel("draw1", "lookLeft1");
     });
     document.getElementById("lookLeft1").addEventListener("click", function () {
-        changeCancel("lookLeft1", "outCards1");
+        changeCancel("lookLeft1", "drawLeft1");
+    });
+    document.getElementById("drawLeft1").addEventListener("click", function () {
+        changeCancel("drawLeft1", "outCards1");
     });
 
 
@@ -161,8 +164,8 @@ function showOtherCard(spanId, card) {
 }
 
 
-//去掉自己还回去和亮出来的手牌
-function removeCard(seatDivId) {
+//复选框选择的手牌
+function checkCard() {
 
     //获取复选框选择的牌的salt
     let checkVal = [];
@@ -171,6 +174,15 @@ function removeCard(seatDivId) {
         checkVal.push(saltsObj[checkBoxValue]);
 
     }
+
+    return checkVal;
+
+}
+
+
+//去掉自己还回去和亮出来的手牌
+function removeCard(seatDivId) {
+
     checkBoxValueList = [];
 
     let generateDiv = document.getElementById(seatDivId);
@@ -183,9 +195,4 @@ function removeCard(seatDivId) {
 
     checkBoxList = [];
 
-    return checkVal;
-
 }
-
-
-
