@@ -14,60 +14,56 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-/**
- * 斗地主controller
- */
 @ServerEndpoint("/ws")
 @Component
 public class WebSocketServer {
 
 
-    //获取上下文
     private static ApplicationContext applicationContext;
 
-    //注入service
     private PlayService playService;
 
     public static void setApplicationContext(ApplicationContext applicationContext) {
         WebSocketServer.applicationContext = applicationContext;
     }
 
-    //concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象
+    // Store the MyWebSocket object corresponding to each client
     private static CopyOnWriteArraySet<WebSocketServer> webSocketSet = new CopyOnWriteArraySet<>();
 
-    //记录当前在线连接数
+    // Record the current number of online connections
     private static int onlineCount = 0;
 
-    //与客户端的连接会话
+    // Connection session with the client
     private Session session;
 
     private String uid;
 
-    //缓存onmessage请求
+    // Cache onmessage request
     private byte[] drawRequest;
 
 
     /**
-     * 连接建立成功调用的方法
+     * Connection establishment successfully called methodConnection establishment successfully called method
+     *
+     * @param session Connection session with the client
      */
     @OnOpen
     public void onOpen(Session session) {
         playService = applicationContext.getBean(PlayService.class);
         this.session = session;
         this.uid = UUIDUtils.getUUID();
-        webSocketSet.add(this);     //加入set中
-        addOnlineCount();           //在线数加1
+        webSocketSet.add(this);
+        addOnlineCount();
         playService.sendHallMessage(this);
         System.out.println("有新连接加入！当前在线人数为" + getOnlineCount());
-        //发布监听
-//      applicationContext.publishEvent(new PlayEvent(this, i, webSocketSet));
     }
 
 
     /**
-     * 收到客户端消息后调用的方法
+     * Method called after receiving a client message
      *
-     * @param message 客户端发送过来的消息
+     * @param message The message sent by the client
+     * @param session Connection session with the client
      */
     @OnMessage
     public void onMessage(byte[] message, Session session) throws IOException {
@@ -106,15 +102,15 @@ public class WebSocketServer {
         } else if (b == 5) {
             //DisCard request
             playService.disCard(msg, this);
-//            if (!StringUtils.isBlank(returnResponse.getErrMsg())) {
-//                sendMessage(TypeUtils.getMsg(returnResponse.toByteArray(), (byte) 5));
-//            }
         }
     }
 
 
     /**
-     * 发送消息
+     * sendInfo
+     *
+     * @param message Sent message
+     * @param uid     Uid is empty to send messages to everyone, not empty to send messages to the specified client
      */
     public static void sendInfo(byte[] message, String uid) throws IOException {
         if (0 == webSocketSet.size()) {
@@ -135,18 +131,18 @@ public class WebSocketServer {
 
 
     /**
-     * 连接关闭调用的方法
+     * Connection close call method
      */
     @OnClose
     public void onClose() {
-        webSocketSet.remove(this);  //从set中删除
+        webSocketSet.remove(this);
         playService.leavePlay(this);
-        subOnlineCount();           //在线数减1
+        subOnlineCount();
         System.out.println("有一连接关闭！当前在线人数为" + getOnlineCount());
     }
 
     /**
-     * 发生错误时调用
+     * Called when an error occurs
      *
      * @param session
      * @param error

@@ -175,7 +175,7 @@ public class PlayServiceImpl implements PlayService {
                             pks[i] = players.get(i).getPk();
                         }
                         Object[] obj = deckDealer.openGame(ps.getNumCards(), ps.getNumDecks(), pks);
-                        // 设置抽牌顺序
+                        // Set the draw order
                         List<String> index = ps.getIndex();
                         for(Integer i = 0; i < ps.getRounds(); i++) {
                             for(Player player : players) {
@@ -183,15 +183,16 @@ public class PlayServiceImpl implements PlayService {
                             }
                         }
                         jresp.setSalt(ByteString.copyFrom((byte[]) obj[0])).setDpk(ByteString.copyFrom((byte[]) obj[1]));
+                        // Send start game information
                         byte[] m = TypeUtils.getMsg(jresp.build().toByteArray(), (byte) 1);
                         for(Player player : players) {
-                            WebSocketServer.sendInfo(m, player.getUid());// 发送开始游戏信息
+                            WebSocketServer.sendInfo(m, player.getUid());
                         }
                     } else {
                         jresp.setErrMsg(Error.getMsg(10001));
                     }
                 } else {
-                    throw new Exception("未找到该牌桌");
+                    throw new Exception(Error.getMsg(10005));
                 }
 
             }
@@ -207,7 +208,11 @@ public class PlayServiceImpl implements PlayService {
 
 
     /**
-     * 斗地主抽牌,抽17轮，剩3张
+     * drawCard
+     *
+     * @param dreq Buffer.DrawRequest
+     * @param wss  The currently requested websocket
+     * @return Buffer.DrawResponse
      */
     public synchronized Buffer.DrawResponse drawCard(byte[] dreq, WebSocketServer wss) {
         Buffer.DrawResponse.Builder dresp = Buffer.DrawResponse.newBuilder();
@@ -216,19 +221,21 @@ public class PlayServiceImpl implements PlayService {
             String deckId = dr.getDeckId().toString("utf-8");
             for(PlayStatus ps : pss) {
                 if (ps.getDeckId().equalsIgnoreCase(deckId)) {
+                    // Cache draw request
                     List<WebSocketServer> wsl = ps.getWss();
-                    // 缓存抽牌请求
                     if (null == wsl || !wsl.contains(wss)) {
                         wss.setDrawRequest(dreq);
                         wsl.add(wss);
                     }
-                    // 判断人数是否凑齐
+
+                    // Determine if the number of people is in order
                     if (ps.getPlayers().size() != ps.getNumPlayers()) {
                         Buffer.DrawResponse build = dresp.setErrMsg(Error.getMsg(10004)).build();
                         WebSocketServer.sendInfo(TypeUtils.getMsg(build.toByteArray(), (byte) 2), wss.getUid());
                         return null;
                     }
-                    // 当前牌局
+
+                    // Determine if the draw ends
                     List<String> index = ps.getIndex();
                     if (index.size() <= 0) {
                         wsl.clear();
@@ -238,39 +245,41 @@ public class PlayServiceImpl implements PlayService {
                         }
                         return null;
                     }
-                    // 轮到哪位玩家抽牌
+
+                    // Draw in the order of the order
                     String inUid = index.get(0);
                     for(WebSocketServer ws : wsl) {
                         String uid = ws.getUid();
                         if (uid.equalsIgnoreCase(inUid)) {
                             byte[] drawRequest = ws.getDrawRequest();
                             Buffer.DrawRequest drawReq = Buffer.DrawRequest.parseFrom(drawRequest);
-                            // 抽牌
                             DeckDealer deckDealer = ps.getDeckDealer();
                             byte[] sign = CryptoUtils.rsGenSign(drawReq.getSig().toByteArray());
                             byte[] pk = TypeUtils.formatPK(drawReq.getPk().toByteArray());
                             Object[] obj = deckDealer.drawCard(pk, sign);
                             Buffer.DrawResponse.Builder card = (Buffer.DrawResponse.Builder) obj[0];
                             Buffer.DrawNotification.Builder notify = (Buffer.DrawNotification.Builder) obj[1];
-                            Buffer.DrawResponse c = card.build();
-                            Buffer.DrawNotification n = notify.build();
-                            // 存入数据库
+
+                            // Deposit proof into the database
                             Proofs proofs = new Proofs();
                             proofs.setProof((String) obj[3]);
                             proofs.setDeckId(deckId);
                             proofs.setPk(Base64.getEncoder().encodeToString(pk));
                             this.proofsDao.insertSelective(proofs);
-                            WebSocketServer.sendInfo(TypeUtils.getMsg(c.toByteArray(), (byte) 2), uid);
+
+                            // Return the drawn card
+                            WebSocketServer.sendInfo(TypeUtils.getMsg(card.build().toByteArray(), (byte) 2), uid);
                             index.remove(0);
                             wsl.remove(ws);
-                            byte[] msg = TypeUtils.getMsg(n.toByteArray(), (byte) 3);
-                            // 获取其他用户id
+
+                            // Inform other players that the player draws proof and pk
+                            byte[] msg = TypeUtils.getMsg(notify.build().toByteArray(), (byte) 3);
                             for(Player player : ps.getPlayers()) {
                                 String oid = player.getUid();
                                 if (!oid.equalsIgnoreCase(uid)) {
                                     WebSocketServer.sendInfo(msg, oid);
                                 } else {
-                                    // 存储玩家最新盐
+                                    // Store the latest salt of the player
                                     player.getSalt().add((byte[]) obj[2]);
                                 }
                             }
@@ -278,7 +287,7 @@ public class PlayServiceImpl implements PlayService {
                         }
                     }
                 } else {
-                    throw new Exception("未找到该牌桌");
+                    throw new Exception(Error.getMsg(10005));
                 }
             }
         } catch (InvalidProtocolBufferException e) {
@@ -293,9 +302,11 @@ public class PlayServiceImpl implements PlayService {
 
 
     /**
-     * 抽取剩余牌
+     * drawLeftCards
      *
-     * @param
+     * @param dleftReq Buffer.DrawLeftRequest
+     * @param wss      The currently requested websocket
+     * @return Buffer.DrawLeftNotification
      */
     public synchronized Buffer.DrawLeftNotification drawLeftCards(byte[] dleftReq, WebSocketServer wss) {
         Buffer.DrawLeftNotification.Builder lresp = Buffer.DrawLeftNotification.newBuilder();
@@ -304,25 +315,26 @@ public class PlayServiceImpl implements PlayService {
             String deckId = dl.getDeckId().toString("utf-8");
             for(PlayStatus ps : pss) {
                 if (ps.getDeckId().equalsIgnoreCase(deckId)) {
+                    // Cache player request
                     List<WebSocketServer> wssl = ps.getWss();
                     Integer nump = ps.getNumPlayers();
-                    byte[] sign = CryptoUtils.rsGenSign(dl.getSig().toByteArray());
                     if (wssl.size() < nump) {
                         if (!wssl.contains(wss)) {
                             wssl.add(wss);
                         }
-                        // 存储玩家pk和签名
+
+                        // Store player pk and signature
                         byte[] leftpk = TypeUtils.formatPK(dl.getPk().toByteArray());
                         for(Player player : ps.getPlayers()) {
                             if (Arrays.equals(player.getPk(), leftpk)) {
-                                player.setSign(sign);
+                                player.setSign(CryptoUtils.rsGenSign(dl.getSig().toByteArray()));
                                 player.setPk(leftpk);
                             }
                         }
                     }
 
+                    // Extract the specified number of remaining cards
                     if (wssl.size() == nump) {
-                        // 抽剩余牌
                         DeckDealer deckDealer = ps.getDeckDealer();
                         byte[][] pks = new byte[nump][];
                         byte[][] ss = new byte[nump][];
@@ -340,7 +352,7 @@ public class PlayServiceImpl implements PlayService {
                         wssl.clear();
                     }
                 } else {
-                    throw new Exception("未找到该牌桌");
+                    throw new Exception(Error.getMsg(10005));
                 }
             }
         } catch (InvalidProtocolBufferException e) {
@@ -355,9 +367,11 @@ public class PlayServiceImpl implements PlayService {
 
 
     /**
-     * 还牌
+     * returnCards
      *
-     * @param
+     * @param returnReq Buffer.ReturnRequest
+     * @param wss       The currently requested websocket
+     * @return Buffer.ReturnResponse
      */
     @Override
     public Buffer.ReturnResponse returnCards(byte[] returnReq, WebSocketServer wss) {
@@ -367,12 +381,11 @@ public class PlayServiceImpl implements PlayService {
             String deckId = rr.getDeckId().toString("utf-8");
             for(PlayStatus ps : pss) {
                 if (ps.getDeckId().equalsIgnoreCase(deckId)) {
-                    // 还牌
+                    // Take out all the salt containing information
                     Buffer.EciesBody ec = rr.getCardsCipher();
                     byte[] cards = CryptoUtils.ECDHDecrypt(ps.getDsk(), ec);
                     int l = cards.length;
                     if (l % 32 == 0 && l != 0) {
-                        // 取出牌信息
                         List<byte[]> cs = new ArrayList<>();
                         byte[] card = new byte[32];
                         int n = l / 32;
@@ -380,15 +393,16 @@ public class PlayServiceImpl implements PlayService {
                             System.arraycopy(cards, i * 32, card, 0, 32);
                             cs.add(card);
                         }
+
+                        // returnCards and return Buffer.ReturnResponse
                         DeckDealer deckDealer = ps.getDeckDealer();
-                        byte[] pk = TypeUtils.formatPK(rr.getPk().toByteArray());
-                        byte[] sign = CryptoUtils.rsGenSign(rr.getSig().toByteArray());
-                        Object[] obj = deckDealer.returnCards(pk, sign, cs);
+                        Object[] obj = deckDealer.returnCards(TypeUtils.formatPK(rr.getPk().toByteArray()), CryptoUtils.rsGenSign(rr.getSig().toByteArray()), cs);
                         Buffer.ReturnResponse resp = (Buffer.ReturnResponse) obj[0];
                         Buffer.ReturnNotification notify = (Buffer.ReturnNotification) obj[1];
                         String uid = wss.getUid();
                         WebSocketServer.sendInfo(TypeUtils.getMsg(resp.toByteArray(), (byte) 5), uid);
-                        // 通知其他人还牌信息
+
+                        // Notify others to return information
                         for(Player player : ps.getPlayers()) {
                             String oid = player.getUid();
                             if (!oid.equalsIgnoreCase(uid)) {
@@ -399,7 +413,7 @@ public class PlayServiceImpl implements PlayService {
                         rresp.setErrMsg(Error.getMsg(10002));
                     }
                 } else {
-                    throw new Exception("未找到该牌桌");
+                    throw new Exception(Error.getMsg(10005));
                 }
             }
         } catch (InvalidProtocolBufferException e) {
@@ -414,24 +428,24 @@ public class PlayServiceImpl implements PlayService {
 
 
     /**
-     * 出牌
+     * disCard
      *
-     * @param disCards
+     * @param disCards Buffer.DisCard
+     * @param wss      The currently requested websocket
      */
     public void disCard(byte[] disCards, WebSocketServer wss) {
-        Buffer.DisCard.Builder rresp = Buffer.DisCard.newBuilder();
         try {
             Buffer.DisCard dc = Buffer.DisCard.parseFrom(disCards);
             String deckId = dc.getDeckId().toString("utf-8");
             for(PlayStatus ps : pss) {
                 if (ps.getDeckId().equalsIgnoreCase(deckId)) {
                     ByteString ppk = dc.getPk();
-                    String pk = Base64.getEncoder().encodeToString(TypeUtils.formatPK(ppk.toByteArray()));
                     ByteString salts = dc.getSalt();
                     byte[] cards = salts.toByteArray();
                     int l = cards.length;
                     if (l % 32 == 0 && l != 0) {
-                        // 取出牌信息
+
+                        // take out cards information
                         List<byte[]> cs = new ArrayList<>();
                         byte[] card = new byte[32];
                         int n = l / 32;
@@ -439,19 +453,22 @@ public class PlayServiceImpl implements PlayService {
                             System.arraycopy(cards, i * 32, card, 0, 32);
                             cs.add(card);
                         }
+
+                        // Verify that the salt is in compliance with proof
                         boolean b = true;
                         for(byte[] c : cs) {
                             Proofs proof = new Proofs();
                             proof.setDeckId(deckId);
-                            proof.setPk(pk);
+                            proof.setPk(Base64.getEncoder().encodeToString(TypeUtils.formatPK(ppk.toByteArray())));
                             proof.setProof(Base64.getEncoder().encodeToString(SHA256.getSHA256Bytes(c)));
                             List<Proofs> select = this.proofsDao.select(proof);
                             if (null == select || 0 == select.size()) {
                                 b = false;
                             }
                         }
+
+                        // Notify others to download information
                         if (b) {
-                            // 通知其他人出牌信息
                             String uid = wss.getUid();
                             Buffer.DisCardsNotify notify = Buffer.DisCardsNotify.newBuilder().setPk(ppk).setSalt(salts).build();
                             for(Player player : ps.getPlayers()) {
@@ -461,13 +478,13 @@ public class PlayServiceImpl implements PlayService {
                                 }
                             }
                         } else {
-                            throw new Exception("抽牌证明验证未通过");
+                            throw new Exception(Error.getMsg(10006));
                         }
                     } else {
-                        throw new Exception("出牌salts数不对应");
+                        throw new Exception(Error.getMsg(10007));
                     }
                 } else {
-                    throw new Exception("未找到该牌桌");
+                    throw new Exception(Error.getMsg(10005));
                 }
             }
         } catch (InvalidProtocolBufferException e) {
@@ -480,9 +497,9 @@ public class PlayServiceImpl implements PlayService {
     }
 
     /**
-     * 玩家退出桌局
+     * Player exits the table
      *
-     * @param wss
+     * @param wss The currently requested websocket
      */
     public synchronized void leavePlay(WebSocketServer wss) {
         for(PlayStatus ps : pss) {
