@@ -10,28 +10,6 @@ public class ECDSA {
     //算法名称
     private static String ALGORITHM_NAME = "EC";
 
-
-    /**
-     * 初始化密钥
-     *
-     * @param curveName 所用曲线名字
-     * @return KeyPair 秘钥信息
-     * @throws NoSuchAlgorithmException
-     */
-    public static KeyPair getKeyPair(String curveName) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM_NAME);
-
-        ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec(curveName);
-
-        keyPairGenerator.initialize(ecGenParameterSpec, new SecureRandom());
-
-        KeyPair keyPair = keyPairGenerator.generateKeyPair();
-
-        return keyPair;
-    }
-
-
     /**
      * 执行签名
      *

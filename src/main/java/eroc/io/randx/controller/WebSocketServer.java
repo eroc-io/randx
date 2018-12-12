@@ -21,12 +21,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Component
 public class WebSocketServer {
 
-//    @Resource
-//    private PlayService playService;
 
-    //此处是解决无法注入的关键
+    //获取上下文
     private static ApplicationContext applicationContext;
-    //你要注入的service或者dao
+
+    //注入service
     private PlayService playService;
 
     public static void setApplicationContext(ApplicationContext applicationContext) {
@@ -35,13 +34,16 @@ public class WebSocketServer {
 
     //concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象
     private static CopyOnWriteArraySet<WebSocketServer> webSocketSet = new CopyOnWriteArraySet<>();
+
     //记录当前在线连接数
     private static int onlineCount = 0;
+
     //与客户端的连接会话
     private Session session;
 
     private String uid;
 
+    //缓存onmessage请求
     private byte[] drawRequest;
 
 
@@ -101,7 +103,7 @@ public class WebSocketServer {
             if (!StringUtils.isBlank(returnResponse.getErrMsg())) {
                 sendMessage(TypeUtils.getMsg(returnResponse.toByteArray(), (byte) 5));
             }
-        }else if (b == 5) {
+        } else if (b == 5) {
             //DisCard request
             playService.disCard(msg, this);
 //            if (!StringUtils.isBlank(returnResponse.getErrMsg())) {

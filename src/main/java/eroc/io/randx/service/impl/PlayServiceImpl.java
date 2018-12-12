@@ -110,16 +110,17 @@ public class PlayServiceImpl implements PlayService {
         Buffer.StartResponse.Builder jresp = Buffer.StartResponse.newBuilder();
         try {
             Buffer.JoinRequest jmsg = Buffer.JoinRequest.parseFrom(msg);
-            String deckId = jmsg.getDeckId().toString("utf-8");//牌桌id
+            // 牌桌id
+            String deckId = jmsg.getDeckId().toString("utf-8");
             for(PlayStatus ps : pss) {
-                //当前牌局
+                // 当前牌局
                 if (ps.getDeckId().equalsIgnoreCase(deckId)) {
                     List<Player> players = ps.getPlayers();
                     Integer nump = ps.getNumPlayers();
                     String uid = wss.getUid();
                     int psize = players.size();
                     if (nump > psize) {
-                        //加入游戏
+                        // 加入游戏
                         Player player = new Player();
                         byte[] pk = TypeUtils.formatPK(jmsg.getPk().toByteArray());
                         byte[][] seatSort = ps.getSeatSort();
@@ -131,15 +132,15 @@ public class PlayServiceImpl implements PlayService {
                             }
                         }
                         player.setPk(pk);
-                        player.setUid(uid);//加入uid
-                        player.setSeat(i);//座位号
+                        player.setUid(uid);// 加入uid
+                        player.setSeat(i);// 座位号
                         players.add(player);
-                        int empty = nump - players.size();//空座数
-                        //通知当前玩家
+                        int empty = nump - players.size();// 空座数
+                        // 通知当前玩家
                         List<Buffer.JoinNotification> js = ps.getJoinNotifyBuilder();
                         Buffer.JoinResponse joinResponse = Buffer.JoinResponse.newBuilder().setNumber(i).setEmptySeat(empty).addAllJoinNotify(js).build();
                         WebSocketServer.sendInfo(TypeUtils.getMsg(joinResponse.toByteArray(), (byte) 7), uid);
-                        //通知其他玩家
+                        // 通知其他玩家
                         Buffer.JoinNotification.Builder joinNotification = Buffer.JoinNotification.newBuilder().setJoinSeat(i).setJoinpk(ByteString.copyFrom(TypeUtils.bufferPk(pk)));
                         js.add(joinNotification.build());
                         byte[] m = TypeUtils.getMsg(joinNotification.setEmptySeat(empty).build().toByteArray(), (byte) 8);
@@ -152,7 +153,7 @@ public class PlayServiceImpl implements PlayService {
                         sendHallMessage(null);
                     }
                     if (nump == players.size()) {
-                        //开始游戏
+                        // 开始游戏
                         DeckDealer deckDealer = ps.getDeckDealer();
                         Object[] o = deckDealer.resetOrStart();
                         ps.setDsk((byte[]) o[0]);
@@ -162,7 +163,7 @@ public class PlayServiceImpl implements PlayService {
                             pks.add(player.getPk());
                         }
                         Object[] obj = deckDealer.openGame(ps.getNumCards(), ps.getNumDecks(), pks);
-                        //设置抽牌顺序
+                        // 设置抽牌顺序
                         List<String> index = ps.getIndex();
                         for(Integer i = 0; i < ps.getRounds(); i++) {
                             for(Player player : players) {
@@ -172,7 +173,7 @@ public class PlayServiceImpl implements PlayService {
                         jresp.setSalt(ByteString.copyFrom((byte[]) obj[0])).setDpk(ByteString.copyFrom((byte[]) obj[1]));
                         byte[] m = TypeUtils.getMsg(jresp.build().toByteArray(), (byte) 1);
                         for(Player player : players) {
-                            WebSocketServer.sendInfo(m, player.getUid());//发送开始游戏信息
+                            WebSocketServer.sendInfo(m, player.getUid());// 发送开始游戏信息
                         }
                     } else {
                         jresp.setErrMsg(Error.getMsg(10001));
@@ -208,18 +209,18 @@ public class PlayServiceImpl implements PlayService {
             for(PlayStatus ps : pss) {
                 if (ps.getDeckId().equalsIgnoreCase(deckId)) {
                     List<WebSocketServer> wsl = ps.getWss();
-                    //缓存抽牌请求
+                    // 缓存抽牌请求
                     if (null == wsl || !wsl.contains(wss)) {
                         wss.setDrawRequest(dreq);
                         wsl.add(wss);
                     }
-                    //判断人数是否凑齐
+                    // 判断人数是否凑齐
                     if (ps.getPlayers().size() != ps.getNumPlayers()) {
                         Buffer.DrawResponse build = dresp.setErrMsg(Error.getMsg(10004)).build();
                         WebSocketServer.sendInfo(TypeUtils.getMsg(build.toByteArray(), (byte) 2), wss.getUid());
                         return null;
                     }
-                    //当前牌局
+                    // 当前牌局
                     List<String> index = ps.getIndex();
                     if (index.size() <= 0) {
                         Buffer.DrawResponse build = dresp.setErrMsg(Error.getMsg(10003)).build();
@@ -228,14 +229,14 @@ public class PlayServiceImpl implements PlayService {
                         }
                         return null;
                     }
-                    //轮到哪位玩家抽牌
+                    // 轮到哪位玩家抽牌
                     String inUid = index.get(0);
                     for(WebSocketServer ws : wsl) {
                         String uid = ws.getUid();
                         if (uid.equalsIgnoreCase(inUid)) {
                             byte[] drawRequest = ws.getDrawRequest();
                             Buffer.DrawRequest drawReq = Buffer.DrawRequest.parseFrom(drawRequest);
-                            //抽牌
+                            // 抽牌
                             DeckDealer deckDealer = ps.getDeckDealer();
                             byte[] sign = CryptoUtils.rsGenSign(drawReq.getSig().toByteArray());
                             byte[] pk = TypeUtils.formatPK(drawReq.getPk().toByteArray());
@@ -244,7 +245,7 @@ public class PlayServiceImpl implements PlayService {
                             Buffer.DrawNotification.Builder notify = (Buffer.DrawNotification.Builder) obj[1];
                             Buffer.DrawResponse c = card.build();
                             Buffer.DrawNotification n = notify.build();
-                            //存入数据库
+                            // 存入数据库
                             Proofs proofs = new Proofs();
                             proofs.setProof((String) obj[3]);
                             proofs.setDeckId(deckId);
@@ -254,13 +255,13 @@ public class PlayServiceImpl implements PlayService {
                             index.remove(0);
                             wsl.remove(ws);
                             byte[] msg = TypeUtils.getMsg(n.toByteArray(), (byte) 3);
-                            //获取其他用户id
+                            // 获取其他用户id
                             for(Player player : ps.getPlayers()) {
                                 String oid = player.getUid();
                                 if (!oid.equalsIgnoreCase(uid)) {
                                     WebSocketServer.sendInfo(msg, oid);
                                 } else {
-                                    //缓存玩家抽牌信息
+                                    // 缓存玩家抽牌信息
                                     player.getSalt().add((byte[]) obj[2]);
                                 }
                             }
@@ -297,12 +298,14 @@ public class PlayServiceImpl implements PlayService {
             String deckId = dl.getDeckId().toString("utf-8");
             for(PlayStatus ps : pss) {
                 if (ps.getDeckId().equalsIgnoreCase(deckId)) {
-                    List<byte[]> signs = ps.getSigns();
+                    List<WebSocketServer> wssl = ps.getWss();
                     Integer nump = ps.getNumPlayers();
                     byte[] sign = CryptoUtils.rsGenSign(dl.getSig().toByteArray());
-                    if (signs.size() < nump) {
-                        signs.add(sign);
-                        //存储玩家pk和签名
+                    if (wssl.size() < nump) {
+                        if (!wssl.contains(wss)) {
+                            wssl.add(wss);
+                        }
+                        // 存储玩家pk和签名
                         byte[] leftpk = TypeUtils.formatPK(dl.getPk().toByteArray());
                         for(Player player : ps.getPlayers()) {
                             if (Arrays.equals(player.getPk(), leftpk)) {
@@ -311,8 +314,8 @@ public class PlayServiceImpl implements PlayService {
                             }
                         }
                     }
-                    if (signs.size() == nump) {
-                        //抽剩余牌
+                    if (wssl.size() == nump) {
+                        // 抽剩余牌
                         DeckDealer deckDealer = ps.getDeckDealer();
                         byte[][] pks = new byte[nump][];
                         byte[][] ss = new byte[nump][];
@@ -323,11 +326,11 @@ public class PlayServiceImpl implements PlayService {
                             pks[seat] = player.getPk();
                             ss[seat] = player.getSign();
                         }
-                        byte[] msg = TypeUtils.getMsg(deckDealer.drawLeftCards(pks, ss).build().toByteArray(), (byte) 4);
+                        byte[] msg = TypeUtils.getMsg(deckDealer.drawLeftCards(pks, ss, null).build().toByteArray(), (byte) 4);
                         for(Player player : players) {
                             WebSocketServer.sendInfo(msg, player.getUid());
                         }
-                        signs.clear();
+                        wssl.clear();
                     }
                 } else {
                     throw new Exception("未找到该牌桌");
@@ -360,12 +363,12 @@ public class PlayServiceImpl implements PlayService {
             String deckId = rr.getDeckId().toString("utf-8");
             for(PlayStatus ps : pss) {
                 if (ps.getDeckId().equalsIgnoreCase(deckId)) {
-                    //还牌
+                    // 还牌
                     Buffer.EciesBody ec = rr.getCardsCipher();
                     byte[] cards = CryptoUtils.ECDHDecrypt(ps.getDsk(), ec);
                     int l = cards.length;
                     if (l % 32 == 0 && l != 0) {
-                        //取出牌信息
+                        // 取出牌信息
                         List<byte[]> cs = new ArrayList<>();
                         byte[] card = new byte[32];
                         int n = l / 32;
@@ -381,7 +384,7 @@ public class PlayServiceImpl implements PlayService {
                         Buffer.ReturnNotification notify = (Buffer.ReturnNotification) obj[1];
                         String uid = wss.getUid();
                         WebSocketServer.sendInfo(TypeUtils.getMsg(resp.toByteArray(), (byte) 5), uid);
-                        //通知其他人还牌信息
+                        // 通知其他人还牌信息
                         for(Player player : ps.getPlayers()) {
                             String oid = player.getUid();
                             if (!oid.equalsIgnoreCase(uid)) {
@@ -427,7 +430,7 @@ public class PlayServiceImpl implements PlayService {
                     byte[] cards = salts.toByteArray();
                     int l = cards.length;
                     if (l % 32 == 0 && l != 0) {
-                        //取出牌信息
+                        // 取出牌信息
                         List<byte[]> cs = new ArrayList<>();
                         byte[] card = new byte[32];
                         int n = l / 32;
@@ -447,7 +450,7 @@ public class PlayServiceImpl implements PlayService {
                             }
                         }
                         if (b) {
-                            //通知其他人出牌信息
+                            // 通知其他人出牌信息
                             String uid = wss.getUid();
                             Buffer.DisCardsNotify notify = Buffer.DisCardsNotify.newBuilder().setPk(ppk).setSalt(salts).build();
                             for(Player player : ps.getPlayers()) {
@@ -484,12 +487,12 @@ public class PlayServiceImpl implements PlayService {
      */
     public synchronized void leavePlay(WebSocketServer wss) {
         for(PlayStatus ps : pss) {
-            List<Player> players = ps.getPlayers();
-            byte[][] seatSort = ps.getSeatSort();
             List<WebSocketServer> wss1 = ps.getWss();
             if (wss1.contains(wss)) {
                 wss1.remove(wss);
             }
+            List<Player> players = ps.getPlayers();
+            byte[][] seatSort = ps.getSeatSort();
             for(Player player : players) {
                 if (player.getUid().equalsIgnoreCase(wss.getUid())) {
                     for(int i = 0; i < seatSort.length; i++) {
