@@ -24,10 +24,7 @@ message DeckMsg{
 // endpoint: /wss/odeck or funcId = 0;
 message OpenRequest {
 	int32 deckNo = 1;
-	int32 numCards = 2;
-	int32 numDecks = 3;
-	int32 numPlayers = 4;
-	int32 rounds = 5;
+	string code = 2;
 }
 
 //responseId=0

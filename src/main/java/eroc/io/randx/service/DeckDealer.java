@@ -164,7 +164,7 @@ public class DeckDealer {
 
 
     /**
-     * drawLeftCards
+     * lookLeftCards
      *
      * @param pks   All players public key
      * @param signs All Players Signature Collection

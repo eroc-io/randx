@@ -87,8 +87,9 @@ ws.onmessage = async function getMessage(evt) {
 
             if (obj2.errMsg == "抽牌结束") {
 
-                document.getElementById("drawLeft" + deckNo).removeAttribute("disabled");
+                document.getElementById("lookLeft" + deckNo).removeAttribute("disabled");
             }
+
             break;
         case 3:
             //其他玩家抓到牌的proof， responseId = 3
@@ -252,10 +253,10 @@ ws.onclose = function (evt) {
 
 
 //open游戏
-async function openGame(deckNum, cards, decks, players, rounds) {
+async function openGame(deckNum, code) {
     deckNo = deckNum;
 
-    let payload = {deckNo: deckNo, numCards: cards, numDecks: decks, numPlayers: players, rounds: rounds};
+    let payload = {deckNo: deckNo, code: code};
 
     let buffer = await createPbf(protoUrl, "OpenRequest", payload);
 
@@ -288,8 +289,8 @@ async function drawCard() {
 
 };
 
-//剩余牌 funcId = 3
-async function drawLeftCards() {
+//一起查看底牌 funcId = 3
+async function lookLeftCards() {
 
     let allPk = [];
 
@@ -306,6 +307,20 @@ async function drawLeftCards() {
     let buffer = await createPbf(protoUrl, "DrawLeftRequest", payload);
 
     ws.send(addOneByte(3, buffer));
+};
+
+
+//抓底牌 funcId = 5
+async function drawLeftCards() {
+
+    let sign = await signByECDSA(salt);
+
+    let payload = {deckId: deckId, pk: new Uint8Array(pkBuffer), sig: new Uint8Array(sign)};
+
+    let buffer = await createPbf(protoUrl, "DrawRequest", payload);
+
+    ws.send(addOneByte(5, buffer));
+
 };
 
 
