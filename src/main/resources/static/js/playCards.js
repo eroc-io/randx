@@ -8,8 +8,8 @@ if (window.WebSocket) {
 //.proto文件路径
 const protoUrl = "/js/comms.proto";
 
-const webSocketPath = "ws://192.168.10.153:8080/ws";
-// const webSocketPath = "ws://localhost:8080/ws";
+// const webSocketPath = "ws://192.168.10.153:8080/ws";
+const webSocketPath = "ws://localhost:8080/ws";
 
 const CARD_INDEX = 7;
 //大厅座位使用信息
@@ -120,7 +120,7 @@ ws.onmessage = async function getMessage(evt) {
                 reCards.push(cardNames[i]);
             }
             showMessage("p3", "底牌:" + reCards);
-            document.getElementById("drawLeft1" + deckNo).removeAttribute("disabled");
+            document.getElementById("drawLeft" + deckNo).removeAttribute("disabled");
             salt = obj4.salt;
             console.log("error message " + obj4.errMsg);
             break;
@@ -135,7 +135,9 @@ ws.onmessage = async function getMessage(evt) {
                 removeCard("player" + myNumber);
                 let numReturned = obj5.numReturned;
                 showMessage("p3", '您还了 ' + numReturned + ' 张牌' + backCard);
-                document.getElementById("returnCards" + deckNo).style.display = "none";
+                changeCancel("returnCards" + deckNo, "outCards" + deckNo);
+                document.getElementById("outCards" + deckNo).removeAttribute("disabled");
+
                 salt = obj5.salt;
                 console.log("error message " + obj5.errMsg);
             }
@@ -149,7 +151,7 @@ ws.onmessage = async function getMessage(evt) {
                 if (btoa(uint8ArrayToString(orderPks[num])) == btoa(uint8ArrayToString(obj6.pk))) {
 
                     showMessage("p3", 'player' + num + '还了' + obj6.numReturned + ' 张牌' + backCard);
-                    document.getElementById("returnCards" + deckNo).style.display = "none";
+                    document.getElementById("outCards" + deckNo).removeAttribute("disabled");
                 }
             }
 
@@ -254,7 +256,8 @@ ws.onmessage = async function getMessage(evt) {
                 if (btoa(uint8ArrayToString(orderPks[num])) == btoa(uint8ArrayToString(obj11.pk))) {
 
                     showMessage("p3", 'player' + num + '抢到底牌。');
-                    document.getElementById("drawLeft1" + deckNo).style.display = "none";
+                    document.getElementById("drawLeft" + deckNo).style.display = "none";
+                    changeCancel("drawLeft" + deckNo, "outCards" + deckNo);
                     await drawCard();
                 }
             }

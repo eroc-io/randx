@@ -26,7 +26,7 @@ window.onload = function () {
         changeCancel("lookLeft1", "drawLeft1");
     });
     document.getElementById("drawLeft1").addEventListener("click", function () {
-        changeCancel("drawLeft1", "outCards1");
+        changeCancel("drawLeft1", "returnCards1");
     });
 
 
@@ -38,11 +38,13 @@ window.onload = function () {
         changeCancel("join2", "draw2");
     });
     document.getElementById("draw2").addEventListener("click", function () {
-        changeCancel("draw2", "drawLeft2");
+        changeCancel("draw2", "lookLeft2");
+    });
+    document.getElementById("lookLeft2").addEventListener("click", function () {
+        changeCancel("lookLeft2", "drawLeft2");
     });
     document.getElementById("drawLeft2").addEventListener("click", function () {
         changeCancel("drawLeft2", "returnCards2");
-        document.getElementById("outCards2").style.display = "block";
     });
 
 
@@ -54,7 +56,13 @@ window.onload = function () {
         changeCancel("join3", "draw3");
     });
     document.getElementById("draw3").addEventListener("click", function () {
-        changeCancel("draw3", "outCards3");
+        changeCancel("draw3", "lookLeft3");
+    });
+    document.getElementById("lookLeft3").addEventListener("click", function () {
+        changeCancel("lookLeft3", "drawLeft3");
+    });
+    document.getElementById("drawLeft3").addEventListener("click", function () {
+        changeCancel("drawLeft3", "returnCards3");
     });
 
 }

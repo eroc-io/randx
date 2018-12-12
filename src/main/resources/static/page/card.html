@@ -24,29 +24,39 @@
            onClick="lookLeftCards();"/>
     <input type="button" id="drawLeft1" style="display:none" disabled="disabled" value="抓底牌（庄家抓回底牌）"
            onClick="drawLeftCards();"/>
-    <input type="button" id="outCards1" style="display:none" value="亮牌" onClick="outCards();"/>
+    <input type="button" id="returnCards1" style="display:none" value="还牌（庄家还回等同底牌的牌数）"
+           onClick="returnCards();"/>
+    <input type="button" id="outCards1" style="display:none" disabled="disabled" value="亮牌" onClick="outCards();"/>
     <br/><br/>
 </div>
 
 <div id="cardTable2" style="display: block;">
     2号牌桌：
-    <input type="button" id="open2" value="开局（选择牌桌）" onClick="openGame(2,'0002');"/>
+    <input type="button" id="open2" value="开局（选择牌桌）" onClick="openGame(2,'0001');"/>
     <input type="button" id="join2" style="display:none" value="准备（加入本桌游戏）" onClick="joinGame();"/>
     <input type="button" id="draw2" style="display:none" disabled="disabled" value="开始游戏（抓牌）" onClick="drawCard();"/>
-    <input type="button" id="drawLeft2" style="display:none"  value="抓底牌（庄家抓回底牌）"
+    <input type="button" id="lookLeft2" style="display:none" disabled="disabled" value="掀开底牌（一起查看底牌）"
+           onClick="lookLeftCards();"/>
+    <input type="button" id="drawLeft2" style="display:none" disabled="disabled" value="抓底牌（庄家抓回底牌）"
            onClick="drawLeftCards();"/>
     <input type="button" id="returnCards2" style="display:none" value="还牌（庄家还回等同底牌的牌数）"
            onClick="returnCards();"/>
-    <input type="button" id="outCards2" style="display:none" value="亮牌" onClick="outCards();"/>
+    <input type="button" id="outCards2" style="display:none" disabled="disabled" value="亮牌" onClick="outCards();"/>
     <br/><br/>
 </div>
 
 <div id="cardTable3" style="display: block;">
     3号牌桌：
-    <input type="button" id="open3" value="开局（选择牌桌）" onClick="openGame(3,'0003');"/>
+    <input type="button" id="open3" value="开局（选择牌桌）" onClick="openGame(3,'0001');"/>
     <input type="button" id="join3" style="display:none" value="准备（加入本桌游戏）" onClick="joinGame();"/>
     <input type="button" id="draw3" style="display:none" disabled="disabled" value="开始游戏（抓牌）" onClick="drawCard();"/>
-    <input type="button" id="outCards3" style="display:none" value="亮牌" onClick="outCards();"/>
+    <input type="button" id="lookLeft3" style="display:none" disabled="disabled" value="掀开底牌（一起查看底牌）"
+           onClick="lookLeftCards();"/>
+    <input type="button" id="drawLeft3" style="display:none" disabled="disabled" value="抓底牌（庄家抓回底牌）"
+           onClick="drawLeftCards();"/>
+    <input type="button" id="returnCards3" style="display:none" value="还牌（庄家还回等同底牌的牌数）"
+           onClick="returnCards();"/>
+    <input type="button" id="outCards3" style="display:none" disabled="disabled" value="亮牌" onClick="outCards();"/>
     <br/><br/>
 </div>
 <p id="p1"></p>
