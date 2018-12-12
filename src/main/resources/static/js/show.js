@@ -20,12 +20,15 @@ window.onload = function () {
         changeCancel("join1", "draw1");
     });
     document.getElementById("draw1").addEventListener("click", function () {
-        changeCancel("draw1", "drawLeft1");
+        changeCancel("draw1", "lookLeft1");
+    });
+    document.getElementById("lookLeft1").addEventListener("click", function () {
+        changeCancel("lookLeft1", "drawLeft1");
     });
     document.getElementById("drawLeft1").addEventListener("click", function () {
-        changeCancel("drawLeft1", "returnCards1");
-        document.getElementById("outCards1").style.display = "block";
+        changeCancel("drawLeft1", "outCards1");
     });
+
 
     document.getElementById("open2").addEventListener("click", function () {
         changeCancel("open2", "join2");
@@ -42,6 +45,7 @@ window.onload = function () {
         document.getElementById("outCards2").style.display = "block";
     });
 
+
     document.getElementById("open3").addEventListener("click", function () {
         changeCancel("open3", "join3");
         nonoCancel(["cardTable1", "cardTable2"])
@@ -50,12 +54,9 @@ window.onload = function () {
         changeCancel("join3", "draw3");
     });
     document.getElementById("draw3").addEventListener("click", function () {
-        changeCancel("draw3", "drawLeft3");
+        changeCancel("draw3", "outCards3");
     });
-    document.getElementById("drawLeft3").addEventListener("click", function () {
-        changeCancel("drawLeft3", "returnCards3");
-        document.getElementById("outCards3").style.display = "block";
-    });
+
 }
 
 function changeCancel(noneStr, blockStr) {
@@ -121,12 +122,13 @@ function eventListenerFunction(event) {
 
         //未选中从数组里去除
     } else {
-        let index = checkBoxValueList.indexOf(target.value);
-        checkBoxValueList.splice(index, 1);
-        checkBoxList.splice(index, 1);
 
+        if (target.type == "checkbox") {
+            let index = checkBoxValueList.indexOf(target.value);
+            checkBoxValueList.splice(index, 1);
+            checkBoxList.splice(index, 1);
+        }
     }
-
 }
 
 
@@ -162,8 +164,8 @@ function showOtherCard(spanId, card) {
 }
 
 
-//去掉自己还回去和亮出来的手牌
-function removeCard(seatDivId) {
+//复选框选择的手牌
+function checkCard() {
 
     //获取复选框选择的牌的salt
     let checkVal = [];
@@ -172,6 +174,15 @@ function removeCard(seatDivId) {
         checkVal.push(saltsObj[checkBoxValue]);
 
     }
+
+    return checkVal;
+
+}
+
+
+//去掉自己还回去和亮出来的手牌
+function removeCard(seatDivId) {
+
     checkBoxValueList = [];
 
     let generateDiv = document.getElementById(seatDivId);
@@ -184,9 +195,4 @@ function removeCard(seatDivId) {
 
     checkBoxList = [];
 
-    return checkVal;
-
 }
-
-
-

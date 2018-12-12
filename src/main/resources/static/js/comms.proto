@@ -24,10 +24,7 @@ message DeckMsg{
 // endpoint: /wss/odeck or funcId = 0;
 message OpenRequest {
 	int32 deckNo = 1;
-	int32 numCards = 2;
-	int32 numDecks = 3;
-	int32 numPlayers = 4;
-	int32 rounds = 5;
+	string code = 2;
 }
 
 //responseId=0
@@ -84,7 +81,7 @@ message DrawNotification {
 	bytes proof = 2;
 }
 
-// draw all request & response 抽剩余牌
+// draw all request & response 剩余牌
 // endpoint: /wss/dleft or funcId = 3;
 message DrawLeftRequest {
 	bytes deckId = 1;
@@ -121,16 +118,27 @@ message ReturnNotification {
 	int32 numReturned = 2;
 }
 
-//requestId=5  出牌
+//funcId=5  出牌请求
 message DisCard{
 	bytes deckId = 1;
 	bytes pk = 2;
 	bytes salt = 3;
 }
 
-//responseId=10
+//responseId=10   出牌返回
 message DisCardsNotify{
 	bytes salt=1;
 	bytes pk=2;
+}
+
+// funcId=6  抓底牌请求
+message catchCardsRequest{
+		bytes deckId = 1;
+    	bytes pk=2;
+}
+
+// responseId=11  抓底牌返回
+message catchCardsResponse{
+	bytes pk=1;
 }
 

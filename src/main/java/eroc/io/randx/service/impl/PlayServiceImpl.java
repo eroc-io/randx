@@ -316,7 +316,7 @@ public class PlayServiceImpl implements PlayService {
 
 
     /**
-     * drawLeftCards
+     * lookLeftCards
      *
      * @param dleftReq Buffer.DrawLeftRequest
      * @param wss      The currently requested websocket
