@@ -27,6 +27,7 @@ public class AES256 {
         return encData;
     }
 
+
     //解密
     public static byte[] AES_cbc_decrypt(byte[] encData, byte[] key, byte[] iv) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
